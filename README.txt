@@ -8,6 +8,7 @@ This directory contains the following files and directories:
 - example:		Directory of example(s) application(s) using qbsolv
 			as a solver
 - tests:		Directory of scripts and qubo(s) to test qbsolv
+- contrib.txt:		Instructions for potential contributors
 
 qbsolv (qb for qubo, solv for solve )
 
