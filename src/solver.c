@@ -47,7 +47,7 @@ return result;
 // can be optimal
 //
 double
-evaluate_1_bit (double V_old,int bit, short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col)
+evaluate_1bit (double V_old,int bit, short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col)
 {
   int i, j ;
 
@@ -100,14 +100,14 @@ return result;
 //improving Q and returning the last Evaluated value
 //
 double
-localSearch_1bit(double V,short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col,long long *t)
+local_search_1bit(double V,short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col,long long *t)
 {
 short improve;
 int k,kk;
 int kkstr=0,kkend=maxNodes,kkinc;    
 int index[maxNodes];
 for (k=0;k<maxNodes;k++){ index[k]=k;}
-// initial evaluate (Qval,Row,Col all primed)  needed before evaluate_1_bit can be used
+// initial evaluate (Qval,Row,Col all primed)  needed before evaluate_1bit can be used
   improve = TRUE;
   while (improve) {
     improve = FALSE;
@@ -122,7 +122,7 @@ for (k=0;k<maxNodes;k++){ index[k]=k;}
         k=index[kk];
         (*t)++;
 	    if ( V+Qval[k] > V ) {
-          V = evaluate_1_bit (V,k, Q, maxNodes,val,Qval,Row,Col);
+          V = evaluate_1bit (V,k, Q, maxNodes,val,Qval,Row,Col);
 	      improve = TRUE;
         }
 	 }  
@@ -133,23 +133,23 @@ for (k=0;k<maxNodes;k++){ index[k]=k;}
 //this function performance a local Max search improving Q and returning the last Evaluated value
 //
 double
-localSearch(short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col,long long *t)
+local_search(short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col,long long *t)
 {
   short improve;
   double V;
   int k;
   improve = TRUE;
 
-  // initial evaluate needed before evaluate_1_bit can be used
+  // initial evaluate needed before evaluate_1bit can be used
   V = evaluate (Q,maxNodes,val,Qval,Row,Col);
-  V = localSearch_1bit(V,Q,maxNodes,val,Qval,Row,Col,t); // local search to polish the change
+  V = local_search_1bit(V,Q,maxNodes,val,Qval,Row,Col,t); // local search to polish the change
   return V;
 }
 //
 //this function is called by solv to execute a tabu search,, This is THE Tabu search
 //
 double
-TabuSearch (short *Q,short *Qt, int maxNodes,double **val,double *Qval,
+tabu_search (short *Q,short *Qt, int maxNodes,double **val,double *Qval,
         double *Row,double *Col,long long *t, long long IterMax, int *TabuK,int *index)
 {
 int i, k, K;     //iteration working vars
@@ -184,7 +184,7 @@ if ( findMax_ ) {
     fmin=-1.0;
 }
 
-Vs = localSearch(Q, maxNodes,val,Qval,Row,Col,t);
+Vs = local_search(Q, maxNodes,val,Qval,Row,Col,t);
 val_index_sort(index,Qval,maxNodes) ;                                 // Create index array of sorted values
 thisIter=IterMax-(*t);
 increaseIter=thisIter/2;
@@ -213,8 +213,8 @@ for (i=0;i<maxNodes;i++) TabuK[i]=0; //Zero out the Tabu vector
 	        if(  V > Vs  ){ 
                 brk=TRUE;
                 K=k;
-                V = evaluate_1_bit(Vlastchange,k,Q, maxNodes,val,Qval,Row,Col);// flip the bit and fix tables
-                Vlastchange = localSearch_1bit(V,Q,maxNodes,val,Qval,Row,Col,t); // local search to polish the change
+                V = evaluate_1bit(Vlastchange,k,Q, maxNodes,val,Qval,Row,Col);// flip the bit and fix tables
+                Vlastchange = local_search_1bit(V,Q,maxNodes,val,Qval,Row,Col,t); // local search to polish the change
                 val_index_sort_ns(index,Qval,maxNodes) ;    // update index array of sorted values, don't shuffle index
                 Vs=Vlastchange;
                 for (i=0;i<maxNodes;i++) Qt[i]=Q[i]; //copy the best solution so far
@@ -253,7 +253,7 @@ for (i=0;i<maxNodes;i++) TabuK[i]=0; //Zero out the Tabu vector
      } 
      if ( ! brk ) // this is the fall thru case and we havent tripped interior If V> VS test so flip Q[K]
      {  
-        Vlastchange = evaluate_1_bit(Vlastchange,K,Q, maxNodes,val,Qval,Row,Col);
+        Vlastchange = evaluate_1bit(Vlastchange,K,Q, maxNodes,val,Qval,Row,Col);
      } 
      for (i = 0; i < maxNodes; i++) TabuK [i] =  MAX(0,TabuK[i] - 1);
      if (Q[i] == 0 ) {
@@ -323,11 +323,11 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
 }
 // do the smaller matrix solver here, currently dummied not holding the Dwave part yet
 //
-double SubMatrix (short *Q,short *Qt, int maxNodes,double **val,double *Qval,
+double solv_submatrix (short *Q,short *Qt, int maxNodes,double **val,double *Qval,
         double *Row,double *Col,long long *t, int *TabuK,int *index)
 {
     long long IterMax=(*t)+(long long) MAX((long long) 3000,(long long) 20000*(long long) maxNodes);
-    return  TabuSearch (Q,Qt, maxNodes,val,Qval,Row,Col,t,IterMax,TabuK,index);
+    return  tabu_search (Q,Qt, maxNodes,val,Qval,Row,Col,t,IterMax,TabuK,index);
 }
 //
 //  Entry into the overall solver from the main program
@@ -421,7 +421,7 @@ if ( findMax_ ) {
 //
 IterMax=t+(long long) MAX((long long) 400,(long long) 6500*(long long) maxNodes);
 if (Verbose_ > 2) {DLT;printf(" Starting Full initial Tabu\n");}
-V = TabuSearch (Q,Qt, maxNodes,val,Qval,Row,Col,&t,IterMax,TabuK,index);
+V = tabu_search (Q,Qt, maxNodes,val,Qval,Row,Col,&t,IterMax,TabuK,index);
 // save best result
 Vbest=V;
 NU=manage_Q(Q,Qlist,V,QVs,Qcounts,Qindex,QLEN,maxNodes);
@@ -496,7 +496,7 @@ while ( ContinueWhile )  // outer loop begin
             if ( UseDwave_ ) {
                 dw_solver ( val_s,subMatrix,Q_s );
             } else {
-                SubMatrix (Q_s,Qt_s, subMatrix,val_s,Qval_s,Row_s,Col_s,&t,TabuK_s,index_s);
+                solv_submatrix (Q_s,Qt_s, subMatrix,val_s,Qval_s,Row_s,Col_s,&t,TabuK_s,index_s);
             }
             if (Verbose_>3){
                  printf("Bits set after solver     ");
@@ -520,7 +520,7 @@ while ( ContinueWhile )  // outer loop begin
 
    IterMax=t+(long long) 1600 * (long long) maxNodes;
    val_index_sort(index,Qval,maxNodes) ;                     // Create index array of sorted values
-   V = TabuSearch (Q,Qt, maxNodes,val,Qval,Row,Col,&t,IterMax,TabuK,index);
+   V = tabu_search (Q,Qt, maxNodes,val,Qval,Row,Col,&t,IterMax,TabuK,index);
    val_index_sort(index,Qval,maxNodes) ;                     // Create index array of sorted values
 
    if ( Verbose_>1 ) {DLT;printf ("Latest answer  %4.5f iterations =%lld\n", V*fmin    ,t);}

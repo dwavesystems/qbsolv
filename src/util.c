@@ -175,7 +175,7 @@ int partition (double val[],int arr[], int l, int h)
 /* val[] --> Array to be sorted, 
    arr[] --> index to point to order from largest to smallest
    n     --> number of elements in arrays */
-void quickSortIterativeIndex (double val[],int arr[], int n)
+void quick_sort_iterative_index (double val[],int arr[], int n)
 {
     int h,l;
     h=n-1; // last index
@@ -223,7 +223,7 @@ void quickSortIterativeIndex (double val[],int arr[], int n)
 }
 // routine to check the sort on index'ed sort
 //
-int IsIndSorted(double data[],int index[], int size)
+int is_index_sorted(double data[],int index[], int size)
 {
 int i;
 for (i = 0; i<(size-1); i++) {
@@ -243,7 +243,7 @@ void val_index_sort(int *index,double *val,int n) {
     int i;
     for (i=0;i<n;i++) index[i]=i;
     shuffle_index(index,n);
-    quickSortIterativeIndex(val,index,n);
+    quick_sort_iterative_index(val,index,n);
     // check code:
     // for (i=0;i<n-1;i++) { if (val[index[i]]<val[index[i+1]]) { DL; exit(9); } }
 return;
@@ -252,7 +252,7 @@ void val_index_sort_ns(int *index,double *val,int n) {
     int i;
     // Assure that the index array covers val[] completely
     for (i=0;i<n;i++) index[i]=i;
-    quickSortIterativeIndex(val,index,n);
+    quick_sort_iterative_index(val,index,n);
     // check code:
     // for (i=0;i<n-1;i++) { if (val[index[i]]<val[index[i+1]]) { DL; exit(9); } }
 return;
@@ -373,7 +373,7 @@ int manage_Q( short *Qnow, short **Qlist,double Vnow, double *QVs, int *Qcounts,
 }                                                          
 // write a txt qubo file to "filename" file
 //
-void writeQubo(double **val,int nMax,const char *filename) 
+void write_qubo(double **val,int nMax,const char *filename) 
 {
     FILE *file;
     if ((file=fopen(filename,"w"))==0) {DL;printf(" failed to open %s\n",filename);exit(9);}

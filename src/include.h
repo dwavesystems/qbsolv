@@ -42,13 +42,12 @@ struct nodeStr_ {
 // ------------------- Prototypes --------------------------------------
 int   main( int argc,  char *argv[]);
 int   read_qubo(void);
-void  writeQubo(double **val,int nMax,const char *filename);
+void  write_qubo(double **val,int nMax,const char *filename);
 void  solve  ( double **val,  int maxNodes);
 void  **malloc2D (int rows, int cols, int size  ) ;
 void  fill_val(double **val,int maxNodes,struct nodeStr_ *nodes, int nNodes,struct nodeStr_ *couplers, int nCouplers);
 void  print_qubo_format( void);                                                                                  
 void  print_help ( void);                                                                                  
-int   Comparem( const void *p1,  const void *p2);
 int   DoesFileExist( const char *filename);
 void  print_V_Q_Qval(short *Q, int maxNodes,double **val);
 int   check_corrupt_Q(short *Q,int N);
@@ -60,7 +59,7 @@ double just_evaluate (short *Q, int maxNodes,double **val)     ;
 void  check_row_col_qval (short *Q, int maxNodes,double **val,double *Qval,double *Row,double *Col)   ;
 void  check_Qval (short *Q, int maxNodes,double **val,double *Qval,double *Row, double *Col);
 void  print_output(int maxNodes,short *Q,long numPartCalls,double energy,double seconds) ;
-void  quickSortIterativeIndex (double arr[],int ind[], int n) ;
+void  quick_sort_iterative_index (double arr[],int ind[], int n) ;
 void  val_index_sort(int *index,double *val,int n);
 void  val_index_sort_ns(int *index,double *val,int n);
 void  index_sort(int *index,int n,short FWD);
