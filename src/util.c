@@ -26,8 +26,9 @@ void **malloc2D(int rows, int cols, int size  ) {
     space = rows*(sizeof(char *)+(cols*size));
     big_array = (char **)malloc(space);
     if (big_array == NULL)  {
-        printf("\n\t%s error - memory request for X[%d][%d]  "
-            "denied\n\n", pgmName_, rows,cols);
+        DL;
+        printf("\n\t%s error - memory request for X[%d][%d], %ld Mbytes  "
+            "denied\n\n", pgmName_, rows,cols,(long)space/1024/1024 );
         exit(9);
     }
     space = cols*size;                  // ie, nColumns * elemSize
