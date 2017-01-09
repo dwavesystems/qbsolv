@@ -16,6 +16,7 @@
 // ---------misc stuff used by habit
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <math.h>
 #include<sys/types.h>
