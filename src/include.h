@@ -14,6 +14,9 @@
  limitations under the License.
 */
 // ---------misc stuff used by habit
+#ifndef QBSOLV_INCLUDE_H
+#define QBSOLV_INCLUDE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -70,3 +73,4 @@ void dw_init ( );
 void dw_solver ( double **val, int maxNodes, short *Q ) ;
 void dw_close ();
 
+#endif
