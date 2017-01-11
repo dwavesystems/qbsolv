@@ -96,7 +96,7 @@ evaluate_1bit (double V_old,int bit, short *Q, int maxNodes,double **val,double 
 return result;
 }
 //
-//this function performance a local Max search but doesn't require an initial Evaluation
+//this function performs a local Max search but doesn't require an initial Evaluation
 //improving Q and returning the last Evaluated value
 //
 double
