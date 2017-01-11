@@ -13,20 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-if [ "$1" == "" ]
-then
-    adj="blank_US_state_map.svg"
-else
-    adj=$1
-fi
-prwd=`pwd`
+adj=${1:-"blank_US_state_map.svg"}
+prwd=$(pwd)
+
 for qbouts in *.qbout
-do
-    echo $qbouts $adj $xsplits
+do  echo $qbouts $adj $xsplits
     split -l 5 $qbouts
     for xsplits in x*
-    do
-        python color_states.py -i $prwd/$xsplits -s $prwd/${adj} -o $prwd/${qbouts}.${xsplits}.svg
+    do  python color_states.py -i $prwd/$xsplits -s $prwd/${adj} -o $prwd/${qbouts}.${xsplits}.svg
     done
     rm $prwd/x*
 done
