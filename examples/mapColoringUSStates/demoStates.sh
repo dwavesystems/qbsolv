@@ -27,10 +27,12 @@ if [ -e /c/Users/trainee/Desktop/States ] ; then
 	rm -rf /c/Users/trainee/Desktop/States
 fi
 
-dw get connection
-dw get solver
+subm=""
+#dw get connection
+#dw get solver
+#subm=-S0
 
-qbsolv -i usa.qubo -o usa.qbout -v1 -n 8 -S0
+qbsolv -i usa.qubo -o usa.qbout -v1 -n 8 
 cat usa.qbout
 
 echo Solved -- Plotting
