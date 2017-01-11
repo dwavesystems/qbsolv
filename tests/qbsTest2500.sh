@@ -100,8 +100,8 @@ shift $((OPTIND-1))
 Local=`../src/qbsolv -V |grep Compiled|sed "s/Compiled: //"`
 echo $SubMatrix  $verbose $numrepeats
 echo $Default $Local
-dw get env
-date
+#dw get env
+#date
 #dw get connection
 #dw get solver
 
