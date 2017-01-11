@@ -305,7 +305,7 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
                 ji--;
                 if (ji == rc) break;
             } else {
-                clamp+=val[rc][j]*Q[j]*Q[rc];
+                clamp+=val[rc_s][j]*Q[j];
             }
         }
         ji=0;
@@ -314,7 +314,7 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
                 ji++;
                 if (ji == rc) break;
             } else {
-                clamp+=val[j][rc]*Q[j]*Q[rc];
+                clamp+=val[j][rc_s]*Q[j];
             }
         }
         val_s[rc][rc]+=clamp;
