@@ -17,7 +17,7 @@ qbsolv (qb for qubo, solv for solve )
 
 DESCRIPTION 
 	qbsolv executes a quadratic unconstrained binary optimization 
-	(QUOB) problem represented in a file, providing bit-vector 
+	(QUBO) problem represented in a file, providing bit-vector 
 	result(s) that minimizes (or optionally, maximizes) the value of 
 	the objective function represented by the QUBO.  The problem is 
 	represented in the QUBO(5) file format and notably is not limited 
