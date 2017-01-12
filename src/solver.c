@@ -317,7 +317,7 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 			val_s[i][j] = val[Icompress[i]][Icompress[j]];
 		}
 	}
-
+    return;
 	// clamping
 	double clamp;
 	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
