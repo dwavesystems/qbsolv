@@ -22,7 +22,7 @@ void **malloc2D(int rows, int cols, int size  ) {
 //
     char *ptr;
     char **big_array;
-    uintptr_t  space,i,j;
+    uintptr_t  space,i;
     space = rows*(sizeof(char *)+(cols*size));
     big_array = (char **)malloc(space);
     if (big_array == NULL)  {
