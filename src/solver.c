@@ -282,7 +282,7 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
     //  using the Qcompress bit vector reduce the Val matrix
     //
     //  clean out the subMatrix
-    for (i=0;j<subMatrix;j++) { //for each column
+    for (i=0; i < subMatrix; i++) { //for each column
         for (j=0;j<subMatrix;j++) val_s[i][j]=0.0; //for each row
     }
     //  fill the subMatrix
@@ -291,34 +291,35 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
         for (j=i;j<subMatrix;j++) { //copy row
             val_s[i][j]=val[Icompress[i]][Icompress[j]];
         }
-    }   
-// clamping
+    }
+
+    // clamping
     double clamp;
     int rc_s,rc; //rc = row/col (diag) rc_s submatrix version
     int ji;
-    for (rc=0;rc<subMatrix;rc++) {
-        rc_s=Icompress[rc];
-        clamp=0;
-        ji=subMatrix-1;
-        for ( j=maxNodes-1;j>rc_s;j--) {
-            if ( j== Icompress[ji] ) {
+    for (rc_s = 0; rc_s < subMatrix; rc_s++) {
+        rc = Icompress[rc_s];
+        clamp = 0;
+        ji = subMatrix-1;
+        for ( j = maxNodes-1; j > rc; j--) {
+            if ( j == Icompress[ji] ) {
                 ji--;
-                if (ji == rc) break;
+                if (ji == rc_s) break;
             } else {
-                clamp+=val[rc_s][j]*Q[j];
+                clamp += val[rc][j] * Q[j];
             }
         }
         ji=0;
-        for ( j=0;j<rc+1;j++) {
-            if ( j== Icompress[ji] ) {
+        for ( j = 0; j < rc + 1; j++) {
+            if ( j == Icompress[ji] ) {
                 ji++;
-                if (ji == rc) break;
+                if (ji == rc_s) break;
             } else {
-                clamp+=val[j][rc_s]*Q[j];
+                clamp += val[j][rc] * Q[j];
             }
         }
-        val_s[rc][rc]+=clamp;
-    } 
+        val_s[rc_s][rc_s] += clamp;
+    }
     return;
 }
 // do the smaller matrix solver here, currently dummied not holding the Dwave part yet
