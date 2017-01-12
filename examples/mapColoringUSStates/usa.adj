@@ -2,17 +2,16 @@
 # License:  Public Domain.    I would love to hear about any projects you use if it for though!
 # 
 AK
+HI
 AL,MS,TN,GA,FL
 AR,MO,TN,MS,LA,TX,OK
 AZ,CA,NV,UT,CO,NM
 CA,OR,NV,AZ
 CO,WY,NE,KS,OK,NM,AZ,UT
 CT,NY,MA,RI
-DC,MD,VA
 DE,MD,PA,NJ
 FL,AL,GA
 GA,FL,AL,TN,NC,SC
-HI
 IA,MN,WI,IL,MO,NE,SD
 ID,MT,WY,UT,NV,OR,WA
 IL,IN,KY,MO,IA,WI
@@ -52,3 +51,4 @@ WA,ID,OR
 WI,MI,MN,IA,IL
 WV,OH,PA,MD,VA,KY
 WY,MT,SD,NE,CO,UT,ID
+DC,MD,VA
