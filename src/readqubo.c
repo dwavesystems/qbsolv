@@ -1,4 +1,4 @@
-/* 
+/*
  Copyright 2016 D-Wave Systems Inc.
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,78 +18,85 @@
 /*
  * read from inFile_ and parse the qubo file
 */
-int pFound = FALSE;
-int lineNm=0;
-const char s[2]=" ";
-int i,j,k; // standard scratch int's 
-int inode=0,icoupler=0;
-double f;
-int read_qubo(void) 
+int        pFound = FALSE;
+int        lineNm = 0;
+const char s[2] = " ";
+int        i, j, k; // standard scratch int's
+int        inode = 0, icoupler = 0;
+double     f;
+int read_qubo(void)
 {
-    int lineLen;
-    size_t linecap =0;
-    char *line = NULL;
-    char token[50] ,tokenp[50]; 
-    while ((lineLen=getline(&line,&linecap,inFile_)) >0 ) {
-        lineNm++;
-        if ( strncmp(line,"c",1)==0 || strncmp(line,"C",1)==0) {
-            continue; // comment line in file
-        }
-        if ( ! pFound ) {
-            if ( strncmp(line,"p",1)==0 || strncmp(line,"P",1)==0) { //found program line
-                sscanf(line," %s %s %d %d %d %d",tokenp,token,&i,&maxNodes_,&nNodes_,&nCouplers_);
-                if ( strncmp(token,"qubo",4) != 0 ) {
-                    fprintf(stderr," P line in %s is not a qubo, it lists as %s\n",inFileNm_,token);
-                    exit(9);
-                } else {  // it is a p qubo line :-)
-                    // now we can allocate node and coupler memory
-                    if (GETMEM(nodes_   ,struct nodeStr_,nNodes_   ) == NULL ) { BADMALLOC }
-                    if (GETMEM(couplers_,struct nodeStr_,nCouplers_) == NULL ) { BADMALLOC }
-                }
-                pFound=TRUE;
-            } else {
-                continue; // not a comment line not a p line, so unknown, so skip it
-            }
-        
-        } else { // p is been found and parsed, not a comment line so must be an input line or blank
-            if ( sscanf(line,"%d %d %lf",&i,&j,&f) == 3 ) {
-            //printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
-                if ( i == j ) {
-                    if ( inode > nNodes_ ) {
-                        fprintf(stderr," Number of nodes exceeded at line %d %s,\n nodes= %d\n",lineNm,line,inode);
-                        exit(9);
-                    }
-                    nodes_[inode].n1=i;
-                    nodes_[inode].n2=j;
-                    nodes_[inode++].value=f;
-                }else {
-                    if ( icoupler > nCouplers_ ) {
-                        fprintf(stderr," Number of couplers exceeded at line %d %s,\n Couplers= %d\n",lineNm,line,icoupler);
-                        exit(9);
-                    }
-                    couplers_[icoupler].n1=i;
-                    couplers_[icoupler].n2=j;
-                    couplers_[icoupler++].value=f;
-                }
-                if ( (i+1 > maxNodes_) || (j+1 > maxNodes_) ) { 
-                    fprintf(stderr," Coordinates out of bounds ( 0 to %d )  at line %d %s,\n %d %d\n",maxNodes_,lineNm,line,i,j);
-                    exit(9);
-                }
-    //        printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
-            }
-        }
-    }
-    int errors=0;
-    if ( icoupler != nCouplers_ ) { 
-        fprintf(stderr," Number of couplers too small couplers = %d, Ncouplers =%d\n",icoupler,nCouplers_);
-        errors++;
-    }
-    if ( inode != nNodes_ ) {
-        fprintf(stderr," Number of couplers too small nodes = %d, Nnodes =%d\n",inode,nNodes_);
-        errors++;
-    }
-    if ( errors > 0 ) { exit (9); }
-    //for ( i =0;i<nNodes_;i++) {printf("node %d : %d %d %lf \n",i,nodes_[i].n1,nodes_[i].n2,nodes_[i].value);}
-    //for ( i =0;i<nCouplers_;i++) {printf("coupler %d : %d %d %lf \n",i,couplers_[i].n1,couplers_[i].n2,couplers_[i].value);}
-    return errors;
+	int    lineLen;
+	size_t linecap = 0;
+	char   *line = NULL;
+	char   token[50], tokenp[50];
+
+	while ((lineLen = getline(&line, &linecap, inFile_)) > 0 ) {
+		lineNm++;
+		if ( strncmp(line, "c", 1) == 0 || strncmp(line, "C", 1) == 0) {
+			continue; // comment line in file
+		}
+		if ( !pFound ) {
+			if ( strncmp(line, "p", 1) == 0 || strncmp(line, "P", 1) == 0) { //found program line
+				sscanf(line, " %s %s %d %d %d %d", tokenp, token, &i, &maxNodes_, &nNodes_, &nCouplers_);
+				if ( strncmp(token, "qubo", 4) != 0 ) {
+					fprintf(stderr, " P line in %s is not a qubo, it lists as %s\n", inFileNm_, token);
+					exit(9);
+				} else {  // it is a p qubo line :-)
+					// now we can allocate node and coupler memory
+					if (GETMEM(nodes_, struct nodeStr_, nNodes_   ) == NULL ) {
+						BADMALLOC
+					}
+					if (GETMEM(couplers_, struct nodeStr_, nCouplers_) == NULL ) {
+						BADMALLOC
+					}
+				}
+				pFound = TRUE;
+			} else {
+				continue; // not a comment line not a p line, so unknown, so skip it
+			}
+
+		} else { // p is been found and parsed, not a comment line so must be an input line or blank
+			if ( sscanf(line, "%d %d %lf", &i, &j, &f) == 3 ) {
+				//printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
+				if ( i == j ) {
+					if ( inode > nNodes_ ) {
+						fprintf(stderr, " Number of nodes exceeded at line %d %s,\n nodes= %d\n", lineNm, line, inode);
+						exit(9);
+					}
+					nodes_[inode].n1      = i;
+					nodes_[inode].n2      = j;
+					nodes_[inode++].value = f;
+				}else {
+					if ( icoupler > nCouplers_ ) {
+						fprintf(stderr, " Number of couplers exceeded at line %d %s,\n Couplers= %d\n", lineNm, line, icoupler);
+						exit(9);
+					}
+					couplers_[icoupler].n1      = i;
+					couplers_[icoupler].n2      = j;
+					couplers_[icoupler++].value = f;
+				}
+				if ( (i + 1 > maxNodes_) || (j + 1 > maxNodes_) ) {
+					fprintf(stderr, " Coordinates out of bounds ( 0 to %d )  at line %d %s,\n %d %d\n", maxNodes_, lineNm, line, i, j);
+					exit(9);
+				}
+				//        printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
+			}
+		}
+	}
+	int errors = 0;
+	if ( icoupler != nCouplers_ ) {
+		fprintf(stderr, " Number of couplers too small couplers = %d, Ncouplers =%d\n", icoupler, nCouplers_);
+		errors++;
+	}
+	if ( inode != nNodes_ ) {
+		fprintf(stderr, " Number of couplers too small nodes = %d, Nnodes =%d\n", inode, nNodes_);
+		errors++;
+	}
+	if ( errors > 0 ) {
+		exit(9);
+	}
+	//for ( i =0;i<nNodes_;i++) {printf("node %d : %d %d %lf \n",i,nodes_[i].n1,nodes_[i].n2,nodes_[i].value);}
+	//for ( i =0;i<nCouplers_;i++) {printf("coupler %d : %d %d %lf \n",i,couplers_[i].n1,couplers_[i].n2,couplers_[i].value);}
+	return errors;
 }
