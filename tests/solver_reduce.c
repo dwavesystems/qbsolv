@@ -51,6 +51,7 @@ void testOne(){
 
     // output variables
     short selectionState[1];
+    maxNodes_ = 1;
     double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
@@ -168,10 +169,13 @@ void testTwo(){
 
     // selection variables
     int selectionMapping[1];
-    short globalState[2];
+    short globalState[4];
+    globalState[0] = 0;
+    globalState[1] = 0;
 
     // output variables
     short selectionState[1];
+    maxNodes_ = 1;
     double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
