@@ -32,7 +32,7 @@ subm=""
 #dw get solver
 #subm=-S0
 
-qbsolv -i usa.qubo -o usa.qbout -v1 -n 8 
+../../src/qbsolv -i usa.qubo -o usa.qbout -v1 -n 8 
 cat usa.qbout
 
 echo Solved -- Plotting
