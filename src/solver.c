@@ -322,23 +322,30 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 	double clamp;
 	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
 	int    ji;
+	
+	// Go over every variable that we are extracting
 	for (rc_s = 0; rc_s < subMatrix; rc_s++) {
+		// Get the global index of the current variable
 		rc    = Icompress[rc_s];
 		clamp = 0;
+
+		// Go over all other (non-extracted) variable 
+		// from the highest until we reach the current variable
 		ji    = subMatrix - 1;
 		for ( j = maxNodes - 1; j > rc; j--) {
 			if ( j == Icompress[ji] ) {
 				ji--;
-				if (ji == rc_s) break;
 			} else {
 				clamp += val[rc][j] * Q[j];
 			}
 		}
+
+		// Go over all other (non-extracted) variable 
+		// from zero until we reach the current variable
 		ji = 0;
 		for ( j = 0; j < rc + 1; j++) {
 			if ( j == Icompress[ji] ) {
 				ji++;
-				if (ji == rc_s) break;
 			} else {
 				clamp += val[j][rc] * Q[j];
 			}
