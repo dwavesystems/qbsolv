@@ -48,6 +48,12 @@ struct nodeStr_ {
 };
 
 // ------------------- Prototypes --------------------------------------
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 int   main( int argc,  char *argv[]);
 int   read_qubo(void);
 void  write_qubo(double **val, int nMax, const char *filename);
@@ -76,5 +82,9 @@ int is_Q_equal( short *Qnow, short *Qcompare, int nbits);
 void dw_init( );
 void dw_solver( double **val, int maxNodes, short *Q );
 void dw_close();
+void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **val_s, short *Q, short *Q_s);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
