@@ -578,16 +578,16 @@ void solve(double **val, int maxNodes)
 				} else {
 					solv_submatrix(Q_s, Qt_s, subMatrix, val_s, Qval_s, Row_s, Col_s, &t, TabuK_s, index_s);
 				}
-				if (Verbose_ > 3) {
-					printf("Bits set after solver     ");
-					for (i = 0; i < subMatrix; i++) printf("%d", Q[index[i + l]]);
-					printf("\n");
-				}
-				numPartCalls++;
 				for (j = 0; j < subMatrix; j++) {
 					i    = Icompress[j];
 					Q[i] = Q_s[j];
 				}
+				if (Verbose_ > 3) {
+					printf("Bits set after solve     ");
+					for (j = 0; j < subMatrix; j++) printf("%d", Q[Icompress[j]]);
+					printf("\n");
+				}
+				numPartCalls++;
 				DwaveQubo++;
 			}
 			//  completed submatrix passes
