@@ -477,12 +477,74 @@ void testThree(){
     test_eq(1, selectionState[1]);
 }
 
+void testFour(){
+    // -------------------------------------------------------------------------
+    // TEST 3:  Test a slightly larger problem
+    printf("Non-contiguous, two variables from a five variable system\n");
+
+    // -- Bootstrap
+    // Declare the full QUBO
+    int maxNodes = maxNodes_ = 5;
+    double ** quboMat = (double**)malloc2D(5, 5, sizeof(double));
+
+    // Encode simple 2 variable system
+    // E(b) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 +
+    //        b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 +
+    //        5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    quboMat[0][0] = 1;
+    quboMat[1][1] = 2;
+    quboMat[2][2] = -3;
+    quboMat[3][3] = 4;
+    quboMat[4][4] = 2;
+
+    quboMat[0][1] = 1;
+    quboMat[0][2] = -1;
+    quboMat[1][2] = 4;
+    quboMat[1][3] = -2;
+    quboMat[2][3] = 5;
+    quboMat[2][4] = 1;
+    quboMat[3][4] = 2;
+
+
+    // selection variables
+    int selectionMapping[2];
+    short globalState[5];
+
+    // output variables
+    short selectionState[2];
+    double ** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
+
+    // -- part 8
+    // E([1, ?, 1, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2b_1 - 3(1) + 4b_3 + 2(1) + (1) * b_1 - (1) * (1) + 4 * b_1 * (1) - 2 * b_1 * b_3 + 5 * (1) * b_3 + (1) * (1) + 2 * b_3 * (1)
+    //                    = 2b_1 + 4b_3 + b_1 + 4 * b_1 - 2 * b_1 * b_3 + 5 b_3 + 2 * b_3 
+    //                    = 7b_1 + 11b_3 - 2 * b_1 * b_3
+    
+    selectionMapping[0] = 1;
+    selectionMapping[1] = 3;
+    globalState[0] = 1;
+    globalState[1] = 1;
+    globalState[2] = 1;
+    globalState[3] = 1;
+    globalState[4] = 1;
+
+    reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
+
+    test_eqf(7, selectionMat[0][0]);
+    test_eqf(11, selectionMat[1][1]);
+    test_eqf(-2, selectionMat[0][1] + selectionMat[1][0]);
+
+    test_eq(1, selectionState[0]);
+    test_eq(1, selectionState[1]);
+}
+
 
 int main(int argc, char *argv[]){
 
     testOne();
     testTwo();
     testThree();
+    testFour();
 
     //
     return 0;
