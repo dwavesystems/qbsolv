@@ -362,7 +362,7 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **val, double *Q
 }
 
 // Entry into the overall solver from the main program
-void solve(double **val, int maxNodes)
+void solve(double **val, int maxNodes, int nRepeats)
 {
 	double    *Qval, *Row, *Col, V;
 	int       i, j,  *TabuK, *index, *index_s, start_;
@@ -509,7 +509,7 @@ void solve(double **val, int maxNodes)
 			ContinueWhile = TRUE;
 		}
 	} else {
-		if ( RepeatPass < nRepeats_) {
+		if ( RepeatPass < nRepeats) {
 			ContinueWhile = TRUE;
 		} else {
 			ContinueWhile = FALSE;
@@ -540,7 +540,7 @@ void solve(double **val, int maxNodes)
 			}
 			if (Verbose_ > 1) {
 				DLT; printf(" \n\n Reset Q and start over Repeat = %d/%d, as no progress is exhausted %d %d\n\n\n",
-				            nRepeats_, RepeatPass, NoProgress, NoProgress % Pchk);
+				            nRepeats, RepeatPass, NoProgress, NoProgress % Pchk);
 			}
 		} else {
 			for (l = 0; l < MIN(maxNodes - subMatrix, l_max); l += subMatrix) {
@@ -641,7 +641,7 @@ void solve(double **val, int maxNodes)
 				ContinueWhile = TRUE;
 			}
 		} else {
-			if ( RepeatPass < nRepeats_) {
+			if ( RepeatPass < nRepeats) {
 				ContinueWhile = TRUE;
 			} else {
 				ContinueWhile = FALSE;
