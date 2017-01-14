@@ -22,7 +22,7 @@
 FILE            *inFile_, *outFile_;
 int             maxNodes_, nCouplers_, nNodes_, nRepeats_, findMax_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, RepeatPass_, WriteMatrix_, Tlist_;
-char            *inFileNm_, *outFileNm_, pgmName_[16];
+char            *outFileNm_, pgmName_[16];
 double          **val;
 double          Target_, Time_;
 struct nodeStr_ *nodes_;
@@ -45,6 +45,8 @@ int  main( int argc,  char *argv[])
  */
 	extern char *optarg;
 	extern int  optind, optopt, opterr;
+
+	char *inFileName = NULL;
 
 	strcpy(pgmName_, "qbsolv");
 	inFile_      = NULL;
@@ -89,8 +91,8 @@ int  main( int argc,  char *argv[])
 			print_help();
 			exit(0);
 		case 'i':
-			inFileNm_ = optarg;
-			if ((inFile_ = fopen(inFileNm_, "r")) == NULL) {
+			inFileName = optarg;
+			if ((inFile_ = fopen(inFileName, "r")) == NULL) {
 				fprintf(stderr, "\n\t Error - can't find/open file " "\"%s\"\n\n", optarg);
 				exit(9);
 			}
@@ -162,13 +164,13 @@ int  main( int argc,  char *argv[])
 		exit(9);
 	}
 
-	errorCount = read_qubo(); // read in the QUBO from file
+	errorCount = read_qubo(inFileName); // read in the QUBO from file
 
 	if ((errorCount > 0) ) {
 		fprintf(stderr, "\n\t%d Input error(s) on file \"%s\"\n\n"
 		        "\t%s has been stopped.\n\tThere is a desription "
 		        "of the .qubo file format: use %s -q to print it\n\n",
-		        errorCount, inFileNm_, pgmName_, pgmName_);
+		        errorCount, inFileName, pgmName_, pgmName_);
 		exit(1);
 	}
 
@@ -186,7 +188,7 @@ int  main( int argc,  char *argv[])
 	}
 	if (Verbose_ > 3) {
 		fprintf(outFile_, "\n\t\"qbsolv  -i %s\" (%d nodes, %d couplers) - end-of-job\n\n",
-		        inFileNm_, nNodes_, nCouplers_);
+		        inFileName, nNodes_, nCouplers_);
 	}
 	exit(0);
 

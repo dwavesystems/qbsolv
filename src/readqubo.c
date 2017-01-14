@@ -25,7 +25,7 @@ int        i, j, k; // standard scratch ints
 int        inode = 0, icoupler = 0;
 double     f;
 
-int read_qubo(void)
+int read_qubo(const char * inFileName)
 {
 	int    lineLen;
 	size_t linecap = 0;
@@ -41,7 +41,7 @@ int read_qubo(void)
 			if ( strncmp(line, "p", 1) == 0 || strncmp(line, "P", 1) == 0) { //found program line
 				sscanf(line, " %s %s %d %d %d %d", tokenp, token, &i, &maxNodes_, &nNodes_, &nCouplers_);
 				if ( strncmp(token, "qubo", 4) != 0 ) {
-					fprintf(stderr, " P line in %s is not a qubo, it lists as %s\n", inFileNm_, token);
+					fprintf(stderr, " P line in %s is not a qubo, it lists as %s\n", inFileName, token);
 					exit(9);
 				} else { // it is a p qubo line :-)
 					// The p line is a header in the qubo file format

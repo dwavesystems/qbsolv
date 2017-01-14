@@ -5,7 +5,7 @@
 FILE   *inFile_, *outFile_;
 int    maxNodes_,nCouplers_,nNodes_,nRepeats_,findMax_;
 int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,RepeatPass_,WriteMatrix_,Tlist_;
-char   *inFileNm_,*outFileNm_,pgmName_[16];
+char   *outFileNm_,pgmName_[16];
 double **val;
 double Target_,Time_;
 struct nodeStr_  *nodes_;

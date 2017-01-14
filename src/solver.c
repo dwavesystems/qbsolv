@@ -66,7 +66,7 @@ double evaluate_1bit(double V_old, int bit, short *Q, int maxNodes, double **val
 			Row[i] -= val[i][bit];
 		}
 		for (i = bit + 1; i < maxNodes; i++) {
-			Col[i] -= val[bit][i]; 
+			Col[i] -= val[bit][i];
 		}
 
 	} else{
@@ -174,22 +174,22 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 		nTabu = MIN(Tlist_, maxNodes + 1 ); // tabu use set tenure
 	} else {
 		if ( maxNodes < 100 ) {
-			nTabu = 10; 
+			nTabu = 10;
 		}
 		else if ( maxNodes < 250) {
-			nTabu = 12; 
+			nTabu = 12;
 		}
 		else if ( maxNodes < 500) {
-			nTabu = 13; 
+			nTabu = 13;
 		}
 		else if ( maxNodes < 1000) {
-			nTabu = 21; 
+			nTabu = 21;
 		}
 		else if ( maxNodes < 2500) {
-			nTabu = 29; 
+			nTabu = 29;
 		}
 		else if ( maxNodes < 8000) {
-			nTabu = 34; 
+			nTabu = 34;
 		}
 		else { // maxNodes >= 8000
 			nTabu = 35;
@@ -261,7 +261,7 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 					Vss = V;   // record neighbor solution value
 				}
 			}
-		} 
+		}
 
 		if ( TargetSet_ ) {
 			if ( Vlastchange >= (fmin * Target_) ) {
@@ -286,7 +286,7 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 	V = evaluate(Q, maxNodes, val, Qval, Row, Col);
 
 	// Create index array of sorted values
-	val_index_sort(index, Qval, maxNodes); 
+	val_index_sort(index, Qval, maxNodes);
 	return V;
 }
 
@@ -297,7 +297,7 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 	int i, j; // scratch intergers looping
 
 	// using the Qcompress bit vector reduce the Val matrix
-	
+
 	// clean out the subMatrix
 	for (i = 0; i < subMatrix; i++) { // for each column
 		for (j = 0; j < subMatrix; j++) val_s[i][j] = 0.0; // for each row
@@ -311,21 +311,21 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 	}
 
     return;
-	// TODO: This code is correct but needs to be reworked 
+	// TODO: This code is correct but needs to be reworked
 	// and is required in some cases
 	/*
 	// clamping
 	double clamp;
 	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
 	int    ji;
-	
+
 	// Go over every variable that we are extracting
 	for (rc_s = 0; rc_s < subMatrix; rc_s++) {
 		// Get the global index of the current variable
 		rc    = Icompress[rc_s];
 		clamp = 0;
 
-		// Go over all other (non-extracted) variable 
+		// Go over all other (non-extracted) variable
 		// from the highest until we reach the current variable
 		ji    = subMatrix - 1;
 		for ( j = maxNodes - 1; j > rc; j--) {
@@ -336,7 +336,7 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 			}
 		}
 
-		// Go over all other (non-extracted) variable 
+		// Go over all other (non-extracted) variable
 		// from zero until we reach the current variable
 		ji = 0;
 		for ( j = 0; j < rc + 1; j++) {
@@ -486,7 +486,7 @@ void solve(double **val, int maxNodes)
 		DLT; printf(" Starting Full initial Tabu\n");
 	}
 	V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, index);
-	
+
 	// save best result
 	Vbest = V;
 	NU    = manage_Q(Q, Qlist, V, QVs, Qcounts, Qindex, QLEN, maxNodes);
@@ -523,7 +523,7 @@ void solve(double **val, int maxNodes)
 	int Pchk = 8;
 
 	// outer loop begin
-	while ( ContinueWhile ) { 
+	while ( ContinueWhile ) {
 		// use the first "remove" index values to remove rows and columns from new matrix
 		// initial TabuK to nothing tabu Q_s[i] = Q[i];
 		// create compression bit vector
@@ -630,7 +630,7 @@ void solve(double **val, int maxNodes)
 		}
 
 		if ( Verbose_ > 1) {
-			DLT; printf("V Best outer loop =%lf iterations %lld,  %s\n", Vbest * fmin, t, inFileNm_);
+			DLT; printf("V Best outer loop =%lf iterations %lld\n", Vbest * fmin, t);
 		}
 
 		// check on, if to continue the outer loop
@@ -651,14 +651,14 @@ void solve(double **val, int maxNodes)
 		// timeout test
 		if ( (double)(clock() - start_) / CLOCKS_PER_SEC >= Time_ ) {
 			ContinueWhile = FALSE;
-		} 
+		}
 	} // end of outer loop
 
 	// all done print results if needed and free allocated arrays
-	if (WriteMatrix_ == TRUE) 
+	if (WriteMatrix_ == TRUE)
 		print_V_Q_Qval(Q, maxNodes, val);
 
-	if ( Verbose_ == 0 ) 
+	if ( Verbose_ == 0 )
 		print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
 	free(index); free(TabuK); free(TabuK_s); free(Q_s);  free(val_s); free(Row_s); free(Col_s);
