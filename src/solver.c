@@ -16,12 +16,11 @@
 
 #include "include.h"
 #include "extern.h"
-//
-//this function evaluates the objective function for a given Q, It is called when the search
+
+// this function evaluates the objective function for a given Q, It is called when the search
 // is starting over, such as after a projection in outer loop of solver
-//Qval = the change if a Q bit is flipped
-//Row and Col are used for fast Qval updates in other functions when the bit is flipped
-//
+// Qval = the change if a Q bit is flipped
+// Row and Col are used for fast Qval updates in other functions when the bit is flipped
 double evaluate(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
 {
 	int    i, j;
@@ -38,7 +37,7 @@ double evaluate(short *Q, int maxNodes, double **val, double *Qval, double *Row,
 		}
 
 		if ( Q[i] == 1 ) {
-			result +=    Row[i] +       val[i][i];
+			result +=    Row[i] +          val[i][i];
 			Qval[i] = -( Row[i] + Col[i] + val[i][i] );
 		} else {
 			Qval[i] =  ( Row[i] + Col[i] + val[i][i] );
@@ -47,11 +46,9 @@ double evaluate(short *Q, int maxNodes, double **val, double *Qval, double *Row,
 	return result;
 }
 
-//
-//this function evaluates change in the objective function and Qval for a given Q, and
-//Qval = the change if a Q single bit is flipped, Row and Col are updated so this function
+// this function evaluates change in the objective function and Qval for a given Q, and
+// Qval = the change if a Q single bit is flipped, Row and Col are updated so this function
 // can be optimal
-//
 double evaluate_1bit(double V_old, int bit, short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
 {
 	int i, j;
@@ -66,20 +63,20 @@ double evaluate_1bit(double V_old, int bit, short *Q, int maxNodes, double **val
 		// then it was a 1 before and we have to reduce all the rows from 0 to bit by val[bit][j]*Q[j]
 		// from bit+1 to maxNodes reduce cols by val[j][bit]*Q[j]
 		for (i = 0; i < bit; i++) {
-			{ Row[i] -= val[i][bit]; }
+			Row[i] -= val[i][bit];
 		}
 		for (i = bit + 1; i < maxNodes; i++) {
-			{ Col[i] -= val[bit][i]; }
+			Col[i] -= val[bit][i]; 
 		}
 
 	} else{
 		// then it was a 0 before and we have to increase all the rows from 0 to bit by val[bit][j]*Q[j]
 		// from bit+1 to maxNodes increase cols by val[j][bit]*Q[j]
 		for (i = 0; i < bit; i++) {
-			{ Row[i] += val[i][bit]; }
+			Row[i] += val[i][bit];
 		}
 		for (i = bit + 1; i < maxNodes; i++) {
-			{ Col[i] += val[bit][i]; }
+			Col[i] += val[bit][i];
 		}
 	}
 	// Col[bit] Row[bit] need recalculation
@@ -104,12 +101,9 @@ double evaluate_1bit(double V_old, int bit, short *Q, int maxNodes, double **val
 	return result;
 }
 
-//
-//this function performs a local Max search but doesn't require an initial Evaluation
-//improving Q and returning the last Evaluated value
-//
-double
-local_search_1bit(double V, short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col, long long *t)
+// this function performs a local Max search but doesn't require an initial Evaluation
+// improving Q and returning the last Evaluated value
+double local_search_1bit(double V, short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col, long long *t)
 {
 	short improve;
 	int   k, kk;
@@ -119,14 +113,15 @@ local_search_1bit(double V, short *Q, int maxNodes, double **val, double *Qval, 
 	for (k = 0; k < maxNodes; k++) {
 		index[k] = k;
 	}
-// initial evaluate (Qval,Row,Col all primed)  needed before evaluate_1bit can be used
+
+	// initial evaluate (Qval,Row,Col all primed)  needed before evaluate_1bit can be used
 	improve = TRUE;
 	while (improve) {
 		improve = FALSE;
 		if ( kkstr == 0 ) { // sweep top to bottom
 			shuffle_index(index, maxNodes);
 			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
-		}else{           // sweep bottom to top
+		}else{ // sweep bottom to top
 			kkstr = 0; kkinc = 1; kkend = maxNodes; // got thru it backwards then reshuffle
 		}
 		for (kk = kkstr; kk != kkend; kk = kk + kkinc) {
@@ -141,9 +136,7 @@ local_search_1bit(double V, short *Q, int maxNodes, double **val, double *Qval, 
 	return V;
 }
 
-//
-//this function performance a local Max search improving Q and returning the last Evaluated value
-//
+// this function performance a local Max search improving Q and returning the last Evaluated value
 double local_search(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col, long long *t)
 {
 	short  improve;
@@ -157,19 +150,17 @@ double local_search(short *Q, int maxNodes, double **val, double *Qval, double *
 	V = local_search_1bit(V, Q, maxNodes, val, Qval, Row, Col, t); // local search to polish the change
 	return V;
 }
-//
-//this function is called by solv to execute a tabu search,, This is THE Tabu search
-//
-double
-tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
+
+// this function is called by solve to execute a tabu search, This is THE Tabu search
+double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
             double *Row, double *Col, long long *t, long long IterMax, int *TabuK, int *index)
 {
-	int       i, k, K; //iteration working vars
-	int       brk;     //Flag to mark a break and not a fall thru of the loop
-	double    Vs;      //best solution so far
-	double    Vss;     //best solution in neighbour
-	double    V;       //working solution variable
-	double    Vlastchange; //working solution variable
+	int       i, k, K;     // iteration working vars
+	int       brk;         // flag to mark a break and not a fall thru of the loop
+	double    Vs;          // best solution so far
+	double    Vss;         // best solution in neighbour
+	double    V;           // working solution variable
+	double    Vlastchange; // working solution variable
 	int       nTabu;
 	double    fmin;
 	long long thisIter;
@@ -177,33 +168,33 @@ tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
 	int       numIncrease = 900;
 	double    howFar;
 
-// setup nTabu
+	// setup nTabu
+	// these nTabu numbers might need to be adjusted to work correctly
 	if ( Tlist_ != -1 ) {
-		nTabu = MIN(Tlist_, maxNodes + 1 );     //tabu use set tenure
+		nTabu = MIN(Tlist_, maxNodes + 1 ); // tabu use set tenure
 	} else {
-		if ( maxNodes <= 50    && maxNodes < 1 ) {
-			nTabu = 10; goto brk;
+		if ( maxNodes < 100 ) {
+			nTabu = 10; 
 		}
-		if ( maxNodes <= 100   && maxNodes <= 249  ) {
-			nTabu = 12; goto brk;
+		else if ( maxNodes < 250) {
+			nTabu = 12; 
 		}
-		if ( maxNodes <= 250   && maxNodes <= 499  ) {
-			nTabu = 13; goto brk;
+		else if ( maxNodes < 500) {
+			nTabu = 13; 
 		}
-		if ( maxNodes <= 500   && maxNodes <= 999  ) {
-			nTabu = 21; goto brk;
+		else if ( maxNodes < 1000) {
+			nTabu = 21; 
 		}
-		if ( maxNodes <= 1000  && maxNodes <= 2499 ) {
-			nTabu = 29; goto brk;
+		else if ( maxNodes < 2500) {
+			nTabu = 29; 
 		}
-		if ( maxNodes >= 2500  && maxNodes <= 7999 ) {
-			nTabu = 34; goto brk;
+		else if ( maxNodes < 8000) {
+			nTabu = 34; 
 		}
-		if ( maxNodes >= 8000 ) {
+		else { // maxNodes >= 8000
 			nTabu = 35;
 		}
 	}
-brk:
 
 	if ( findMax_ ) {
 		fmin = 1.0;
@@ -212,23 +203,24 @@ brk:
 	}
 
 	Vs = local_search(Q, maxNodes, val, Qval, Row, Col, t);
-	val_index_sort(index, Qval, maxNodes);                            // Create index array of sorted values
+	val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
 	thisIter     = IterMax - (*t);
 	increaseIter = thisIter / 2;
 	Vlastchange  = Vs; V = Vs;
 	K            = 0;
-	for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; //copy the best solution so far
-	for (i = 0; i < maxNodes; i++) TabuK[i] = 0; //Zero out the Tabu vector
+	for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; // copy the best solution so far
+	for (i = 0; i < maxNodes; i++) TabuK[i] = 0; // zero out the Tabu vector
 
 	int kk, kkstr = 0, kkend = maxNodes, kkinc;
 	while (*t < IterMax) {
-		Vss = BIGNEGFP; // really really unlikely to find a number smaller by
+		Vss = BIGNEGFP; // initialized most negative number
 		brk = FALSE;
 		if ( kkstr == 0 ) { // sweep top to bottom
 			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
-		}else{           // sweep bottom to top
+		} else { // sweep bottom to top
 			kkstr = 0; kkinc = 1; kkend = maxNodes;
 		}
+
 		for (kk = kkstr; kk != kkend; kk = kk + kkinc) {
 			k = index[kk];
 			if (TabuK[k] != (short)0 ) continue;
@@ -238,11 +230,11 @@ brk:
 				if (  V > Vs  ) {
 					brk         = TRUE;
 					K           = k;
-					V           = evaluate_1bit(Vlastchange, k, Q, maxNodes, val, Qval, Row, Col);// flip the bit and fix tables
+					V           = evaluate_1bit(Vlastchange, k, Q, maxNodes, val, Qval, Row, Col); // flip the bit and fix tables
 					Vlastchange = local_search_1bit(V, Q, maxNodes, val, Qval, Row, Col, t); // local search to polish the change
 					val_index_sort_ns(index, Qval, maxNodes); // update index array of sorted values, don't shuffle index
 					Vs = Vlastchange;
-					for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; //copy the best solution so far
+					for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; // copy the best solution so far
 
 					if ( TargetSet_ ) {
 						if ( Vlastchange >= (fmin * Target_) ) {
@@ -265,11 +257,11 @@ brk:
 				}
 				// Q vector unchanged
 				if (V > Vss) { // check for improved neighbor solution
-					K   = k;  // record position
-					Vss = V;  // record neighbor solution value
+					K   = k;   // record position
+					Vss = V;   // record neighbor solution value
 				}
 			}
-		} // end for k=0;k<maxNodes and TabuK[k] != 0
+		} 
 
 		if ( TargetSet_ ) {
 			if ( Vlastchange >= (fmin * Target_) ) {
@@ -287,37 +279,41 @@ brk:
 		} // add some asymetry
 	}
 
-	for (i = 0; i < maxNodes; i++) Q[i] = Qt[i];      // copy over the best solution
-/// ok, we are leaving Tabu,, we can do a for sure clean up run of evaluate, to be sure we
+	for (i = 0; i < maxNodes; i++) Q[i] = Qt[i]; // copy over the best solution
+
+	// ok, we are leaving Tabu, we can do a for sure clean up run of evaluate, to be sure we
+	// return the true evaluation of the function (given that we only do this a handfull of times)
 	V = evaluate(Q, maxNodes, val, Qval, Row, Col);
-// return the true evaluation of the function (given that we only do this a handfull of times
-	val_index_sort(index, Qval, maxNodes);              // Create index array of sorted values
+
+	// Create index array of sorted values
+	val_index_sort(index, Qval, maxNodes); 
 	return V;
 }
-//
+
 // given a bit vector Qcompress, remove the row and column of Val, nodes and couplers
 // also returning the new maxNodes and nCouplers
-//
 void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **val_s, short *Q, short *Q_s)
 {
+	int i, j; // scratch intergers looping
 
-	int i, j;  //scratch intergers loopoing
-
-	//
-	//  using the Qcompress bit vector reduce the Val matrix
-	//
-	//  clean out the subMatrix
-	for (i = 0; i < subMatrix; i++) { //for each column
-		for (j = 0; j < subMatrix; j++) val_s[i][j] = 0.0; //for each row
+	// using the Qcompress bit vector reduce the Val matrix
+	
+	// clean out the subMatrix
+	for (i = 0; i < subMatrix; i++) { // for each column
+		for (j = 0; j < subMatrix; j++) val_s[i][j] = 0.0; // for each row
 	}
-	//  fill the subMatrix
-	for (i = 0; i < subMatrix; i++) { //for each column
+	// fill the subMatrix
+	for (i = 0; i < subMatrix; i++) { // for each column
 		Q_s[i] = Q[Icompress[i]];
-		for (j = i; j < subMatrix; j++) { //copy row
+		for (j = i; j < subMatrix; j++) { // copy row
 			val_s[i][j] = val[Icompress[i]][Icompress[j]];
 		}
 	}
+
     return;
+	// TODO: This code is correct but needs to be reworked 
+	// and is required in some cases
+	/*
 	// clamping
 	double clamp;
 	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
@@ -353,9 +349,10 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 		val_s[rc_s][rc_s] += clamp;
 	}
 	return;
+	*/
 }
+
 // do the smaller matrix solver here, currently dummied not holding the Dwave part yet
-//
 double solv_submatrix(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
                       double *Row, double *Col, long long *t, int *TabuK, int *index)
 {
@@ -363,11 +360,8 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **val, double *Q
 
 	return tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, t, IterMax, TabuK, index);
 }
-//
-//  Entry into the overall solver from the main program
-//
-//#define DLT printf ("%lf seconds ",(double) (clock()-start_)/CLOCKS_PER_SEC);
 
+// Entry into the overall solver from the main program
 void solve(double **val, int maxNodes)
 {
 	double    *Qval, *Row, *Col, V;
@@ -378,9 +372,8 @@ void solve(double **val, int maxNodes)
 
 	start_ = clock();
 	t      = 0;
-//
-//  Get some memory for the larger val matrix to solve
-//
+
+	// Get some memory for the larger val matrix to solve
 	if (GETMEM(Q, short, maxNodes) == NULL) {
 		BADMALLOC
 	}
@@ -402,10 +395,9 @@ void solve(double **val, int maxNodes)
 	if (GETMEM(TabuK, int, maxNodes) == NULL) {
 		BADMALLOC
 	}
-//
-// get some memory for storing and shorting Q bit vectors
-//
-#define QLEN 20
+
+	// get some memory for storing and shorting Q bit vectors
+	const int QLEN 20;
 	short  **Qlist;
 	double *QVs;
 	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
@@ -423,14 +415,12 @@ void solve(double **val, int maxNodes)
 	for (i = 0; i < QLEN + 1; i++) {
 		QVs[i]     = BIGNEGFP;
 		Qcounts[i] = 0;
-		//Qindex[i] = i; not needed due to val_index_sort
 		for ( j = 0; j < maxNodes; j++ ) {
 			Qlist[i][j] = 0;
 		}
 	}
-//
-// get some memory for a reduced sub matrixs
-//
+
+	// get some memory for reduced sub matrices
 	short  *Q_s, *Qt_s, *Qbest;
 	double Vbest, *Qval_s, *Row_s, *Col_s, **val_s;
 	int    *TabuK_s, *Icompress;
@@ -463,26 +453,24 @@ void solve(double **val, int maxNodes)
 	if (GETMEM(index_s, int, SubMatrix_) == NULL) {
 		BADMALLOC
 	}
-//
-//
-//  initialize
-//
+
+	// initialize
 	int MaxNodes_sub = MAX(SubMatrix_ + 1, .052 * maxNodes);
 	int subMatrix    = SubMatrix_;
 	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
 	set_bit(Qt_s, SubMatrix_);
 	set_bit(Qt, maxNodes);
 	for (i = 0; i < maxNodes; i++) {
-		index[i] = i;   //initial index to 0,1,2,...maxNodes
-		TabuK[i] = 0;   //initial TabuK to nothing tabu
+		index[i] = i;   // initial index to 0,1,2,...maxNodes
+		TabuK[i] = 0;   // initial TabuK to nothing tabu
 		Q[i]     = 0;
 	}
 	for (i = 0; i < SubMatrix_; i++) {
-		index_s[i] = i; //initial index to 0,1,2,...SubMartix_
+		index_s[i] = i; // initial index to 0,1,2,...SubMartix_
 		Q_s[i]     = 0;
 		Qt_s[i]    = Qt[i];
 	}
-//
+
 	int    l = 0, DwaveQubo = 0;
 	double fmin;
 
@@ -491,28 +479,27 @@ void solve(double **val, int maxNodes)
 	} else {
 		fmin = -1.0;
 	}
-//
-//  run initial Tabu Search to establish backbone
-//
+
+	// run initial Tabu Search to establish backbone
 	IterMax = t + (long long)MAX((long long)400, (long long)6500 * (long long)maxNodes);
 	if (Verbose_ > 2) {
 		DLT; printf(" Starting Full initial Tabu\n");
 	}
 	V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, index);
-// save best result
+	
+	// save best result
 	Vbest = V;
 	NU    = manage_Q(Q, Qlist, V, QVs, Qcounts, Qindex, QLEN, maxNodes);
 	for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
-	val_index_sort(index, Qval, maxNodes);                            // Create index array of sorted values
+	val_index_sort(index, Qval, maxNodes); // create index array of sorted values
 	if ( Verbose_ > 0 ) {
 		print_output(maxNodes, Q, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 	}
 	if (Verbose_ > 1) {
 		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", Vbest * fmin, t);
 	}
-//
-//Starting main search loop  Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
-//
+
+	// starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
 	short RepeatPass = 0, NoProgress = 0;
 	short ContinueWhile = FALSE;
 	if ( TargetSet_ ) {
@@ -534,15 +521,17 @@ void solve(double **val, int maxNodes)
 
 	DwaveQubo = 0;
 	int Pchk = 8;
-	while ( ContinueWhile ) { // outer loop begin
-// use the first "remove" index values to remove rows and columns from new matrix
-// initial TabuK to nothing tabu Q_s[i] = Q[i];
-// create compression bit vector
-//
-		val_index_sort(index, Qval, maxNodes);                           // Create index array of sorted values
+
+	// outer loop begin
+	while ( ContinueWhile ) { 
+		// use the first "remove" index values to remove rows and columns from new matrix
+		// initial TabuK to nothing tabu Q_s[i] = Q[i];
+		// create compression bit vector
+
+		val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
 		if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
 			                     MIN(maxNodes - subMatrix, l_max), subMatrix);
-// begin submatrix passes
+		// begin submatrix passes
 		if ( NoProgress % Pchk == (Pchk - 1) ) { // every Pchk (th) loop without progess
 			// reset completely
 			set_bit(Q, maxNodes);
@@ -564,9 +553,8 @@ void solve(double **val, int maxNodes)
 					TabuK[Icompress[j]] = 0;
 				}
 				index_sort(Icompress, subMatrix, TRUE); // sort it for effective reduction
-				//
-				// Coarsen and reduce the problem
-				//
+
+				// coarsen and reduce the problem
 				reduce(Icompress, val, subMatrix, maxNodes, val_s, Q, Q_s);
 				if (Verbose_ > 3) {
 					printf("Bits as set before solve ");
@@ -590,20 +578,19 @@ void solve(double **val, int maxNodes)
 				numPartCalls++;
 				DwaveQubo++;
 			}
-			//  completed submatrix passes
-			//
 
+			// completed submatrix passes
 			if ( Verbose_ > 1 ) printf("\n");
 		}
 		if ( Verbose_ > 1 ) {
 			DLT; printf(" ***Full Tabu  -- after partition pass \n");
 		}
-		//    FULL TABU run here
+		// FULL TABU run here
 
 		IterMax = t + (long long)1600 * (long long)maxNodes;
-		val_index_sort(index, Qval, maxNodes);               // Create index array of sorted values
+		val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
 		V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, index);
-		val_index_sort(index, Qval, maxNodes);               // Create index array of sorted values
+		val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
 
 		if ( Verbose_ > 1 ) {
 			DLT; printf("Latest answer  %4.5f iterations =%lld\n", V * fmin, t);
@@ -624,10 +611,9 @@ void solve(double **val, int maxNodes)
 			if ( Verbose_ > 0 ) {
 				print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 			}
-		} else if ( NU == 30 | NU == 20  ) {// equal solution, but how it is different?
+		} else if ( NU == 30 | NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
 			if (is_Q_equal(Q, Qbest, maxNodes)) {
-				//if (repeats > 8) {
 				NoProgress++;
 			} else {
 				for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
@@ -657,19 +643,24 @@ void solve(double **val, int maxNodes)
 		} else {
 			if ( RepeatPass < nRepeats_) {
 				ContinueWhile = TRUE;
-				//DLT;printf("numRepeats= %d RepeatPass = %d\n" , nRepeats_,RepeatPass);
 			} else {
 				ContinueWhile = FALSE;
 			}
 		}
+
+		// timeout test
 		if ( (double)(clock() - start_) / CLOCKS_PER_SEC >= Time_ ) {
 			ContinueWhile = FALSE;
-		}                                                                          // timeout test
+		} 
 	} // end of outer loop
 
-//  all done print results if needed and free allocated arrays
-	if (WriteMatrix_ == TRUE) print_V_Q_Qval(Q, maxNodes, val);
-	if ( Verbose_ == 0 ) print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+	// all done print results if needed and free allocated arrays
+	if (WriteMatrix_ == TRUE) 
+		print_V_Q_Qval(Q, maxNodes, val);
+
+	if ( Verbose_ == 0 ) 
+		print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+
 	free(index); free(TabuK); free(TabuK_s); free(Q_s);  free(val_s); free(Row_s); free(Col_s);
 	return;
 }

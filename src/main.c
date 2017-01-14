@@ -51,13 +51,13 @@ int  main( int argc,  char *argv[])
 	findMax_     = FALSE;
 	UseDwave_    = FALSE;
 	Verbose_     = 0;
-	nRepeats_    = 50; // Default setting
-	SubMatrix_   = 46; // Submatrix default
+	nRepeats_    = 50; // default setting
+	SubMatrix_   = 46; // submatrix default
 	WriteMatrix_ = FALSE;
 	outFile_     = stdout;
 	TargetSet_   = FALSE;
-	Time_        = 2592000; // a months worth of seconds
-	Tlist_       = -1;  // tabu list length  -1 signials go with defaults
+	Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
+	Tlist_       = -1; // tabu list length  -1 signials go with defaults
 	long seed       = 17932241798878;
 	int  errorCount = 0;
 
@@ -99,7 +99,7 @@ int  main( int argc,  char *argv[])
 			Tlist_ = strtol(optarg, &chx, 10); // this sets the length of the tabu list
 			break;
 		case 'm':
-			findMax_ = TRUE; //go for max and not min
+			findMax_ = TRUE; // go for the maximum value otherwise the minimum is found by default
 			break;
 		case 'n':
 			nRepeats_ = strtol(optarg, &chx, 10); // this sets the number of outer loop repeat without improvement
@@ -119,16 +119,17 @@ int  main( int argc,  char *argv[])
 					++errorCount;
 				}
 			}
+
 			if ( SubMatrix_ == 0 ) {
 				UseDwave_ = TRUE;
 			}
 			break;
 		case 'T':
-			Target_    = strtod(optarg, (char**)NULL); // this sets the size of the Partitioning Matrix
+			Target_    = strtod(optarg, (char**)NULL); // this sets desired optimal energy
 			TargetSet_ = TRUE;
 			break;
 		case 't':
-			Time_ = strtod(optarg, (char**)NULL); // this sets the size of the Partitioning Matrix
+			Time_ = strtod(optarg, (char**)NULL); // this sets the maximum runtime of the algorithm in seconds
 			break;
 		case 'o':
 			if ((outFile_ = fopen(optarg, "w")) == NULL) {
@@ -142,7 +143,7 @@ int  main( int argc,  char *argv[])
 			exit(0);
 			break;
 		case 'r':
-			seed = strtol(optarg, &chx, 10); // change from default seed value
+			seed = strtol(optarg, &chx, 10); // sets the seed value
 			break;
 		case 'w':
 			WriteMatrix_ = TRUE;
@@ -178,7 +179,7 @@ int  main( int argc,  char *argv[])
 		dw_init();
 	}
 
-	solve(val, maxNodes_);             // solve
+	solve(val, maxNodes_);
 
 	if ( UseDwave_ ) {
 		dw_close();

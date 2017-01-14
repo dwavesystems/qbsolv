@@ -15,15 +15,16 @@
 */
 #include "include.h"
 #include "extern.h"
-/*
- * read from inFile_ and parse the qubo file
-*/
+
+// read from inFile_ and parse the qubo file
+
 int        pFound = FALSE;
 int        lineNm = 0;
-const char s[2] = " ";
-int        i, j, k; // standard scratch int's
+const char s[2] = " "; // TODO: please comment what this variable is for
+int        i, j, k; // standard scratch ints
 int        inode = 0, icoupler = 0;
 double     f;
+
 int read_qubo(void)
 {
 	int    lineLen;
@@ -42,7 +43,8 @@ int read_qubo(void)
 				if ( strncmp(token, "qubo", 4) != 0 ) {
 					fprintf(stderr, " P line in %s is not a qubo, it lists as %s\n", inFileNm_, token);
 					exit(9);
-				} else {  // it is a p qubo line :-)
+				} else { // it is a p qubo line :-)
+					// The p line is a header in the qubo file format
 					// now we can allocate node and coupler memory
 					if (GETMEM(nodes_, struct nodeStr_, nNodes_   ) == NULL ) {
 						BADMALLOC
@@ -58,7 +60,6 @@ int read_qubo(void)
 
 		} else { // p is been found and parsed, not a comment line so must be an input line or blank
 			if ( sscanf(line, "%d %d %lf", &i, &j, &f) == 3 ) {
-				//printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
 				if ( i == j ) {
 					if ( inode > nNodes_ ) {
 						fprintf(stderr, " Number of nodes exceeded at line %d %s,\n nodes= %d\n", lineNm, line, inode);
@@ -80,10 +81,10 @@ int read_qubo(void)
 					fprintf(stderr, " Coordinates out of bounds ( 0 to %d )  at line %d %s,\n %d %d\n", maxNodes_, lineNm, line, i, j);
 					exit(9);
 				}
-				//        printf(" scanned the line  %d :%d %d %lf  couplers %d  nodes %d \n",lineNm,i,j,f,icoupler,inode);
 			}
 		}
 	}
+
 	int errors = 0;
 	if ( icoupler != nCouplers_ ) {
 		fprintf(stderr, " Number of couplers too small couplers = %d, Ncouplers =%d\n", icoupler, nCouplers_);
@@ -96,7 +97,6 @@ int read_qubo(void)
 	if ( errors > 0 ) {
 		exit(9);
 	}
-	//for ( i =0;i<nNodes_;i++) {printf("node %d : %d %d %lf \n",i,nodes_[i].n1,nodes_[i].n2,nodes_[i].value);}
-	//for ( i =0;i<nCouplers_;i++) {printf("coupler %d : %d %d %lf \n",i,couplers_[i].n1,couplers_[i].n2,couplers_[i].value);}
+
 	return errors;
 }
