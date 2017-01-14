@@ -17,8 +17,7 @@
 #include "include.h"
 #include "extern.h"
 
-//this DEBUG function just checks for a corrupt Q bit vector
-//
+// this DEBUG function just checks for a corrupt Q bit vector
 int check_corrupt_Q(short *Q, int N)
 {
 	int i;
@@ -35,8 +34,7 @@ int check_corrupt_Q(short *Q, int N)
 	return ret;
 }
 
-//this DEBUG function just checks for a corrupt tabu list only used in debugging
-//
+// this DEBUG function just checks for a corrupt tabu list
 int check_corrupt_tabu(int *T, int N, int nTabu)
 {
 	int i;
@@ -53,8 +51,7 @@ int check_corrupt_tabu(int *T, int N, int nTabu)
 	return ret;
 }
 
-//this DEBUG function evaluates the objective function for a given Q, with no optimizations ( the long way )
-//
+// this DEBUG function evaluates the objective function for a given Q, with no optimizations ( the long way )
 double just_evaluate(short *Q, int maxNodes, double **val)
 {
 	int    i, j;
@@ -68,8 +65,8 @@ double just_evaluate(short *Q, int maxNodes, double **val)
 	return result;
 }
 
-//this DEBUG function evaluates the validity of the Qval difference vector Qval, and it will abort if there is a problem
-//Qval = the change if a Q bit is flipped
+// this DEBUG function evaluates the validity of the Qval difference vector Qval, and it will abort if there is a problem
+// Qval = the change if a Q bit is flipped
 void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
 {
 	int    i, j;
@@ -98,8 +95,7 @@ void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, doub
 	return;
 }
 
-// this debug function checks the Qval vector
-//
+// this DEBUG function checks the Qval vector
 void check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
 {
 	//  checking the Qval vector

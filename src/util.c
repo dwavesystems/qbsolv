@@ -25,7 +25,7 @@ void **malloc2D(int rows, int cols, int size)
 	char      **big_array;
 	uintptr_t space, i;
 
-	space     = rows * (sizeof(char *) + (cols * size));
+	space     = rows * (sizeof(char *) + (cols * size)); // the total amount of memory required to hold both the matrix and the lookup table
 	big_array = (char**)malloc(space);
 	if (big_array == NULL) {
 		DL;
@@ -33,15 +33,16 @@ void **malloc2D(int rows, int cols, int size)
 		       "denied\n\n", pgmName_, rows, cols, (long)space / 1024 / 1024 );
 		exit(9);
 	}
-	space = cols * size;                  // ie, nColumns * elemSize
-	ptr   = (char*)&big_array[maxNodes_];// ie, &big_array[nRows]
-	for (i = 0; i < rows; ++i) {        // assign pointer to row, then incr pointer by size of row
+
+	space = cols * size;                  // space is now equal to the size of a row
+	ptr   = (char*)&big_array[maxNodes_]; // ie, &big_array[nRows]
+	for (i = 0; i < rows; ++i) {          // assign pointer to row, then increment pointer by size of row
 		big_array[i] = ptr;
 		ptr         += space;
 	}
 	return (void*)big_array;
 }
-//this randomly sets the bit vector to 1 or 0
+// this randomly sets the bit vector to 1 or 0
 //
 void set_bit(short *Q, int nbits)
 {
@@ -56,8 +57,8 @@ void set_bit(short *Q, int nbits)
 		}
 	}
 }
-// shuffle the index vector before sort
 
+// shuffle the index vector before sort
 void shuffle_index(int *index, int n)
 {
 	int j, i;
@@ -69,7 +70,7 @@ void shuffle_index(int *index, int n)
 	}
 }
 
-//  print out the bit vector as row and colum , surrounding the Qubo in triangular form  used in the -w option
+//  print out the bit vector as row and column, surrounding the Qubo in triangular form  used in the -w option
 //
 void print_V_Q_Qval(short *Q, int maxNodes, double **val)
 {
@@ -97,7 +98,7 @@ void print_V_Q_Qval(short *Q, int maxNodes, double **val)
 		}
 		fprintf(outFile_, "\n");
 	}
-	/*  print out the bit vector as row and colum , surrounding the
+	/*  print out the bit vector as row and column, surrounding the
 	 *  Qubo where both the row and col bit is set in triangular form */
 	fprintf(outFile_, "  Values that have a Q of 1 ");
 	fprintf(outFile_, "ij, "); for (i = 0; i < maxNodes; i++) fprintf(outFile_, ",%d", i); fprintf(outFile_, "\n");
@@ -141,7 +142,7 @@ void print_output(int maxNodes, short *Q, long numPartCalls, double energy, doub
 //
 void fill_val(double **val, int maxNodes, struct nodeStr_ *nodes, int nNodes, struct nodeStr_ *couplers, int nCouplers)
 {
-	int i, j;  //scratch intergers loopoing
+	int i, j;  //scratch intergers looping
 
 	for (i = 0; i < maxNodes; i++) {
 		for (j = 0; j < maxNodes; j++) {
@@ -191,7 +192,7 @@ void quick_sort_iterative_index(double val[], int arr[], int n)
 	int h, l;
 
 	h = n - 1; // last index
-	l = 0;   // first index
+	l = 0; // first index
 	int *stack; // temp space = n + 1
 	// Create an auxiliary stack
 	//int stack[ h - l + 1 ];
@@ -282,8 +283,8 @@ int compare_intsAsc( const void *p, const void *q)
 	int x = *(const int*)p;
 	int y = *(const int*)q;
 
-	if (x < y) return -1;       // Return -1 if you want ascending, 1 if you want descending order.
-	else if (x > y) return 1;     // Return 1 if you want ascending, -1 if you want descending order.
+	if (x < y) return -1; // return -1 if you want ascending, 1 if you want descending order.
+	else if (x > y) return 1; // return 1 if you want ascending, -1 if you want descending order.
 	return 0;
 }
 
@@ -292,13 +293,13 @@ int compare_intsDes( const void *p, const void *q)
 	int x = *(const int*)p;
 	int y = *(const int*)q;
 
-	if (x < y) return 1;       // Return -1 if you want ascending, 1 if you want descending order.
-	else if (x > y) return -1;   // Return 1 if you want ascending, -1 if you want descending order.
+	if (x < y) return 1;       // return -1 if you want ascending, 1 if you want descending order.
+	else if (x > y) return -1;   // return 1 if you want ascending, -1 if you want descending order.
 	return 0;
 }
 
 //
-//  sort an index array
+// sort an index array
 //
 void index_sort(int *index, int n, short FWD)
 {
@@ -314,6 +315,7 @@ void index_sort(int *index, int n, short FWD)
 	return;
 }
 
+// compares two vectors, bit by bit
 int is_Q_equal( short *Qnow, short *Qcompare, int nbits)
 {
 	int i;
@@ -328,7 +330,6 @@ int is_Q_equal( short *Qnow, short *Qcompare, int nbits)
 
 int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits)
 {
-	//
 	// Qnow is the Q vector being looked at
 	// Qlist is the 2d array of Q vectors being stored
 	// Vnow is the energy of the Q vector being looked at
@@ -347,7 +348,6 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 	// 30 duplicate highest energy and a unique Q  (highest energy to add to table )
 	// 3n duplicate energy and a duplicate  Q  (not highest energy to add to table ) n=number of repeats
 	// 40 new energy and unique Q (by definition )
-	//
 	int i, j, I, Rtrn, iL;
 
 	val_index_sort_ns(Qindex, QVs, nMax); // index array of sorted energies
@@ -356,7 +356,7 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 		I = nMax - 1; Rtrn = I; // we will add it to the space to an empty queue, Sort will fix it later
 		for ( i = 0; i < nbits; i++ ) {
 			Qlist[Qindex[I]][i] = Qnow[i];
-		}                                                      // save the bits to Qlist first entry
+		} // save the bits to Qlist first entry
 		QVs[Qindex[I]]     = Vnow;
 		Qcounts[Qindex[I]] = 1;
 		val_index_sort_ns(Qindex, QVs, nMax); // index array of sorted energies
@@ -366,16 +366,16 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 		return 0;
 	}
 	// new energy is in the range of our list
-	for (i = 0; i < nMax; i++) {       // search thru the list to see if there is an equal energy
+	for (i = 0; i < nMax; i++) { // search thru the list to see if there is an equal energy
 		if ( Vnow == QVs[Qindex[i]] ) {
-			j = i;    // now have a common energy, but it could be that we have a different Q
-			while ( QVs[Qindex[j]] == Vnow  & j < (nMax)) {   // look thru all Q's of common energy (they are ordered)
+			j = i; // now have a common energy, but it could be that we have a different Q
+			while ( QVs[Qindex[j]] == Vnow  & j < (nMax)) { // look thru all Q's of common energy (they are ordered)
 				if ( is_Q_equal( &Qlist[Qindex[j]][0], Qnow, nbits)) {
 					Qcounts[Qindex[j]]++; // simply mark this Q and energy as a duplicate find
 					if ( Vnow == QVs[Qindex[0]] ) {
-						Rtrn = 20 + Qcounts[Qindex[j]];   // duplicate energy matching another Q and equal to best energy
+						Rtrn = 20 + Qcounts[Qindex[j]]; // duplicate energy matching another Q and equal to best energy
 					} else {
-						Rtrn = 20;   // duplicate energy matching older lower energy Q
+						Rtrn = 20; // duplicate energy matching older lower energy Q
 					}
 					return Rtrn;
 				}
@@ -385,24 +385,24 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 			//
 			j          = Qindex[nMax - 1]; // add it to the worst energy position ( prefilled with worst possible value )
 			QVs[j]     = Vnow; // save energy
-			Qcounts[j] = 1;     // set number of hits as this is a first
+			Qcounts[j] = 1; // set number of hits as this is a first
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			}                                              // save the bits to Qlist
-			val_index_sort_ns(Qindex, QVs, nMax);  // Create index array of sorted energies
+			} // save the bits to Qlist
+			val_index_sort_ns(Qindex, QVs, nMax); // Create index array of sorted energies
 			if ( Vnow == QVs[Qindex[0]] ) {
 				return 30;   // duplicate highest energy unique Q and equal to best energy
 			} else {
-				return 30 + Qcounts[j];   // duplicate energy matching older lower energy Q
+				return 30 + Qcounts[j]; // duplicate energy matching older lower energy Q
 			}
-		} else if ( Vnow < QVs[Qindex[i]] ) {   // we have spilled off the list of energies and need to add this one
+		} else if ( Vnow < QVs[Qindex[i]] ) { // we have spilled off the list of energies and need to add this one
 			j          = Qindex[nMax - 1]; // add it to the worst energy position as it is unique but within the list
 			QVs[j]     = Vnow; // save energy
 			Qcounts[j] = 1; // set number of hits as this is a first
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			}                                              // save the bits to Qlist
-			val_index_sort_ns(Qindex, QVs, nMax);  // Create index array of sorted energies
+			} // save the bits to Qlist
+			val_index_sort_ns(Qindex, QVs, nMax);  // create index array of sorted energies
 			return 40;
 		}
 	}
@@ -410,7 +410,7 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 	exit(9);
 }
 
-// write a txt qubo file to "filename" file
+// write qubo file to *filename
 //
 void write_qubo(double **val, int nMax, const char *filename)
 {
@@ -420,6 +420,7 @@ void write_qubo(double **val, int nMax, const char *filename)
 		DL; printf(" failed to open %s\n", filename); exit(9);
 	}
 	int nNodes = 0, nCouplers = 0, i, j;
+
 	// count the non-zero couplers and nodes
 	for ( i = 0; i < nMax; i++) {
 		if ( val[i][i] != 0.0 ) nNodes++;

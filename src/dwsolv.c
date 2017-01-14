@@ -14,8 +14,14 @@
  limitations under the License.
 */
 
+/*
+ * More information needed, please provide
+ *
+ * Why is this only used when SubMatrix_ == 0?
+*/
+
 #include "include.h"
-#include "extern.h"     // qubo header file: global variable decls
+#include "extern.h" // qubo header file: global variable declarations
 #include <stdio.h>
 #include <locale.h>
 
@@ -31,8 +37,9 @@ const char *DW_INTERNAL__CONNECTION = "DW_INTERNAL__CONNECTION";
 const char *DW_INTERNAL__WSPATH = "DW_INTERNAL__WSPATH";
 const char *DW_INTERNAL__SOLVER = "DW_INTERNAL__SOLVER";
 
+// TODO: this should be made into a const and done correctly
 #define MINGWGINK C:/ MinGW / msys / 1.0
-static char *mingw_base = "MINGWGINK"; //Ridiculous MinGw workaround
+static char *mingw_base = "MINGWGINK"; // ridiculous MinGw workaround
 int         mingw_base_len;
 
 int  DW_setup_error = FALSE;
@@ -48,7 +55,7 @@ char filename_epqmi_max[256];
 char filename_max_full[256];
 char linebuf[256];
 FILE *f, *fr, *fs;
-int  i, j, k, l; /// working integer set
+int  i, j, k, l; // working integer set
 
 void dw_init()
 {
@@ -56,7 +63,7 @@ void dw_init()
 	// .epqmi file and path needed to embed problems to the solver
 
 	mingw_base_len = strlen("MINGWGINK"); // more Ridiculous MinGW workaround
-	my_pid_ = getpid();    // will use for /tmp filename base
+	my_pid_ = getpid(); // will use for /tmp filename base
 
 	workspace = getenv(DW_INTERNAL__WORKSPACE);
 	if ( workspace == NULL ) {
@@ -73,14 +80,22 @@ void dw_init()
 		printf(" dw wspath not set up \n");
 		DW_setup_error = TRUE;
 	} else {
-		if (strncmp(wspath, mingw_base, mingw_base_len) == 0) wspath += mingw_base_len; //completed RMWorkaround
+		
+		if (strncmp(wspath, mingw_base, mingw_base_len) == 0) 
+			wspath += mingw_base_len; // completed RMWorkaround
+
 		sprintf(filename_max_full, "%s/.max_full", workspace);
+		
 		if ((fs = fopen(filename_max_full, "r")) == NULL) {
-			printf(" no file %s\n", filename_max_full); exit(9);
+			printf(" no file %s\n", filename_max_full); 
+			exit(9);
 		}
+		
 		if ( fscanf(fs, "%s", linebuf) == 0 ) {
-			DL; printf("fscanf error"); exit(9);
+			DL; printf("fscanf error"); 
+			exit(9);
 		}
+
 		fclose(fs);
 		sprintf(ws_tmp_path, "/%s", linebuf);
 	}
@@ -91,15 +106,18 @@ void dw_init()
 	}
 	if ( DW_setup_error == TRUE ) {
 		printf(" dw not set up not complete, and -S 0 set \n");
-		DL; printf(" Exiting\n"); exit(9);
+		DL; printf(" Exiting\n"); 
+		exit(9);
 	}
 
 	sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embeded file
 	if ((fs = fopen(filename_epqmi_max, "r")) == NULL) {
-		printf(" no file %s\n", filename_epqmi_max); exit(9);
+		printf(" no file %s\n", filename_epqmi_max); 
+		exit(9);
 	}
 	if ( fscanf(fs, "%d", &S_embed) == 0 ) {
-		DL; printf("fscanf error"); exit(9);
+		DL; printf("fscanf error"); 
+		exit(9);
 	}
 	SubMatrix_ = S_embed;
 	fclose(fs);
@@ -107,7 +125,8 @@ void dw_init()
 	if ( (sysResult = setenv(DW_INTERNAL__WSPATH, ws_tmp_path, 1)) != 0 ) {
 		printf(" result of call %d\n", sysResult);
 		printf(" Error making setenv call %s %s \n", "DW_INTERNAL_WSPATH", ws_tmp_path);
-		DL; printf(" setenv command failed \n"); exit(9);
+		DL; printf(" setenv command failed \n"); 
+		exit(9);
 	}
 	strcpy(tmp_path, "/tmp");
 
@@ -115,7 +134,8 @@ void dw_init()
 
 	if ( (SubMatrix_ < 10) | (SubMatrix_ > 100) ) {
 		DL; printf(" Retrieved a incorrect embedding size, %d  \n", SubMatrix_);
-		printf(" Exiting\n"); exit(9);
+		printf(" Exiting\n"); 
+		exit(9);
 	}
 
 	if (Verbose_ > 2) {
@@ -130,20 +150,17 @@ void dw_init()
 		printf(" %s %s \n", DW_INTERNAL__CONNECTION, connection);
 		printf(" %s %s \n", DW_INTERNAL__WSPATH, wspath);
 		printf(" %s %s \n", DW_INTERNAL__SOLVER, solver);
-		//sprintf(DWcommand, "bash -c \'dw get env\'\n");
-		//sysResult=system(DWcommand);
 	}
 }
 
 void dw_solver(double **val, int maxNodes, short *Q)
 {
-
-// bind to .epqmi
-//
+	// bind to .epqmi
 	sprintf(filename_b, "%s/qbs%d.b", tmp_path, my_pid_); // we will need to write b file to /tmp directory
 
 	if ((f = fopen(filename_b, "w")) == NULL ) {
-		DL; printf("  Failed open %s\n", filename_b); exit(9);
+		DL; printf("  Failed open %s\n", filename_b); 
+		exit(9);
 	}
 
 	// dwave finds minimum, while our tabu finds max, so send negative to dwave
@@ -157,6 +174,7 @@ void dw_solver(double **val, int maxNodes, short *Q)
 	}
 	fclose(f);
 
+	// What does this do?
 	sprintf(DWcommand, "bash -c \'dw bind param_chain=15.0 /tmp/qbs%d.b  > /dev/null;"
 	        "dw exec num_reads=10 qbs%d.qmi  > /dev/null;"
 	        "dw val -s 1 qbs%d.sol |tail -n%d|cut -f3 -d\" \" > /tmp/qbs%d.xB\' \n",
@@ -197,13 +215,13 @@ void dw_close()
 
 	if (system(DWcommand) != 0 ) {
 		DL; printf("system call error,%s", DWcommand);
-	}                                                                            // clean up the /tmp directory
+	} // clean up the /tmp directory
 
 	sprintf(DWcommand, "rm -f %s/%s/qbs%d.* \n", workspace, ws_tmp_path, my_pid_);
 
 	if (system(DWcommand) != 0 ) {
 		DL; printf("system call error,%s", DWcommand);
-	}                                                                            // clean up the dw full.x directory
+	} // clean up the dw full.x directory
 
 	if (Verbose_ > 2) printf("%s", DWcommand);
 
