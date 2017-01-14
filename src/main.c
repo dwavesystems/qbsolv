@@ -20,7 +20,7 @@
 // define what will be used by "extern" in other functions
 //
 FILE            *outFile_;
-int             maxNodes_, nCouplers_, nNodes_, nRepeats_, findMax_;
+int             maxNodes_, nCouplers_, nNodes_, findMax_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16];
 double          **val;
@@ -35,6 +35,8 @@ struct nodeStr_ *couplers_;
 //  //  put in large statics like the -help output
 //      and the qubo file format print out
 //
+
+const int defaultRepeats = 50;
 
 int  main( int argc,  char *argv[])
 {
@@ -53,7 +55,7 @@ int  main( int argc,  char *argv[])
 	findMax_     = FALSE;
 	UseDwave_    = FALSE;
 	Verbose_     = 0;
-	nRepeats_    = 50; // default setting
+	int nRepeats = defaultRepeats;
 	SubMatrix_   = 46; // submatrix default
 	WriteMatrix_ = FALSE;
 	outFile_     = stdout;
@@ -104,7 +106,7 @@ int  main( int argc,  char *argv[])
 			findMax_ = TRUE; // go for the maximum value otherwise the minimum is found by default
 			break;
 		case 'n':
-			nRepeats_ = strtol(optarg, &chx, 10); // this sets the number of outer loop repeat without improvement
+			nRepeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeat without improvement
 			break;
 		case 'v':
 			Verbose_ = strtol(optarg, &chx, 10); // this sets the value of the Verbose
@@ -181,7 +183,7 @@ int  main( int argc,  char *argv[])
 		dw_init();
 	}
 
-	solve(val, maxNodes_);
+	solve(val, maxNodes_, nRepeats);
 
 	if ( UseDwave_ ) {
 		dw_close();
@@ -194,7 +196,7 @@ int  main( int argc,  char *argv[])
 
 }
 
-void  print_help( void)
+void  print_help(void)
 {
 	printf("\n\t%s -i infile [-o outfile] [-m] [-T] [-n] [-S SubMatrix] [-w] \n"
 	       "\t\t[-h] [-v verbosityLevel] [-V] [-q]\n"
@@ -262,7 +264,7 @@ void  print_help( void)
 	       "\t\tformat of the QUBO file.\n"
 	       "\t-r seed \n"
 	       "\t\tUsed to reset the seed for the random number generation \n",
-	       pgmName_, Time_, nRepeats_);
+	       pgmName_, Time_, defaultRepeats);
 
 	return;
 }

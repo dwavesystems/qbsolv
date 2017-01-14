@@ -15,7 +15,7 @@
 */
 // -------  GLOBAL Variables  ------------------------------------------
 extern FILE   *outFile_;
-extern int    maxNodes_, nCouplers_, nNodes_, nRepeats_, findMax_, start_;
+extern int    maxNodes_, nCouplers_, nNodes_, findMax_, start_;
 extern int    my_pid_, UseDwave_;
 extern int    Verbose_, SubMatrix_, TargetSet_, WriteMatrix_, Tlist_;
 extern char   *outFileNm_, pgmName_[16];

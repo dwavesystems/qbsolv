@@ -5,7 +5,7 @@
 void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **val_s,short *Q,short *Q_s);
 
 FILE   *outFile_;
-int    maxNodes_,nCouplers_,nNodes_,nRepeats_,findMax_;
+int    maxNodes_,nCouplers_,nNodes_,findMax_;
 int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,WriteMatrix_,Tlist_;
 char   *outFileNm_,pgmName_[16];
 double **val;

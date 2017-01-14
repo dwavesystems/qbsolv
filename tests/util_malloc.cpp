@@ -3,7 +3,7 @@
 #include "../src/extern.h"
 
 FILE   *outFile_;
-int    maxNodes_,nCouplers_,nNodes_,nRepeats_,findMax_;
+int    maxNodes_,nCouplers_,nNodes_,findMax_;
 int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,WriteMatrix_,Tlist_;
 char   *outFileNm_,pgmName_[16];
 double **val;
