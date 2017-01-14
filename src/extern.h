@@ -14,7 +14,7 @@
  limitations under the License.
 */
 // -------  GLOBAL Variables  ------------------------------------------
-extern FILE   *inFile_, *outFile_;
+extern FILE   *outFile_;
 extern int    maxNodes_, nCouplers_, nNodes_, nRepeats_, findMax_, start_;
 extern int    my_pid_, UseDwave_;
 extern int    Verbose_, SubMatrix_, TargetSet_, RepeatPass_, WriteMatrix_, Tlist_;

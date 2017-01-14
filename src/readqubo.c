@@ -16,7 +16,7 @@
 #include "include.h"
 #include "extern.h"
 
-// read from inFile_ and parse the qubo file
+// read from inFile and parse the qubo file
 
 int        pFound = FALSE;
 int        lineNm = 0;
@@ -25,14 +25,14 @@ int        i, j, k; // standard scratch ints
 int        inode = 0, icoupler = 0;
 double     f;
 
-int read_qubo(const char * inFileName)
+int read_qubo(const char *inFileName, FILE *inFile)
 {
 	int    lineLen;
 	size_t linecap = 0;
 	char   *line = NULL;
 	char   token[50], tokenp[50];
 
-	while ((lineLen = getline(&line, &linecap, inFile_)) > 0 ) {
+	while ((lineLen = getline(&line, &linecap, inFile)) > 0 ) {
 		lineNm++;
 		if ( strncmp(line, "c", 1) == 0 || strncmp(line, "C", 1) == 0) {
 			continue; // comment line in file
