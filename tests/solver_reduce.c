@@ -7,7 +7,7 @@ void reduce(int *Icompress, double **val, int subMatrix,int maxNodes,double **va
 FILE   *inFile_, *outFile_;
 int    maxNodes_,nCouplers_,nNodes_,nRepeats_,findMax_;
 int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,RepeatPass_,WriteMatrix_,Tlist_;
-char   *inFileNm_,*outFileNm_,pgmName_[16];
+char   *outFileNm_,pgmName_[16];
 double **val;
 double Target_,Time_;
 struct nodeStr_  *nodes_;
@@ -521,9 +521,9 @@ void testFour(){
     // -- part 8
     // E([1, ?, 1, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
     //                    = (1) + 2b_1 - 3(1) + 4b_3 + 2(1) + (1) * b_1 - (1) * (1) + 4 * b_1 * (1) - 2 * b_1 * b_3 + 5 * (1) * b_3 + (1) * (1) + 2 * b_3 * (1)
-    //                    = 2b_1 + 4b_3 + b_1 + 4 * b_1 - 2 * b_1 * b_3 + 5 b_3 + 2 * b_3 
+    //                    = 2b_1 + 4b_3 + b_1 + 4 * b_1 - 2 * b_1 * b_3 + 5 b_3 + 2 * b_3
     //                    = 7b_1 + 11b_3 - 2 * b_1 * b_3
-    
+
     selectionMapping[0] = 1;
     selectionMapping[1] = 3;
     globalState[0] = 1;
