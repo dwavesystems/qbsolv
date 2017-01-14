@@ -35,7 +35,7 @@ void **malloc2D(int rows, int cols, int size)
 	}
 
 	space = cols * size;                  // space is now equal to the size of a row
-	ptr   = (char*)&big_array[maxNodes_]; // ie, &big_array[nRows]
+	ptr   = (char*)&big_array[rows];      // ie, &big_array[nRows]
 	for (i = 0; i < rows; ++i) {          // assign pointer to row, then increment pointer by size of row
 		big_array[i] = ptr;
 		ptr         += space;
