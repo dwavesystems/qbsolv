@@ -168,33 +168,33 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 	int       numIncrease = 900;
 	double    howFar;
 
-// setup nTabu
+	// setup nTabu
+	// these nTabu numbers might need to be adjusted to work correctly
 	if ( Tlist_ != -1 ) {
 		nTabu = MIN(Tlist_, maxNodes + 1 ); // tabu use set tenure
 	} else {
-		if ( maxNodes <= 50    && maxNodes < 1 ) {
-			nTabu = 10; goto brk;
+		if ( maxNodes < 100 ) {
+			nTabu = 10; 
 		}
-		if ( maxNodes <= 100   && maxNodes <= 249  ) {
-			nTabu = 12; goto brk;
+		else if ( maxNodes < 250) {
+			nTabu = 12; 
 		}
-		if ( maxNodes <= 250   && maxNodes <= 499  ) {
-			nTabu = 13; goto brk;
+		else if ( maxNodes < 500) {
+			nTabu = 13; 
 		}
-		if ( maxNodes <= 500   && maxNodes <= 999  ) {
-			nTabu = 21; goto brk;
+		else if ( maxNodes < 1000) {
+			nTabu = 21; 
 		}
-		if ( maxNodes <= 1000  && maxNodes <= 2499 ) {
-			nTabu = 29; goto brk;
+		else if ( maxNodes < 2500) {
+			nTabu = 29; 
 		}
-		if ( maxNodes >= 2500  && maxNodes <= 7999 ) {
-			nTabu = 34; goto brk;
+		else if ( maxNodes < 8000) {
+			nTabu = 34; 
 		}
-		if ( maxNodes >= 8000 ) {
+		else { // maxNodes >= 8000
 			nTabu = 35;
 		}
 	}
-brk:
 
 	if ( findMax_ ) {
 		fmin = 1.0;
