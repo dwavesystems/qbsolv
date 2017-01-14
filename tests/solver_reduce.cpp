@@ -2,7 +2,7 @@
 #include "../src/include.h"
 #include "../src/extern.h"
 
-FILE   *inFile_, *outFile_;
+FILE   *outFile_;
 int    maxNodes_,nCouplers_,nNodes_,nRepeats_,findMax_;
 int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,RepeatPass_,WriteMatrix_,Tlist_;
 char   *outFileNm_,pgmName_[16];

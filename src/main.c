@@ -19,7 +19,7 @@
 
 // define what will be used by "extern" in other functions
 //
-FILE            *inFile_, *outFile_;
+FILE            *outFile_;
 int             maxNodes_, nCouplers_, nNodes_, nRepeats_, findMax_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, RepeatPass_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16];
@@ -47,9 +47,9 @@ int  main( int argc,  char *argv[])
 	extern int  optind, optopt, opterr;
 
 	char *inFileName = NULL;
+	FILE *inFile    = NULL;
 
 	strcpy(pgmName_, "qbsolv");
-	inFile_      = NULL;
 	findMax_     = FALSE;
 	UseDwave_    = FALSE;
 	Verbose_     = 0;
@@ -92,7 +92,7 @@ int  main( int argc,  char *argv[])
 			exit(0);
 		case 'i':
 			inFileName = optarg;
-			if ((inFile_ = fopen(inFileName, "r")) == NULL) {
+			if ((inFile = fopen(inFileName, "r")) == NULL) {
 				fprintf(stderr, "\n\t Error - can't find/open file " "\"%s\"\n\n", optarg);
 				exit(9);
 			}
@@ -158,13 +158,13 @@ int  main( int argc,  char *argv[])
 	}
 	srand( seed );
 
-	if (inFile_ == NULL) {
+	if (inFile == NULL) {
 		fprintf(stderr, "\n\t%s error -- no input file (-i option) specified"
 		        "\n\n", pgmName_);
 		exit(9);
 	}
 
-	errorCount = read_qubo(inFileName); // read in the QUBO from file
+	errorCount = read_qubo(inFileName, inFile); // read in the QUBO from file
 
 	if ((errorCount > 0) ) {
 		fprintf(stderr, "\n\t%d Input error(s) on file \"%s\"\n\n"

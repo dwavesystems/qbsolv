@@ -55,7 +55,7 @@ extern "C" {
 
 
 int   main( int argc,  char *argv[]);
-int   read_qubo(const char * inFileName);
+int   read_qubo(const char *inFileName, FILE *inFile);
 void  write_qubo(double **val, int nMax, const char *filename);
 void  solve( double **val,  int maxNodes);
 void  **malloc2D(int rows, int cols, int size  );
