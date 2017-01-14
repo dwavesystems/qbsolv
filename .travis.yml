@@ -1,0 +1,14 @@
+sudo: false
+language: c
+script:
+  - ./ci script "${TRAVIS_BUILD_DIR:?}" ${TEST:?}
+env:
+  - TEST=qbsTest2500.sh
+  - TEST=qbsTest_bqp_Target.sh
+  - TEST=qbsTestcounties.sh
+  - TEST=qbsTestfactoring.sh
+  - TEST=qbsTestmapcolorBig.sh
+matrix:
+  allow_failures:
+    - env: TEST=qbsTest2500.sh
+fast_finish: true
