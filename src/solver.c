@@ -397,7 +397,7 @@ void solve(double **val, int maxNodes)
 	}
 
 	// get some memory for storing and shorting Q bit vectors
-	const int QLEN 20;
+	const int QLEN=20;
 	short  **Qlist;
 	double *QVs;
 	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
