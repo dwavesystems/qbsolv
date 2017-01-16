@@ -336,82 +336,119 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 	// QVs is the 1d array of energies corresponding to Qlists
 	// Qcounts is the 1d array of hits on the corresponding Qlists
 	// Qindex is the order of Qlist based upon energies
-	// nQs is the number of items in Qlist
 	// nMax is size of the arrays (Qlist,Qvs...)
 	// if Qnow is unique, and is better than or equal to the worst Q add it to Qlist
 	// if Qnow is not unique ( equal energy )  increment number of times found
-	// return values
-	// 0 FALSE  nothing done, not good enough to add to the list
-	// 10 newest high energy unique Q ( by definition )
-	// 20 duplicate energy and a unique Q
-	// 2n duplicate highest energy and a duplicate Q n=number or repeats
-	// 30 duplicate highest energy and a unique Q  (highest energy to add to table )
-	// 3n duplicate energy and a duplicate  Q  (not highest energy to add to table ) n=number of repeats
-	// 40 new energy and unique Q (by definition )
-	int i, j, I, Rtrn, iL;
+
+	// return codes
+	enum 
+	{
+		NOTHING = 0,                   // nothing new, do nothing
+		NEW_HIGH_ENERGY_UNIQUE_Q = 10, // Q is unique, highest new energy
+		DUPLICATE_HIGHEST_ENERGY = 20, // two cases, Q is unique, duplicate energy
+		                               //            Q is duplicate, highest energy, add the number of repeats to this value
+		DUPLICATE_ENERGY = 30,         // two cases, Q is unique, highest energy
+		                               //            Q is duplicate, not highest, add the number of repeats to this value
+		NEW_ENERGY_UNIQUE_Q = 40       // Q is unique, new highest energy
+	};
+
+	int i, j, I, iL;
 
 	val_index_sort_ns(Qindex, QVs, nMax); // index array of sorted energies
 
-	if (Vnow > QVs[Qindex[0]] ) { // new high value
-		I = nMax - 1; Rtrn = I; // we will add it to the space to an empty queue, Sort will fix it later
+	// new high value
+	if (Vnow > QVs[Qindex[0]] ) { 
+		I = nMax - 1; // we will add it to the space to an empty queue, Sort will fix it later
+
+		// save the bits to Qlist first entry
 		for ( i = 0; i < nbits; i++ ) {
 			Qlist[Qindex[I]][i] = Qnow[i];
-		} // save the bits to Qlist first entry
+		} 
+
 		QVs[Qindex[I]]     = Vnow;
 		Qcounts[Qindex[I]] = 1;
-		val_index_sort_ns(Qindex, QVs, nMax); // index array of sorted energies
-		return 10;     // we have added this Qnow to the collective, might have overwritten an old one
+
+		// index array of sorted energies
+		val_index_sort_ns(Qindex, QVs, nMax); 
+
+		// we have added this Qnow to the collective, might have overwritten an old one
+		return NEW_HIGH_ENERGY_UNIQUE_Q;     
 	}
-	if (Vnow < QVs[Qindex[nMax - 1]] ) {  // list energies are all higher than this, do nothing
-		return 0;
+
+	// list energies are all higher than this, do nothing
+	if (Vnow < QVs[Qindex[nMax - 1]] ) {  
+		return NOTHING;
 	}
+
 	// new energy is in the range of our list
-	for (i = 0; i < nMax; i++) { // search thru the list to see if there is an equal energy
+	// search thru the list to see if there is an equal energy
+	for (i = 0; i < nMax; i++) { 
 		if ( Vnow == QVs[Qindex[i]] ) {
+
 			j = i; // now have a common energy, but it could be that we have a different Q
-			while ( QVs[Qindex[j]] == Vnow  & j < (nMax)) { // look thru all Q's of common energy (they are ordered)
+
+			// look thru all Q's of common energy (they are ordered)
+			while ( QVs[Qindex[j]] == Vnow  & j < (nMax)) { 
 				if ( is_Q_equal( &Qlist[Qindex[j]][0], Qnow, nbits)) {
-					Qcounts[Qindex[j]]++; // simply mark this Q and energy as a duplicate find
+					// simply mark this Q and energy as a duplicate find
+					Qcounts[Qindex[j]]++; 
+
 					if ( Vnow == QVs[Qindex[0]] ) {
-						Rtrn = 20 + Qcounts[Qindex[j]]; // duplicate energy matching another Q and equal to best energy
+						// duplicate energy matching another Q and equal to best energy
+						return DUPLICATE_HIGHEST_ENERGY + Qcounts[Qindex[j]]; 
 					} else {
-						Rtrn = 20; // duplicate energy matching older lower energy Q
+						// duplicate energy matching older lower energy Q
+						return DUPLICATE_HIGHEST_ENERGY; 
 					}
-					return Rtrn;
 				}
 				j++;
 			}
+
 			// fallen thru equal energies so we need to add it to the list
-			//
 			j          = Qindex[nMax - 1]; // add it to the worst energy position ( prefilled with worst possible value )
 			QVs[j]     = Vnow; // save energy
 			Qcounts[j] = 1; // set number of hits as this is a first
+			
+			// save the bits to Qlist
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			} // save the bits to Qlist
-			val_index_sort_ns(Qindex, QVs, nMax); // Create index array of sorted energies
+			} 
+
+			// Create index array of sorted energies
+			val_index_sort_ns(Qindex, QVs, nMax); 
 			if ( Vnow == QVs[Qindex[0]] ) {
-				return 30;   // duplicate highest energy unique Q and equal to best energy
+				// duplicate highest energy unique Q and equal to best energy
+				return DUPLICATE_ENERGY;   
 			} else {
-				return 30 + Qcounts[j]; // duplicate energy matching older lower energy Q
+				// duplicate energy matching older lower energy Q
+				return DUPLICATE_ENERGY + Qcounts[j]; 
 			}
-		} else if ( Vnow < QVs[Qindex[i]] ) { // we have spilled off the list of energies and need to add this one
+		}
+
+		// we have spilled off the list of energies and need to add this one
+		else if ( Vnow < QVs[Qindex[i]] ) { 
 			j          = Qindex[nMax - 1]; // add it to the worst energy position as it is unique but within the list
 			QVs[j]     = Vnow; // save energy
 			Qcounts[j] = 1; // set number of hits as this is a first
+			
+			// save the bits to Qlist
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			} // save the bits to Qlist
-			val_index_sort_ns(Qindex, QVs, nMax);  // create index array of sorted energies
-			return 40;
+			} 
+
+			// create index array of sorted energies
+			val_index_sort_ns(Qindex, QVs, nMax);  
+			return NEW_ENERGY_UNIQUE_Q;
 		}
 	}
-	for ( iL = 0; iL < nMax; iL++) printf(" %d %d %lf %d \n", Qindex[iL], iL, QVs[Qindex[iL]], Qcounts[Qindex[iL]]);
+	
+	for ( iL = 0; iL < nMax; iL++) 
+		printf(" %d %d %lf %d \n", Qindex[iL], iL, QVs[Qindex[iL]], Qcounts[Qindex[iL]]);
+
 	exit(9);
 }
 
 // write qubo file to *filename
-//
 void write_qubo(double **val, int nMax, const char *filename)
 {
 	FILE *file;
