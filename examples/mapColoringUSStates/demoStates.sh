@@ -23,8 +23,8 @@ python adj2qubo.py -i usa.adj -o usa.qubo
 if [ -e usa.qbout ] ; then
 	rm -f usa.q*.svg  usa.qbout
 fi
-if [ -e /c/Users/trainee/Desktop/States ] ; then
-	rm -rf /c/Users/trainee/Desktop/States
+if [ -e $HOME/.States ] ; then
+	rm -rf $HOME/.States
 fi
 
 subm=""
