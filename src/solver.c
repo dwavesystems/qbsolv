@@ -310,10 +310,6 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 		}
 	}
 
-    return;
-	// TODO: This code is correct but needs to be reworked
-	// and is required in some cases
-	/*
 	// clamping
 	double clamp;
 	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
@@ -349,7 +345,6 @@ void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **
 		val_s[rc_s][rc_s] += clamp;
 	}
 	return;
-	*/
 }
 
 // do the smaller matrix solver here, currently dummied not holding the Dwave part yet
@@ -455,10 +450,9 @@ void solve(double **val, int maxNodes, int nRepeats)
 	}
 
 	// initialize
-	int MaxNodes_sub = MAX(SubMatrix_ + 1, .052 * maxNodes);
+	int MaxNodes_sub = MAX(SubMatrix_ + 1, .182 * maxNodes);
 	int subMatrix    = SubMatrix_;
 	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
-	set_bit(Qt_s, SubMatrix_);
 	set_bit(Qt, maxNodes);
 	for (i = 0; i < maxNodes; i++) {
 		index[i] = i;   // initial index to 0,1,2,...maxNodes
@@ -543,6 +537,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 				            nRepeats, RepeatPass, NoProgress, NoProgress % Pchk);
 			}
 		} else {
+            int change=FALSE;
 			for (l = 0; l < MIN(maxNodes - subMatrix, l_max); l += subMatrix) {
 				if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
 				j = 0;
@@ -568,6 +563,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 				}
 				for (j = 0; j < subMatrix; j++) {
 					i    = Icompress[j];
+                    if ( Q[i] != Q_s[j] ) change=TRUE;
 					Q[i] = Q_s[j];
 				}
 				if (Verbose_ > 3) {
@@ -578,6 +574,13 @@ void solve(double **val, int maxNodes, int nRepeats)
 				numPartCalls++;
 				DwaveQubo++;
 			}
+            // submatrix search did not produce any new values, so randomize those bits
+            if ( change == FALSE ) {
+                set_bit_index( Q, l+subMatrix, index );
+				if (Verbose_ > 3) {
+					printf(" Submatrix search did not produce any new values, so randomize those bits\n  ");
+				}
+            }
 
 			// completed submatrix passes
 			if ( Verbose_ > 1 ) printf("\n");
@@ -661,6 +664,8 @@ void solve(double **val, int maxNodes, int nRepeats)
 	if ( Verbose_ == 0 )
 		print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
-	free(index); free(TabuK); free(TabuK_s); free(Q_s);  free(val_s); free(Row_s); free(Col_s);
+    free(Q); free(Qt); free(Qval); free(Row); free(Col); free(index); free(TabuK); free(QVs); free(Qcounts);
+    free(Qindex); free(Icompress); free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(val); free(val_s); 
+    free(Qval_s); free(Row_s); free(Col_s); free (index_s); free(Qlist);
 	return;
 }

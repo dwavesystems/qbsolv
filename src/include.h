@@ -67,6 +67,7 @@ void  print_V_Q_Qval(short *Q, int maxNodes, double **val);
 int   check_corrupt_Q(short *Q, int N);
 int   check_corrupt_tabu(int *Q, int N, int nTabu);
 void  set_bit(short *Q, int nbits);
+void  set_bit_index(short *Q, int nbits, int *index);
 void  shuffle_index(int *index, int n);
 void  shuffle_indexR(int *index, int n);
 double just_evaluate(short *Q, int maxNodes, double **val);
