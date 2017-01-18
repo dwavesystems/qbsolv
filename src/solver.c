@@ -450,7 +450,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 	}
 
 	// initialize
-	int MaxNodes_sub = MAX(SubMatrix_ + 1, .182 * maxNodes);
+	int MaxNodes_sub = MAX(SubMatrix_ + 1, .214 * maxNodes);
 	int subMatrix    = SubMatrix_;
 	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
 	set_bit(Qt, maxNodes);
@@ -576,9 +576,9 @@ void solve(double **val, int maxNodes, int nRepeats)
 			}
             // submatrix search did not produce any new values, so randomize those bits
             if ( change == FALSE ) {
-                set_bit_index( Q, l+subMatrix, index );
+                set_bit_index( Q, l, index );
 				if (Verbose_ > 3) {
-					printf(" Submatrix search did not produce any new values, so randomize those bits\n  ");
+					printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
 				}
             }
 
