@@ -397,7 +397,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 	double *QVs;
 	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
 
-	Qlist = (short**)malloc2D(maxNodes, QLEN + 1, sizeof(short));
+	Qlist = (short**)malloc2D(QLEN + 1, maxNodes, sizeof(short));
 	if (GETMEM(QVs, double, QLEN + 1) == NULL) {
 		BADMALLOC
 	}
