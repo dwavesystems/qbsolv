@@ -46,15 +46,20 @@ void **malloc2D(int rows, int cols, int size)
 //
 void set_bit(short *Q, int nbits)
 {
-	int number, i;
+	int  i;
 
 	for (i = 0; i < nbits; i++) {
-		number = rand() % 100 + 1;
-		if ( number > 50 ) {
-			Q[i] = 1;
-		}else {
-			Q[i] = 0;
-		}
+        Q[i] = rand() % 2;
+	}
+}
+// this randomly sets the bit vector to 1 or 0, with index
+//
+void set_bit_index(short *Q, int nbits, int *index)
+{
+	int  i;
+
+	for (i = 0; i < nbits; i++) {
+        Q[index[i]] = rand() % 2;
 	}
 }
 
