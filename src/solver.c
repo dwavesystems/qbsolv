@@ -450,7 +450,9 @@ void solve(double **val, int maxNodes, int nRepeats)
 	}
 
 	// initialize
-	int MaxNodes_sub = MAX(SubMatrix_ + 1, .214 * maxNodes);
+	const float MAX_NODE_SUB_SIZE = 0.214; // the size of the submatrix as a percentage of maxNodes
+
+	int MaxNodes_sub = MAX(SubMatrix_ + 1, MAX_NODE_SUB_SIZE * maxNodes);
 	int subMatrix    = SubMatrix_;
 	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
 	set_bit(Qt, maxNodes);
