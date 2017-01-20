@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<meta name="keywords" content="man qbsolv,qbsolv man page" />
+	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.2  (Unix)">
+	<META NAME="AUTHOR" CONTENT="ddahl">
+	<META NAME="CREATED" CONTENT="20160114;19480000">
+	<META NAME="CHANGEDBY" CONTENT="Steve Reinhardt">
+	<META NAME="CHANGED" CONTENT="20161109;23270000">
+	<META NAME="AppVersion" CONTENT="15.0000">
+	<META NAME="DocSecurity" CONTENT="0">
+	<META NAME="HyperlinksChanged" CONTENT="false">
+	<META NAME="LinksUpToDate" CONTENT="false">
+	<META NAME="ScaleCrop" CONTENT="false">
+	<META NAME="ShareDoc" CONTENT="false">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 1in }
+		P { margin-bottom: 0.08in; direction: ltr; color: #000000; widows: 2; orphans: 2 }
+		A:link { color: #0000ff; so-language: zxx }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-CA" TEXT="#000000" LINK="#0000ff" DIR="LTR">
+<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif">QBSOLV(1)
+                 User Commands                     QBSOLV(1)</FONT></P>
+<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>NAME</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+– minimize the objective function represented by a QUBO </FONT>
+</P>
+<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>SYNOPSIS</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in; line-height: 100%">
+<FONT FACE="Courier New, serif"><B>qbsolv </B></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><B>-i
+&lt;input_file.qubo&gt; [-o &lt;output_file&gt; [-w]] [-m] [-T
+&lt;target_value</B></SPAN></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><I><B>&gt;</B></I></SPAN></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><B>]
+[-t &lt;num_seconds&gt;] [-n &lt;num_repeats&gt;] [-S
+&lt;subproblem_size&gt;] [-v &lt;verbosity_level&gt;] [-q] [-V] [-h]</B></SPAN></FONT></P>
+<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>DESCRIPTION</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+executes the quadratic unconstrained binary optimization (QUBO)
+problem in the specified file. It provides bit-vector results that
+minimize or, optionally, maximize the value of the objective function
+represented by the QUBO problem.  </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+typically executes in a hybrid fashion on a classical CPU and a
+quantum processing unit (QPU).</FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">The
+problem must be in the QUBO(5) file format and is not limited to the
+size (number of variables), connectivity pattern, or numerical
+precision of the D-Wave system on which it will be executed.</FONT></P>
+<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>OPTIONS</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in"><FONT FACE="Courier New, serif"><B>-i
+&lt;input_file.qubo&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Name
+of the file (relative or absolute pathname) containing the input
+QUBO.  The “.qubo” extension is by convention.  </FONT>
+</P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-o
+&lt;output_file&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+ Name of the file (relative or absolute pathname) to which qbsolv
+will write results.  If no file is specified, results are written to
+standard output.</FONT></P>
+<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-w</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional,
+in which case </FONT><FONT FACE="Courier New, serif"><B>-o</B></FONT><FONT FACE="Courier New, serif">
+must also be specified. Prints the input QUBO matrix and the output
+result in .csv format to</FONT><FONT FACE="Courier New, serif"><B>
+</B></FONT><FONT FACE="Courier New, serif">the specified output file.</FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-m</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+ Specifies that </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+is to return the maximum value of the objective function instead of
+the minimum (default).</FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-T
+&lt;target_value&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+Target value of the objective function, expressed as an integer or
+floating-point number.  When target value is reached, </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+stops the optimization process.  Usually beneficial to specify only
+when the optimal value of the objective function has been
+analytically derived.</FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-t
+&lt;num_seconds&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif">Optional.
+ Number of seconds of elapsed CPU time consumed by the classically
+executing portion of </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+after which it stops the optimization process. The value may be
+specified as an integer or floating-point value. The elapsed CPU time
+is only checked after completion of the main loop, so the actual stop
+time may be more than the value. If options </FONT><FONT FACE="Courier New, serif"><B>–T</B></FONT><FONT FACE="Courier New, serif">
+or </FONT><FONT FACE="Courier New, serif"><B>–n</B></FONT><FONT FACE="Courier New, serif">
+are also specified, those limits may (depending on their values) stop
+</FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+execution before the timeout is reached. The default value is
+2,592,000.0 seconds (30 days).</FONT></P>
+<P STYLE="margin-left: 0.5in; text-indent: 0.5in; margin-bottom: 0in; line-height: 100%">
+<BR>
+</P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-n
+&lt;num_repeats&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+ Number of times that </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+is to repeat the main loop of the algorithm after a new optimal value
+is found.  This value must be a positive integer. The default value
+is 40.</FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0in"><FONT FACE="Courier New, serif"><B>-S
+&lt;subproblem_size&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+Size of the subproblems into which </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+is to decompose the QUBO.  Use </FONT><FONT FACE="Courier New, serif"><B>0</B></FONT><FONT FACE="Courier New, serif">
+to allow qbsolv to use the most effective size for the target D-Wave
+system. The default value is 45. Any value greater than zero causes
+</FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+to use its internal classical tabu solver instead of the D-Wave
+system.</FONT></P>
+<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-v
+&lt;verbosity_level&gt;</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+ Level of verbosity of the output. Values are as follows:<BR>- </FONT><FONT FACE="Courier New, serif"><B>0</B></FONT><FONT FACE="Courier New, serif">
+(default) outputs the number of bits in the solution, the solution
+itself, and the energy of the solution.  <BR>- </FONT><FONT FACE="Courier New, serif"><B>1</B></FONT><FONT FACE="Courier New, serif">
+outputs the same information as above for multiple solutions, if
+found. <BR>- </FONT><FONT FACE="Courier New, serif"><B>2</B></FONT><FONT FACE="Courier New, serif">
+outputs more detailed information at each step of the algorithm.  </FONT>
+</P>
+<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-q</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif">Optional.
+Prints the format of an arbitrary QUBO file and exits without running
+the program. </FONT>
+</P>
+<P STYLE="margin-left: 0.5in; text-indent: 0.5in; margin-bottom: 0in; line-height: 100%">
+<BR>
+</P>
+<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-V</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+ Prints the version number of the </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+program and exits without running the program.</FONT></P>
+<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-h</B></FONT></P>
+<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
+Prints the help message for </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
+and exits without running the program.</FONT></P>
+<P STYLE="margin-bottom: 0.07in; line-height: 100%"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>BUGS</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Report
+any bugs to </FONT><A HREF="mailto:dwsupport@dwavesys.com"><FONT FACE="Courier New, serif">dwsupport@dwavesys.com</FONT></A><FONT FACE="Courier New, serif">.</FONT></P>
+<P STYLE="margin-bottom: 0.07in; line-height: 100%"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>COPYRIGHT</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">©
+2016 D-Wave Systems Inc.</FONT></P>
+<P STYLE="margin-bottom: 0.07in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>SEE
+ALSO</B></FONT></FONT></P>
+<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><A NAME="_GoBack"></A>
+<FONT FACE="Courier New, serif"><B>qubo</B></FONT><FONT FACE="Courier New, serif">(5)</FONT></P>
+</BODY>
+</HTML>
