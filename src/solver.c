@@ -139,11 +139,7 @@ double local_search_1bit(double V, short *Q, int maxNodes, double **val, double 
 // this function performance a local Max search improving Q and returning the last Evaluated value
 double local_search(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col, long long *t)
 {
-	short  improve;
 	double V;
-	int    k;
-
-	improve = TRUE;
 
 	// initial evaluate needed before evaluate_1bit can be used
 	V = evaluate(Q, maxNodes, val, Qval, Row, Col);
@@ -153,7 +149,7 @@ double local_search(short *Q, int maxNodes, double **val, double *Qval, double *
 
 // this function is called by solve to execute a tabu search, This is THE Tabu search
 double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
-            double *Row, double *Col, long long *t, long long IterMax, int *TabuK, 
+            double *Row, double *Col, long long *t, long long IterMax, int *TabuK,
             double Target, int TargetSet, int *index)
 {
 	int       i, k, K;     // iteration working vars
@@ -620,13 +616,13 @@ void solve(double **val, int maxNodes, int nRepeats)
 			if ( Verbose_ > 0 ) {
 				print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 			}
-		} else if ( NU == 30 | NU == 20  ) { // equal solution, but how it is different?
+		} else if ( NU == 30 || NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
 			if (is_Q_equal(Q, Qbest, maxNodes)) {
 				NoProgress++;
 			} else {
 				for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
-				if ( repeats == 1 & Verbose_ > 0) { // we haven't printed this out before
+				if ( repeats == 1 && Verbose_ > 0) { // we haven't printed this out before
 					print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 				}
 			}
@@ -671,7 +667,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 		print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
     free(Q); free(Qt); free(Qval); free(Row); free(Col); free(index); free(TabuK); free(QVs); free(Qcounts);
-    free(Qindex); free(Icompress); free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(val); free(val_s); 
+    free(Qindex); free(Icompress); free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(val); free(val_s);
     free(Qval_s); free(Row_s); free(Col_s); free (index_s); free(Qlist);
 	return;
 }
