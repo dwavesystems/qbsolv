@@ -15,12 +15,13 @@
 */
 #include "include.h"
 #include "extern.h"
-void **malloc2D(int rows, int cols, int size)
-{
+
 //
 // create and pointer fill a 2d array of "size" for
 // X[rows][cols] addressing. Using only a single malloc
 //
+void **malloc2D(uint rows, uint cols, uint size)
+{
 	char      *ptr;
 	char      **big_array;
 	uintptr_t space, i;
@@ -42,6 +43,7 @@ void **malloc2D(int rows, int cols, int size)
 	}
 	return (void*)big_array;
 }
+
 // this randomly sets the bit vector to 1 or 0
 //
 void set_bit(short *Q, int nbits)
@@ -52,6 +54,7 @@ void set_bit(short *Q, int nbits)
         Q[i] = rand() % 2;
 	}
 }
+
 // this randomly sets the bit vector to 1 or 0, with index
 //
 void set_bit_index(short *Q, int nbits, int *index)
@@ -306,18 +309,15 @@ int compare_intsDes( const void *p, const void *q)
 //
 // sort an index array
 //
-void index_sort(int *index, int n, short FWD)
+void index_sort(int *index, int n, short forward)
 {
-	int i, j, tmp;
-
-	if (FWD == TRUE) {
+	if (forward) {
 		qsort(index, n, sizeof *index, &compare_intsAsc);
 		// check code:for (j=0;j<n-1;j++) { if (index[j]>index[j+1]) { DL; exit(9); }
 	} else {
 		qsort(index, n, sizeof *index, &compare_intsDes);
 		// check code:for (j=0;j<n-1;j++) { if (index[j]<index[j+1]) { DL; exit(9); }
 	}
-	return;
 }
 
 // compares two vectors, bit by bit
@@ -346,7 +346,7 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 	// if Qnow is not unique ( equal energy )  increment number of times found
 
 	// return codes
-	enum 
+	enum
 	{
 		NOTHING = 0,                   // nothing new, do nothing
 		NEW_HIGH_ENERGY_UNIQUE_Q = 10, // Q is unique, highest new energy
@@ -362,48 +362,48 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 	val_index_sort_ns(Qindex, QVs, nMax); // index array of sorted energies
 
 	// new high value
-	if (Vnow > QVs[Qindex[0]] ) { 
+	if (Vnow > QVs[Qindex[0]] ) {
 		I = nMax - 1; // we will add it to the space to an empty queue, Sort will fix it later
 
 		// save the bits to Qlist first entry
 		for ( i = 0; i < nbits; i++ ) {
 			Qlist[Qindex[I]][i] = Qnow[i];
-		} 
+		}
 
 		QVs[Qindex[I]]     = Vnow;
 		Qcounts[Qindex[I]] = 1;
 
 		// index array of sorted energies
-		val_index_sort_ns(Qindex, QVs, nMax); 
+		val_index_sort_ns(Qindex, QVs, nMax);
 
 		// we have added this Qnow to the collective, might have overwritten an old one
-		return NEW_HIGH_ENERGY_UNIQUE_Q;     
+		return NEW_HIGH_ENERGY_UNIQUE_Q;
 	}
 
 	// list energies are all higher than this, do nothing
-	if (Vnow < QVs[Qindex[nMax - 1]] ) {  
+	if (Vnow < QVs[Qindex[nMax - 1]] ) {
 		return NOTHING;
 	}
 
 	// new energy is in the range of our list
 	// search thru the list to see if there is an equal energy
-	for (i = 0; i < nMax; i++) { 
+	for (i = 0; i < nMax; i++) {
 		if ( Vnow == QVs[Qindex[i]] ) {
 
 			j = i; // now have a common energy, but it could be that we have a different Q
 
 			// look thru all Q's of common energy (they are ordered)
-			while ( QVs[Qindex[j]] == Vnow  & j < (nMax)) { 
+			while (j < nMax && QVs[Qindex[j]] == Vnow) {
 				if ( is_Q_equal( &Qlist[Qindex[j]][0], Qnow, nbits)) {
 					// simply mark this Q and energy as a duplicate find
-					Qcounts[Qindex[j]]++; 
+					Qcounts[Qindex[j]]++;
 
 					if ( Vnow == QVs[Qindex[0]] ) {
 						// duplicate energy matching another Q and equal to best energy
-						return DUPLICATE_HIGHEST_ENERGY + Qcounts[Qindex[j]]; 
+						return DUPLICATE_HIGHEST_ENERGY + Qcounts[Qindex[j]];
 					} else {
 						// duplicate energy matching older lower energy Q
-						return DUPLICATE_HIGHEST_ENERGY; 
+						return DUPLICATE_HIGHEST_ENERGY;
 					}
 				}
 				j++;
@@ -413,41 +413,41 @@ int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts
 			j          = Qindex[nMax - 1]; // add it to the worst energy position ( prefilled with worst possible value )
 			QVs[j]     = Vnow; // save energy
 			Qcounts[j] = 1; // set number of hits as this is a first
-			
+
 			// save the bits to Qlist
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			} 
+			}
 
 			// Create index array of sorted energies
-			val_index_sort_ns(Qindex, QVs, nMax); 
+			val_index_sort_ns(Qindex, QVs, nMax);
 			if ( Vnow == QVs[Qindex[0]] ) {
 				// duplicate highest energy unique Q and equal to best energy
-				return DUPLICATE_ENERGY;   
+				return DUPLICATE_ENERGY;
 			} else {
 				// duplicate energy matching older lower energy Q
-				return DUPLICATE_ENERGY + Qcounts[j]; 
+				return DUPLICATE_ENERGY + Qcounts[j];
 			}
 		}
 
 		// we have spilled off the list of energies and need to add this one
-		else if ( Vnow < QVs[Qindex[i]] ) { 
+		else if ( Vnow < QVs[Qindex[i]] ) {
 			j          = Qindex[nMax - 1]; // add it to the worst energy position as it is unique but within the list
 			QVs[j]     = Vnow; // save energy
 			Qcounts[j] = 1; // set number of hits as this is a first
-			
+
 			// save the bits to Qlist
 			for ( i = 0; i < nbits; i++ ) {
 				Qlist[j][i] = Qnow[i];
-			} 
+			}
 
 			// create index array of sorted energies
-			val_index_sort_ns(Qindex, QVs, nMax);  
+			val_index_sort_ns(Qindex, QVs, nMax);
 			return NEW_ENERGY_UNIQUE_Q;
 		}
 	}
-	
-	for ( iL = 0; iL < nMax; iL++) 
+
+	for ( iL = 0; iL < nMax; iL++)
 		printf(" %d %d %lf %d \n", Qindex[iL], iL, QVs[Qindex[iL]], Qcounts[Qindex[iL]]);
 
 	exit(9);
