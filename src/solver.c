@@ -153,7 +153,8 @@ double local_search(short *Q, int maxNodes, double **val, double *Qval, double *
 
 // this function is called by solve to execute a tabu search, This is THE Tabu search
 double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
-            double *Row, double *Col, long long *t, long long IterMax, int *TabuK, int *index)
+            double *Row, double *Col, long long *t, long long IterMax, int *TabuK, 
+            double Target, int TargetSet, int *index)
 {
 	int       i, k, K;     // iteration working vars
 	int       brk;         // flag to mark a break and not a fall thru of the loop
@@ -236,8 +237,8 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 					Vs = Vlastchange;
 					for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; // copy the best solution so far
 
-					if ( TargetSet_ ) {
-						if ( Vlastchange >= (fmin * Target_) ) {
+					if ( TargetSet ) {
+						if ( Vlastchange >= (fmin * Target) ) {
 							break;
 						}
 					}
@@ -263,8 +264,8 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval
 			}
 		}
 
-		if ( TargetSet_ ) {
-			if ( Vlastchange >= (fmin * Target_) ) {
+		if ( TargetSet ) {
+			if ( Vlastchange >= (fmin * Target) ) {
 				break;
 			}
 		}
@@ -353,7 +354,7 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **val, double *Q
 {
 	long long IterMax = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)maxNodes);
 
-	return tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, t, IterMax, TabuK, index);
+	return tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, t, IterMax, TabuK, Target_, FALSE, index);
 }
 
 // Entry into the overall solver from the main program
@@ -449,10 +450,14 @@ void solve(double **val, int maxNodes, int nRepeats)
 		BADMALLOC
 	}
 
-	// initialize
-	const float MAX_NODE_SUB_SIZE = 0.214; // the size of the submatrix as a percentage of maxNodes
+	// initialize and set some tuning parameters
+    //
+	int Progress_check = 8;                 // number of non progresive passes thru main loop before reset
+    float SubMatrix_span = 0.214; // percent of the total size will be covered by the subMatrix pass
+    long long InitialTabuPass_factor=6500.; // initial pass factor for tabu iterations
+    long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
 
-	int MaxNodes_sub = MAX(SubMatrix_ + 1, MAX_NODE_SUB_SIZE * maxNodes);
+	int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * maxNodes);
 	int subMatrix    = SubMatrix_;
 	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
 	set_bit(Qt, maxNodes);
@@ -477,11 +482,11 @@ void solve(double **val, int maxNodes, int nRepeats)
 	}
 
 	// run initial Tabu Search to establish backbone
-	IterMax = t + (long long)MAX((long long)400, (long long)6500 * (long long)maxNodes);
+	IterMax = t + (long long)MAX((long long)400, InitialTabuPass_factor * (long long)maxNodes);
 	if (Verbose_ > 2) {
 		DLT; printf(" Starting Full initial Tabu\n");
 	}
-	V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, index);
+	V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, Target_, TargetSet_, index);
 
 	// save best result
 	Vbest = V;
@@ -516,7 +521,6 @@ void solve(double **val, int maxNodes, int nRepeats)
 	}
 
 	DwaveQubo = 0;
-	int Pchk = 8;
 
 	// outer loop begin
 	while ( ContinueWhile ) {
@@ -528,7 +532,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 		if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
 			                     MIN(maxNodes - subMatrix, l_max), subMatrix);
 		// begin submatrix passes
-		if ( NoProgress % Pchk == (Pchk - 1) ) { // every Pchk (th) loop without progess
+		if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
 			// reset completely
 			set_bit(Q, maxNodes);
 			for (i = 0; i < maxNodes; i++) {
@@ -536,7 +540,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 			}
 			if (Verbose_ > 1) {
 				DLT; printf(" \n\n Reset Q and start over Repeat = %d/%d, as no progress is exhausted %d %d\n\n\n",
-				            nRepeats, RepeatPass, NoProgress, NoProgress % Pchk);
+				            nRepeats, RepeatPass, NoProgress, NoProgress % Progress_check);
 			}
 		} else {
             int change=FALSE;
@@ -592,9 +596,9 @@ void solve(double **val, int maxNodes, int nRepeats)
 		}
 		// FULL TABU run here
 
-		IterMax = t + (long long)1600 * (long long)maxNodes;
+		IterMax = t + TabuPass_factor * (long long)maxNodes;
 		val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
-		V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, index);
+		V = tabu_search(Q, Qt, maxNodes, val, Qval, Row, Col, &t, IterMax, TabuK, Target_, TargetSet_ ,index);
 		val_index_sort(index, Qval, maxNodes); // Create index array of sorted values
 
 		if ( Verbose_ > 1 ) {
