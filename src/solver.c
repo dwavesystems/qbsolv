@@ -147,7 +147,34 @@ double local_search(short *Q, int maxNodes, double **val, double *Qval, double *
 	return V;
 }
 
-// this function is called by solve to execute a tabu search, This is THE Tabu search
+// This function is called by solve to execute a tabu search, This is THE Tabu search
+//
+// A tabu optmization algorithm tries find an approximately maximal solution
+// to a QUBO problem. Tabu is an optimization algorithm which performs single
+// bit flips on a current solution in an attempt to improve it. For each
+// candidate bit flip, the change in objective function value is examined.
+// If this results in a new best solution, that change is accepted.
+// If no bit flip results in a new best solution, we choose the best among
+// the candidate bit flips.
+//
+// In order to avoid getting stuck in local optima, a list of "tabu" (not-allowed)
+// moves is maintained (the vector "tabuK") After a bit has been flipped,
+// it cannot be flipped again for another "nTabu" moves. The algorithm terminates
+// after sufficiently many bit flips without improvment.
+//
+// @param[in,out] Q inputs a current solution and returns the best solution found
+// @param[out] Qt stores the best solution found during the algorithm
+// @param maxNodes is the number of variables in the QUBO matrix
+// @param val is the QUBO matrix to be solved
+// @param Qval is the impact vector (the chainge in objective function value that results from flipping each bit)
+// @param Row Contributions to Qval coming from the rows on val
+// @param Col Contributions to Qval coming from the columns on val
+// @param t is the number of candidate bit flips performed in the entire algorithm so far
+// @param IterMax is the maximum size of t allowed before terminating
+// @param TabuK is stores the list of tabu moves
+// @param Target Halt if this energy is reached and TargetSet is true
+// @param TargetSet Do we have a target energy at which to terminate
+// @param index is the order in which to perform candidate bit flips (determined by Qval).
 double tabu_search(short *Q, short *Qt, int maxNodes, double **val, double *Qval,
             double *Row, double *Col, long long *t, long long IterMax, int *TabuK,
             double Target, int TargetSet, int *index)
@@ -354,6 +381,27 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **val, double *Q
 }
 
 // Entry into the overall solver from the main program
+//
+// It is the main function for solving a quadratic boolean optimization problem.
+//
+// The algorithm alternates between:
+//   1) performing a global tabu search (tabu_search()) from the current solution
+//   2) selecting subregions and optimizing on each of those subregions with
+//      all other variables clamped (solv_submatrix()).
+//
+// Subregions are chosen based on increasing impact ("Qval"). Impact
+// is defined as the change in objective function value that occurs by flipping a bit.
+// The first subregion is chosen as the N least impactful variables, and so on.
+// When none of the variables any in the subregions change, a new solution
+// is chosen based on randomizing those variables.
+//
+// After Pchk = 8 iterations with no improvement, the algorithm is
+//   completely restarted with a new random solution.
+// After nRepeats iterations with no improvement, the algorithm terminates.
+//
+// @param val The QUBO matrix to be solved
+// @param maxNodes is the number of variables in the QUBO matrix
+// @param nRepeats is the number of iterations without improvement before giving up
 void solve(double **val, int maxNodes, int nRepeats)
 {
 	double    *Qval, *Row, *Col, V;
