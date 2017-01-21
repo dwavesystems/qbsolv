@@ -496,7 +496,7 @@ void solve(double **val, int maxNodes, int nRepeats)
 
 	// initialize and set some tuning parameters
     //
-	int Progress_check = 8;                 // number of non progresive passes thru main loop before reset
+	int Progress_check = 12;                 // number of non progresive passes thru main loop before reset
     float SubMatrix_span = 0.214; // percent of the total size will be covered by the subMatrix pass
     long long InitialTabuPass_factor=6500.; // initial pass factor for tabu iterations
     long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
