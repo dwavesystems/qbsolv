@@ -201,8 +201,12 @@ void quick_sort_iterative_index(double val[], int arr[], int n)
 
 	h = n - 1; // last index
 	l = 0; // first index
+	int *stack; // temp space = n + 1
 	// Create an auxiliary stack
-	int stack[ h - l + 1 ];
+	//int stack[ h - l + 1 ];
+	if ((GETMEM(stack, int, h - l + 1)) == NULL) {
+		BADMALLOC
+	}
 
 	// initialize top of stack
 	int top = -1;
@@ -235,6 +239,7 @@ void quick_sort_iterative_index(double val[], int arr[], int n)
 			stack[ ++top ] = h;
 		}
 	}
+	free(stack);
 }
 
 // routine to check the sort on index'ed sort
