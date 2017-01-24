@@ -199,7 +199,7 @@ int  main( int argc,  char *argv[])
 void  print_help(void)
 {
 	printf("\n\t%s -i infile [-o outfile] [-m] [-T] [-n] [-S SubMatrix] [-w] \n"
-	       "\t\t[-h] [-v verbosityLevel] [-V] [-q]\n"
+	       "\t\t[-h] [-v verbosityLevel] [-V] [-q] [-t seconds]\n"
 	       "\nDESCRIPTION \n"
 	       "\tqbsolv executes a quadratic unconstrained binary optimization \n"
 	       "\t(QUBO) problem represented in a file, providing bit-vector \n"
