@@ -5,6 +5,8 @@ This directory contains the following files and directories:
 - License:	        A copy of the Apache License Version 2.0
 - src:		        Source directory of the qbsolv program with Makefile
 			that creates a binary read and solve "QUBO" files
+- doc:			OpenOffice, PDF, and HTML versions of the man page,
+			and instructions for how to change them
 - example:		Directory of example(s) application(s) using qbsolv
 			as a solver
 - tests:		Directory of scripts and qubo(s) to test qbsolv
