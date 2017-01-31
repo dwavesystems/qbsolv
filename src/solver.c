@@ -402,7 +402,7 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **qubo, double *
 // @param qubo The QUBO matrix to be solved
 // @param maxNodes is the number of variables in the QUBO matrix
 // @param nRepeats is the number of iterations without improvement before giving up
-void solve(double **qubo, int maxNodes, int nRepeats)
+void solve(double **qubo, const int maxNodes, int nRepeats)
 {
 	double    *flip_cost, *Row, *Col, V;
 	int       i, j,  *TabuK, *index, *index_s, start_;
@@ -495,15 +495,16 @@ void solve(double **qubo, int maxNodes, int nRepeats)
 	}
 
 	// initialize and set some tuning parameters
-    //
-	int Progress_check = 12;                 // number of non progresive passes thru main loop before reset
-    float SubMatrix_span = 0.214; // percent of the total size will be covered by the subMatrix pass
-    long long InitialTabuPass_factor=6500.; // initial pass factor for tabu iterations
-    long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
+	//
+	const int Progress_check = 12;                 // number of non progresive passes thru main loop before reset
+	const float SubMatrix_span = 0.214; // percent of the total size will be covered by the subMatrix pass
+	const long long InitialTabuPass_factor=6500; // initial pass factor for tabu iterations
+	const long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
 
-	int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * maxNodes);
-	int subMatrix    = SubMatrix_;
-	int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
+	const int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * maxNodes);
+	const int subMatrix    = SubMatrix_;
+	const int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
+
 	set_bit(Qt, maxNodes);
 	for (i = 0; i < maxNodes; i++) {
 		index[i] = i;   // initial index to 0,1,2,...maxNodes
@@ -574,7 +575,8 @@ void solve(double **qubo, int maxNodes, int nRepeats)
 
 		val_index_sort(index, flip_cost, maxNodes); // Create index array of sorted values
 		if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
-			                     MIN(maxNodes - subMatrix, l_max), subMatrix);
+		                         l_max, subMatrix);
+
 		// begin submatrix passes
 		if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
 			// reset completely
@@ -587,8 +589,8 @@ void solve(double **qubo, int maxNodes, int nRepeats)
 				            nRepeats, RepeatPass, NoProgress, NoProgress % Progress_check);
 			}
 		} else {
-            int change=FALSE;
-			for (l = 0; l < MIN(maxNodes - subMatrix, l_max); l += subMatrix) {
+			int change=FALSE;
+			for (l = 0; l < l_max; l += subMatrix) {
 				if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
 				j = 0;
 				for (i = l; i < l + subMatrix; i++) {
@@ -613,7 +615,7 @@ void solve(double **qubo, int maxNodes, int nRepeats)
 				}
 				for (j = 0; j < subMatrix; j++) {
 					i    = Icompress[j];
-                    if ( Q[i] != Q_s[j] ) change=TRUE;
+					if ( Q[i] != Q_s[j] ) change=TRUE;
 					Q[i] = Q_s[j];
 				}
 				if (Verbose_ > 3) {
