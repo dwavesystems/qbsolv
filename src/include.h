@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <math.h>
 #include <sys/types.h>
@@ -28,8 +29,6 @@
 #include <time.h>
 #define  VERSION    "open source 2.3"
 
-#define TRUE   1
-#define FALSE  0
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define EPSILON 1.0e-7

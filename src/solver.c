@@ -115,9 +115,9 @@ double local_search_1bit(double V, short *Q, int maxNodes, double **qubo, double
 	}
 
 	// initial evaluate (flip_cost,Row,Col all primed)  needed before evaluate_1bit can be used
-	improve = TRUE;
+	improve = true;
 	while (improve) {
-		improve = FALSE;
+		improve = false;
 		if ( kkstr == 0 ) { // sweep top to bottom
 			shuffle_index(index, maxNodes);
 			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
@@ -129,7 +129,7 @@ double local_search_1bit(double V, short *Q, int maxNodes, double **qubo, double
 			(*t)++;
 			if ( V + flip_cost[k] > V ) {
 				V       = evaluate_1bit(V, k, Q, maxNodes, qubo, flip_cost, Row, Col);
-				improve = TRUE;
+				improve = true;
 			}
 		}
 	}
@@ -238,7 +238,7 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **qubo, double *fli
 	int kk, kkstr = 0, kkend = maxNodes, kkinc;
 	while (*t < IterMax) {
 		Vss = BIGNEGFP; // initialized most negative number
-		brk = FALSE;
+		brk = false;
 		if ( kkstr == 0 ) { // sweep top to bottom
 			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
 		} else { // sweep bottom to top
@@ -252,7 +252,7 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **qubo, double *fli
 				(*t)++;
 				V = Vlastchange + flip_cost[k]; //  value if Q[k] bit is flipped
 				if (  V > Vs  ) {
-					brk         = TRUE;
+					brk         = true;
 					K           = k;
 					V           = evaluate_1bit(Vlastchange, k, Q, maxNodes, qubo, flip_cost, Row, Col); // flip the bit and fix tables
 					Vlastchange = local_search_1bit(V, Q, maxNodes, qubo, flip_cost, Row, Col, t); // local search to polish the change
@@ -377,7 +377,7 @@ double solv_submatrix(short *Q, short *Qt, int maxNodes, double **qubo, double *
 {
 	long long IterMax = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)maxNodes);
 
-	return tabu_search(Q, Qt, maxNodes, qubo, flip_cost, Row, Col, t, IterMax, TabuK, Target_, FALSE, index);
+	return tabu_search(Q, Qt, maxNodes, qubo, flip_cost, Row, Col, t, IterMax, TabuK, Target_, false, index);
 }
 
 // Entry into the overall solver from the main program
@@ -547,22 +547,22 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 
 	// starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
 	short RepeatPass = 0, NoProgress = 0;
-	short ContinueWhile = FALSE;
+	short ContinueWhile = false;
 	if ( TargetSet_ ) {
 		if ( Vbest >= (fmin * Target_) ) {
-			ContinueWhile = FALSE;
+			ContinueWhile = false;
 		} else {
-			ContinueWhile = TRUE;
+			ContinueWhile = true;
 		}
 	} else {
 		if ( RepeatPass < nRepeats) {
-			ContinueWhile = TRUE;
+			ContinueWhile = true;
 		} else {
-			ContinueWhile = FALSE;
+			ContinueWhile = false;
 		}
 	}
 	if ( maxNodes < 20 || subMatrix > maxNodes ) {
-		ContinueWhile = FALSE; // trivial problem or Submatrix won't contribute
+		ContinueWhile = false; // trivial problem or Submatrix won't contribute
 	}
 
 	DwaveQubo = 0;
@@ -589,7 +589,7 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 				            nRepeats, RepeatPass, NoProgress, NoProgress % Progress_check);
 			}
 		} else {
-			int change=FALSE;
+			int change=false;
 			for (l = 0; l < l_max; l += subMatrix) {
 				if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
 				j = 0;
@@ -599,7 +599,7 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 				for (j = 0; j < subMatrix; j++) {
 					TabuK[Icompress[j]] = 0;
 				}
-				index_sort(Icompress, subMatrix, TRUE); // sort it for effective reduction
+				index_sort(Icompress, subMatrix, true); // sort it for effective reduction
 
 				// coarsen and reduce the problem
 				reduce(Icompress, qubo, subMatrix, maxNodes, val_s, Q, Q_s);
@@ -615,7 +615,7 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 				}
 				for (j = 0; j < subMatrix; j++) {
 					i    = Icompress[j];
-					if ( Q[i] != Q_s[j] ) change=TRUE;
+					if ( Q[i] != Q_s[j] ) change=true;
 					Q[i] = Q_s[j];
 				}
 				if (Verbose_ > 3) {
@@ -627,13 +627,13 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 				DwaveQubo++;
 			}
 
-            // submatrix search did not produce any new values, so randomize those bits
-            if ( change == FALSE ) {
-                set_bit_index( Q, l, index );
+			// submatrix search did not produce any new values, so randomize those bits
+			if (!change) {
+				set_bit_index( Q, l, index );
 				if (Verbose_ > 3) {
 					printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
 				}
-            }
+			}
 
 			// completed submatrix passes
 			if ( Verbose_ > 1 ) printf("\n");
@@ -692,26 +692,26 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 		// check on, if to continue the outer loop
 		if ( TargetSet_ ) {
 			if ( Vbest >= (fmin * Target_) ) {
-				ContinueWhile = FALSE;
+				ContinueWhile = false;
 			} else {
-				ContinueWhile = TRUE;
+				ContinueWhile = true;
 			}
 		} else {
 			if ( RepeatPass < nRepeats) {
-				ContinueWhile = TRUE;
+				ContinueWhile = true;
 			} else {
-				ContinueWhile = FALSE;
+				ContinueWhile = false;
 			}
 		}
 
 		// timeout test
 		if ( (double)(clock() - start_) / CLOCKS_PER_SEC >= Time_ ) {
-			ContinueWhile = FALSE;
+			ContinueWhile = false;
 		}
 	} // end of outer loop
 
 	// all done print results if needed and free allocated arrays
-	if (WriteMatrix_ == TRUE)
+	if (WriteMatrix_)
 		print_V_Q_Qval(Q, maxNodes, qubo);
 
 	if ( Verbose_ == 0 )

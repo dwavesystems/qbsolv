@@ -42,7 +42,7 @@ const char *DW_INTERNAL__SOLVER = "DW_INTERNAL__SOLVER";
 static char *mingw_base = "MINGWGINK"; // ridiculous MinGw workaround
 int         mingw_base_len;
 
-int  DW_setup_error = FALSE;
+int  DW_setup_error = false;
 int  sysResult;
 int  start_;
 int  my_pid_;
@@ -63,17 +63,17 @@ void dw_init()
 	workspace = getenv(DW_INTERNAL__WORKSPACE);
 	if ( workspace == NULL ) {
 		printf(" dw workspace not set up \n");
-		DW_setup_error = TRUE;
+		DW_setup_error = true;
 	}
 	connection = getenv(DW_INTERNAL__CONNECTION);
 	if ( connection == NULL ) {
 		printf(" dw connection not set up \n");
-		DW_setup_error = TRUE;
+		DW_setup_error = true;
 	}
 	wspath = getenv(DW_INTERNAL__WSPATH);
 	if ( wspath == NULL ) {
 		printf(" dw wspath not set up \n");
-		DW_setup_error = TRUE;
+		DW_setup_error = true;
 	} else {
 
 		if (strncmp(wspath, mingw_base, mingw_base_len) == 0)
@@ -97,9 +97,9 @@ void dw_init()
 	solver = getenv(DW_INTERNAL__SOLVER);
 	if ( solver == NULL ) {
 		printf(" dw solver not set up \n");
-		DW_setup_error = TRUE;
+		DW_setup_error = true;
 	}
-	if ( DW_setup_error == TRUE ) {
+	if ( DW_setup_error == true ) {
 		printf(" dw not set up not complete, and -S 0 set \n");
 		DL; printf(" Exiting\n");
 		exit(9);
@@ -139,9 +139,9 @@ void dw_init()
 	if (Verbose_ > 2) {
 		DLT; DL;
 		if ( UseDwave_ ) {
-			printf(" UseDwave = TRUE\n");
+			printf(" UseDwave = true\n");
 		} else{
-			printf(" UseDwave = FALSE\n");
+			printf(" UseDwave = false\n");
 		}
 		printf(" SubMatrix_ = %d\n", SubMatrix_);
 		printf(" %s %s \n", DW_INTERNAL__WORKSPACE, workspace);

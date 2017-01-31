@@ -52,14 +52,14 @@ int  main( int argc,  char *argv[])
 	FILE *inFile    = NULL;
 
 	strcpy(pgmName_, "qbsolv");
-	findMax_     = FALSE;
-	UseDwave_    = FALSE;
+	findMax_     = false;
+	UseDwave_    = false;
 	Verbose_     = 0;
 	int nRepeats = defaultRepeats;
 	SubMatrix_   = 46; // submatrix default
-	WriteMatrix_ = FALSE;
+	WriteMatrix_ = false;
 	outFile_     = stdout;
-	TargetSet_   = FALSE;
+	TargetSet_   = false;
 	Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
 	Tlist_       = -1; // tabu list length  -1 signials go with defaults
 	long seed       = 17932241798878;
@@ -103,7 +103,7 @@ int  main( int argc,  char *argv[])
 			Tlist_ = strtol(optarg, &chx, 10); // this sets the length of the tabu list
 			break;
 		case 'm':
-			findMax_ = TRUE; // go for the maximum value otherwise the minimum is found by default
+			findMax_ = true; // go for the maximum value otherwise the minimum is found by default
 			break;
 		case 'n':
 			nRepeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeat without improvement
@@ -125,12 +125,12 @@ int  main( int argc,  char *argv[])
 			}
 
 			if ( SubMatrix_ == 0 ) {
-				UseDwave_ = TRUE;
+				UseDwave_ = true;
 			}
 			break;
 		case 'T':
 			Target_    = strtod(optarg, (char**)NULL); // this sets desired optimal energy
-			TargetSet_ = TRUE;
+			TargetSet_ = true;
 			break;
 		case 't':
 			Time_ = strtod(optarg, (char**)NULL); // this sets the maximum runtime of the algorithm in seconds
@@ -150,7 +150,7 @@ int  main( int argc,  char *argv[])
 			seed = strtol(optarg, &chx, 10); // sets the seed value
 			break;
 		case 'w':
-			WriteMatrix_ = TRUE;
+			WriteMatrix_ = true;
 			break;
 		default: /* '?' or unknown */
 			print_help();
@@ -271,7 +271,7 @@ void  print_help(void)
 
 void  print_qubo_format( void)
 {
-	char *quboFormat =
+	const char *quboFormat =
 		"\n   A .qubo file contains data which describes an unconstrained\n"
 		"quadratic binary optimization problem.  It is an ASCII file comprise"
 		"d\nof four types of lines:\n\n"
