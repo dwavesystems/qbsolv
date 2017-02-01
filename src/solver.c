@@ -43,7 +43,7 @@ double evaluate(short *solution, uint qubo_size, double **qubo,
 		for (uint jj = ii + 1; jj < qubo_size; jj++)
 			row_sum += qubo[ii][jj] * (double)solution[jj];
 
-		for (uint jj = 0; jj < ii; jj++) 
+		for (uint jj = 0; jj < ii; jj++)
 			col_sum += qubo[jj][ii] * (double)solution[jj];
 
 
@@ -80,15 +80,18 @@ double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_siz
 {
 	double result = old_energy + flip_cost[bit];
 
+	// Flip the bit and reverse its flip_cost
 	solution[bit] = 1 - solution[bit];
+	flip_cost[bit] = -flip_cost[bit];
 
+	// Update the flip cost for all of the adjacent variables
 	if (solution[bit] == 0 ) {
-		// for rows ii up to bit, the flip_cost[ii] changes by qubo[bit][ii] 
+		// for rows ii up to bit, the flip_cost[ii] changes by qubo[bit][ii]
 		// for columns ii from bit+1 and higher, flip_cost[ii] changes by qubo[ii][bit]
 		// the sign of the change (positive or negative) depends on both solution[bit] and solution[ii].
 		for (uint ii = 0; ii < bit; ii++)
 			flip_cost[ii] += qubo[ii][bit]*(solution[ii]-!solution[ii]);
-			
+
 		for (uint ii = bit + 1; ii < qubo_size; ii++)
 			flip_cost[ii] += qubo[bit][ii]*(solution[ii]-!solution[ii]);
 
@@ -96,22 +99,11 @@ double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_siz
 		// if solution[bit] was a 1 before, flip_cost[ii] changes in the other direction.
 		for (uint ii = 0; ii < bit; ii++)
 			flip_cost[ii] -= qubo[ii][bit]*(solution[ii]-!solution[ii]);
-			
+
 		for (uint ii = bit + 1; ii < qubo_size; ii++)
 			flip_cost[ii] -= qubo[bit][ii]*(solution[ii]-!solution[ii]);
 
 	}
-	
-	// flip_cost[bit] needs recalculation.
-	flip_cost[bit] = qubo[bit][bit];
-	for (uint jj = 0; jj < bit; jj++)
-		flip_cost[bit] += qubo[jj][bit] * (double)solution[jj];
-		
-	for (uint jj = bit + 1; jj < qubo_size; jj++)
-		flip_cost[bit] += qubo[bit][jj] * (double)solution[jj];
-		
-	if ( solution[bit] == 1 ) 
-		flip_cost[bit] = -flip_cost[bit];
 
 	return result;
 }
