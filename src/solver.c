@@ -210,7 +210,7 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 	double    best_energy; // best solution so far
 	double    Vlastchange; // working solution variable
 	int       nTabu;
-	double    fmin;
+	double    sign;
 	long long thisIter;
 	long long increaseIter;
 	int       numIncrease = 900;
@@ -231,9 +231,9 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 	}
 
 	if ( findMax_ ) {
-		fmin = 1.0;
+		sign = 1.0;
 	} else {
-		fmin = -1.0;
+		sign = -1.0;
 	}
 
 	best_energy  = local_search(solution, qubo_size, qubo, flip_cost, t);
@@ -273,13 +273,13 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 					for (uint i = 0; i < qubo_size; i++) best[i] = solution[i]; // copy the best solution so far
 
 					if (target_set) {
-						if (Vlastchange >= (fmin * target)) {
+						if (Vlastchange >= (sign * target)) {
 							break;
 						}
 					}
 					howFar = ((double)(iter_max - (*t)) / (double)thisIter);
 					if (Verbose_ > 3) {
-						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", best_energy * fmin, last_bit, (*t), howFar, brk );
+						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", best_energy * sign, last_bit, (*t), howFar, brk );
 					}
 					if ( howFar < 0.80  && numIncrease > 0 ) {
 						if (Verbose_ > 3) {
@@ -300,7 +300,7 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 		}
 
 		if (target_set) {
-			if (Vlastchange >= (fmin * target)) {
+			if (Vlastchange >= (sign * target)) {
 				break;
 			}
 		}
@@ -520,12 +520,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 
 	int    l = 0, DwaveQubo = 0;
-	double fmin;
+	double sign;
 
 	if ( findMax_ ) {
-		fmin = 1.0;
+		sign = 1.0;
 	} else {
-		fmin = -1.0;
+		sign = -1.0;
 	}
 
 	// run initial Tabu Search to establish backbone
@@ -542,18 +542,18 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 	val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
 	if ( Verbose_ > 0 ) {
-		print_output(qubo_size, solution, numPartCalls, Vbest * fmin,
+		print_output(qubo_size, solution, numPartCalls, Vbest * sign,
 			(double)(clock() - start_) / CLOCKS_PER_SEC);
 	}
 	if (Verbose_ > 1) {
-		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", Vbest * fmin, t);
+		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", Vbest * sign, t);
 	}
 
 	// starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
 	short RepeatPass = 0, NoProgress = 0;
 	short ContinueWhile = false;
 	if ( TargetSet_ ) {
-		if ( Vbest >= (fmin * Target_) ) {
+		if ( Vbest >= (sign * Target_) ) {
 			ContinueWhile = false;
 		} else {
 			ContinueWhile = true;
@@ -654,7 +654,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 
 		if ( Verbose_ > 1 ) {
-			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * fmin, t);
+			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign, t);
 		}
 
 		NU = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
@@ -670,7 +670,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 				DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);
 			}
 			if ( Verbose_ > 0 ) {
-				print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+				print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 			}
 		} else if ( NU == 30 || NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
@@ -679,7 +679,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 			} else {
 				for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 				if ( repeats == 1 && Verbose_ > 0) { // we haven't printed this out before
-					print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+					print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 				}
 			}
 		} else { // not as good as our best so far
@@ -691,12 +691,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		}
 
 		if ( Verbose_ > 1) {
-			DLT; printf("V Best outer loop =%lf iterations %lld\n", Vbest * fmin, t);
+			DLT; printf("V Best outer loop =%lf iterations %lld\n", Vbest * sign, t);
 		}
 
 		// check on, if to continue the outer loop
 		if ( TargetSet_ ) {
-			if ( Vbest >= (fmin * Target_) ) {
+			if ( Vbest >= (sign * Target_) ) {
 				ContinueWhile = false;
 			} else {
 				ContinueWhile = true;
@@ -720,7 +720,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		print_V_Q_Qval(solution, qubo_size, qubo);
 
 	if ( Verbose_ == 0 )
-		print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+		print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
     free(solution); free(tabu_solution); free(flip_cost);
 	free(index); free(TabuK); free(QVs); free(Qcounts); free(Qindex); free(Icompress);
