@@ -32,29 +32,29 @@
 double evaluate(short *solution, uint qubo_size, double **qubo,
 	double *flip_cost, double *row, double *col)
 {
-	double result = 0.0;
+	double result = 0.0, row_sum, col_sum;
 
 	for (uint ii = 0; ii < qubo_size; ii++) {
-		row[ii] = 0.0;
-		col[ii] = 0.0;
+		row_sum = 0.0;
+		col_sum = 0.0;
 
-		// This is an upper triangular matrix, so start right of the diagonal
+		// qubo an upper triangular matrix, so start right of the diagonal
 		// for the rows, and stop at the diagonal for the columns
-		for (uint jj = ii + 1; jj < qubo_size; jj++) {
-			row[ii] += qubo[ii][jj] * (double)solution[jj];
-		}
-		for (uint jj = 0; jj < ii; jj++) {
-			col[ii] += qubo[jj][ii] * (double)solution[jj];
-		}
+		for (uint jj = ii + 1; jj < qubo_size; jj++)
+			row_sum += qubo[ii][jj] * (double)solution[jj];
 
-		// If the variable is currently true, then by flipping it we lose
+		for (uint jj = 0; jj < ii; jj++) 
+			col_sum += qubo[jj][ii] * (double)solution[jj];
+
+
+		// If the variable is currently 1, then by flipping it we lose
 		// what it is currently contributing (so we negate the contribution),
 		// when it is currently false, gain that ammount by flipping
 		if (solution[ii] == 1) {
-			result += row[ii] + qubo[ii][ii];
-			flip_cost[ii] = -(row[ii] + col[ii] + qubo[ii][ii]);
+			result += row_sum + qubo[ii][ii];
+			flip_cost[ii] = -(row_sum + col_sum + qubo[ii][ii]);
 		} else {
-			flip_cost[ii] =  (row[ii] + col[ii] + qubo[ii][ii]);
+			flip_cost[ii] =  (row_sum + col_sum + qubo[ii][ii]);
 		}
 	}
 
@@ -83,43 +83,39 @@ double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_siz
 	solution[bit] = 1 - solution[bit];
 
 	if (solution[bit] == 0 ) {
-		// then it was a 1 before and we have to reduce all the rows from 0 to bit by qubo[bit][j]*Q[j]
-		// from bit+1 to maxNodes reduce cols by qubo[j][bit]*Q[j]
+		// for rows ii up to bit, the flip_cost[ii] changes by qubo[bit][ii] 
+		// for columns ii from bit+1 and higher, flip_cost[ii] changes by qubo[ii][bit]
+		// the sign of the change (positive or negative) depends on both solution[bit] and solution[ii].
 		for (uint ii = 0; ii < bit; ii++)
-			row[ii] -= qubo[ii][bit];
+			flip_cost[ii] += qubo[ii][bit]*(solution[ii]-!solution[ii]);
+			
 		for (uint ii = bit + 1; ii < qubo_size; ii++)
-			col[ii] -= qubo[bit][ii];
+			flip_cost[ii] += qubo[bit][ii]*(solution[ii]-!solution[ii]);
 
-	} else{
-		// then it was a 0 before and we have to increase all the rows from 0 to bit by qubo[bit][j]*Q[j]
-		// from bit+1 to maxNodes increase cols by qubo[j][bit]*Q[j]
+	} else {
+		// if solution[bit] was a 1 before, flip_cost[ii] changes in the other direction.
 		for (uint ii = 0; ii < bit; ii++)
-			row[ii] += qubo[ii][bit];
+			flip_cost[ii] -= qubo[ii][bit]*(solution[ii]-!solution[ii]);
+			
 		for (uint ii = bit + 1; ii < qubo_size; ii++)
-			col[ii] += qubo[bit][ii];
+			flip_cost[ii] -= qubo[bit][ii]*(solution[ii]-!solution[ii]);
 
 	}
-	// Col[bit] Row[bit] need recalculation
-	{ // recalculate
-		col[bit] = 0.0;
-		for (uint jj = 0; jj < bit; jj++)
-			col[bit] += qubo[jj][bit] * (double)solution[jj];
-		row[bit] = 0.0;
-		for (uint jj = bit + 1; jj < qubo_size; jj++) {
-			row[bit] += qubo[bit][jj] * (double)solution[jj];
-		}
-	}
-
-	for (uint ii = 0; ii < qubo_size; ii++) {
-		if (solution[ii] == 1) {
-			flip_cost[ii] = -(row[ii] + col[ii] + qubo[ii][ii]);
-		} else {
-			flip_cost[ii] =  (row[ii] + col[ii] + qubo[ii][ii]);
-		}
-	}
+	
+	// flip_cost[bit] needs recalculation.
+	flip_cost[bit] = qubo[bit][bit];
+	for (uint jj = 0; jj < bit; jj++)
+		flip_cost[bit] += qubo[jj][bit] * (double)solution[jj];
+		
+	for (uint jj = bit + 1; jj < qubo_size; jj++)
+		flip_cost[bit] += qubo[bit][jj] * (double)solution[jj];
+		
+	if ( solution[bit] == 1 ) 
+		flip_cost[bit] = -flip_cost[bit];
 
 	return result;
 }
+
 
 // Tries to improve the current solution Q by flipping single bits.
 // It flips a bit whenever a bit flip improves the objective function value,
