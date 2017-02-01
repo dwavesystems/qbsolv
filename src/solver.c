@@ -469,13 +469,13 @@ double solv_submatrix(short *solution, short *best, uint qubo_size, double **qub
 // After nRepeats iterations with no improvement, the algorithm terminates.
 //
 // @param qubo The QUBO matrix to be solved
-// @param maxNodes is the number of variables in the QUBO matrix
+// @param qubo_size is the number of variables in the QUBO matrix
 // @param nRepeats is the number of iterations without improvement before giving up
-void solve(double **qubo, const int maxNodes, int nRepeats)
+void solve(double **qubo, const int qubo_size, int nRepeats)
 {
-	double    *flip_cost, *Row, *Col, V;
-	int       i, j,  *TabuK, *index, *index_s, start_;
-	short     *Q, *Qt;
+	double    *flip_cost, *row, *col, energy;
+	int       *TabuK, *index, *index_s, start_;
+	short     *solution, *tabu_solution;
 	long      numPartCalls = 0;
 	long long t = 0,  IterMax;
 
@@ -483,27 +483,13 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 	t      = 0;
 
 	// Get some memory for the larger val matrix to solve
-	if (GETMEM(Q, short, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qt, short, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(flip_cost, double, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Row, double, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Col, double, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(index, int, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(TabuK, int, maxNodes) == NULL) {
-		BADMALLOC
-	}
+	if (GETMEM(solution, short, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(tabu_solution, short, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(flip_cost, double, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(row, double, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(col, double, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
 
 	// get some memory for storing and shorting Q bit vectors
 	const int QLEN=20;
@@ -511,20 +497,15 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 	double *QVs;
 	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
 
-	Qlist = (short**)malloc2D(QLEN + 1, maxNodes, sizeof(short));
-	if (GETMEM(QVs, double, QLEN + 1) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qcounts, int, QLEN + 1) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qindex, int, QLEN + 1) == NULL) {
-		BADMALLOC
-	}
-	for (i = 0; i < QLEN + 1; i++) {
+	Qlist = (short**)malloc2D(QLEN + 1, qubo_size, sizeof(short));
+	if (GETMEM(QVs, double, QLEN + 1) == NULL) BADMALLOC
+	if (GETMEM(Qcounts, int, QLEN + 1) == NULL) BADMALLOC
+	if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
+
+	for (uint i = 0; i < QLEN + 1; i++) {
 		QVs[i]     = BIGNEGFP;
 		Qcounts[i] = 0;
-		for ( j = 0; j < maxNodes; j++ ) {
+		for (int j = 0; j < qubo_size; j++ ) {
 			Qlist[i][j] = 0;
 		}
 	}
@@ -534,34 +515,16 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 	double Vbest, *Qval_s, *Row_s, *Col_s, **val_s;
 	int    *TabuK_s, *Icompress;
 
-	val_s = (double**)malloc2D(maxNodes, maxNodes, sizeof(double));
-	if (GETMEM(Icompress, int, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qbest, short, maxNodes) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(TabuK_s, int, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Q_s, short, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qt_s, short, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Qval_s, double, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Row_s, double, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(Col_s, double, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
-	if (GETMEM(index_s, int, SubMatrix_) == NULL) {
-		BADMALLOC
-	}
+	val_s = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
+	if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(Qbest, short, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(TabuK_s, int, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Q_s, short, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Qt_s, short, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Qval_s, double, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Row_s, double, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Col_s, double, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(index_s, int, SubMatrix_) == NULL) BADMALLOC
 
 	// initialize and set some tuning parameters
 	//
@@ -570,20 +533,20 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 	const long long InitialTabuPass_factor=6500; // initial pass factor for tabu iterations
 	const long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
 
-	const int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * maxNodes);
+	const int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * qubo_size);
 	const int subMatrix    = SubMatrix_;
-	const int l_max        = MIN(maxNodes - SubMatrix_, MaxNodes_sub);
+	const int l_max        = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
 
-	set_bit(Qt, maxNodes);
-	for (i = 0; i < maxNodes; i++) {
-		index[i] = i;   // initial index to 0,1,2,...maxNodes
-		TabuK[i] = 0;   // initial TabuK to nothing tabu
-		Q[i]     = 0;
+	set_bit(tabu_solution, qubo_size);
+	for (int i = 0; i < qubo_size; i++) {
+		index[i]    = i;   // initial index to 0,1,2,...qubo_size
+		TabuK[i]    = 0;   // initial TabuK to nothing tabu
+		solution[i] = 0;
 	}
-	for (i = 0; i < SubMatrix_; i++) {
+	for (int i = 0; i < SubMatrix_; i++) {
 		index_s[i] = i; // initial index to 0,1,2,...SubMartix_
 		Q_s[i]     = 0;
-		Qt_s[i]    = Qt[i];
+		Qt_s[i]    = tabu_solution[i];
 	}
 
 	int    l = 0, DwaveQubo = 0;
@@ -596,19 +559,21 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 	}
 
 	// run initial Tabu Search to establish backbone
-	IterMax = t + (long long)MAX((long long)400, InitialTabuPass_factor * (long long)maxNodes);
+	IterMax = t + (long long)MAX((long long)400, InitialTabuPass_factor * (long long)qubo_size);
 	if (Verbose_ > 2) {
 		DLT; printf(" Starting Full initial Tabu\n");
 	}
-	V = tabu_search(Q, Qt, maxNodes, qubo, flip_cost, Row, Col, &t, IterMax, TabuK, Target_, TargetSet_, index);
+	energy = tabu_search(solution, tabu_solution, qubo_size, qubo, flip_cost,
+		row, col, &t, IterMax, TabuK, Target_, TargetSet_, index);
 
 	// save best result
-	Vbest = V;
-	NU    = manage_Q(Q, Qlist, V, QVs, Qcounts, Qindex, QLEN, maxNodes);
-	for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
-	val_index_sort(index, flip_cost, maxNodes); // create index array of sorted values
+	Vbest = energy;
+	NU    = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
+	for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
+	val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
 	if ( Verbose_ > 0 ) {
-		print_output(maxNodes, Q, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+		print_output(qubo_size, solution, numPartCalls, Vbest * fmin,
+			(double)(clock() - start_) / CLOCKS_PER_SEC);
 	}
 	if (Verbose_ > 1) {
 		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", Vbest * fmin, t);
@@ -630,7 +595,7 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 			ContinueWhile = false;
 		}
 	}
-	if ( maxNodes < 20 || subMatrix > maxNodes ) {
+	if ( qubo_size < 20 || subMatrix > qubo_size ) {
 		ContinueWhile = false; // trivial problem or Submatrix won't contribute
 	}
 
@@ -642,15 +607,15 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 		// initial TabuK to nothing tabu Q_s[i] = Q[i];
 		// create compression bit vector
 
-		val_index_sort(index, flip_cost, maxNodes); // Create index array of sorted values
+		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 		if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
 		                         l_max, subMatrix);
 
 		// begin submatrix passes
 		if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
 			// reset completely
-			set_bit(Q, maxNodes);
-			for (i = 0; i < maxNodes; i++) {
+			set_bit(solution, qubo_size);
+			for (int i = 0; i < qubo_size; i++) {
 				TabuK[i] = 0;
 			}
 			if (Verbose_ > 1) {
@@ -661,20 +626,20 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 			int change=false;
 			for (l = 0; l < l_max; l += subMatrix) {
 				if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
-				j = 0;
-				for (i = l; i < l + subMatrix; i++) {
+
+				for (int i = l, j = 0; i < l + subMatrix; i++) {
 					Icompress[j++] = index[i]; // create compression index
 				}
-				for (j = 0; j < subMatrix; j++) {
+				for (int j = 0; j < subMatrix; j++) {
 					TabuK[Icompress[j]] = 0;
 				}
 				index_sort(Icompress, subMatrix, true); // sort it for effective reduction
 
 				// coarsen and reduce the problem
-				reduce(Icompress, qubo, subMatrix, maxNodes, val_s, Q, Q_s);
+				reduce(Icompress, qubo, subMatrix, qubo_size, val_s, solution, Q_s);
 				if (Verbose_ > 3) {
 					printf("Bits as set before solve ");
-					for (j = 0; j < subMatrix; j++) printf("%d", Q[Icompress[j]]);
+					for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]);
 					if (Verbose_ > 3) printf("\n");
 				}
 				if ( UseDwave_ ) {
@@ -682,14 +647,14 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 				} else {
 					solv_submatrix(Q_s, Qt_s, subMatrix, val_s, Qval_s, Row_s, Col_s, &t, TabuK_s, index_s);
 				}
-				for (j = 0; j < subMatrix; j++) {
-					i    = Icompress[j];
-					if ( Q[i] != Q_s[j] ) change=true;
-					Q[i] = Q_s[j];
+				for (int j = 0; j < subMatrix; j++) {
+					int bit = Icompress[j];
+					if (solution[bit] != Q_s[j] ) change=true;
+					solution[bit] = Q_s[j];
 				}
 				if (Verbose_ > 3) {
 					printf("Bits set after solve     ");
-					for (j = 0; j < subMatrix; j++) printf("%d", Q[Icompress[j]]);
+					for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]);
 					printf("\n");
 				}
 				numPartCalls++;
@@ -698,7 +663,7 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 
 			// submatrix search did not produce any new values, so randomize those bits
 			if (!change) {
-				set_bit_index( Q, l, index );
+				set_bit_index(solution, l, index );
 				if (Verbose_ > 3) {
 					printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
 				}
@@ -712,38 +677,39 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 		}
 		// FULL TABU run here
 
-		IterMax = t + TabuPass_factor * (long long)maxNodes;
-		val_index_sort(index, flip_cost, maxNodes); // Create index array of sorted values
-		V = tabu_search(Q, Qt, maxNodes, qubo, flip_cost, Row, Col, &t, IterMax, TabuK, Target_, TargetSet_ ,index);
-		val_index_sort(index, flip_cost, maxNodes); // Create index array of sorted values
+		IterMax = t + TabuPass_factor * (long long)qubo_size;
+		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
+		energy = tabu_search(solution, tabu_solution, qubo_size, qubo, flip_cost,
+			row, col, &t, IterMax, TabuK, Target_, TargetSet_ ,index);
+		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 
 		if ( Verbose_ > 1 ) {
-			DLT; printf("Latest answer  %4.5f iterations =%lld\n", V * fmin, t);
+			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * fmin, t);
 		}
 
-		NU = manage_Q(Q, Qlist, V, QVs, Qcounts, Qindex, QLEN, maxNodes);
+		NU = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
 		int repeats;
 		repeats = NU % 10;
 		NU      = NU - repeats;
 		if ( NU == 10 ) { // better solution
-			Vbest = V;
-			for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
+			Vbest = energy;
+			for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 			RepeatPass = 0;
 
 			if ( Verbose_ > 1 ) {
 				DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);
 			}
 			if ( Verbose_ > 0 ) {
-				print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+				print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 			}
 		} else if ( NU == 30 || NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
-			if (is_Q_equal(Q, Qbest, maxNodes)) {
+			if (is_Q_equal(solution, Qbest, qubo_size)) {
 				NoProgress++;
 			} else {
-				for (i = 0; i < maxNodes; i++) Qbest[i] = Q[i];
+				for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 				if ( repeats == 1 && Verbose_ > 0) { // we haven't printed this out before
-					print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+					print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 				}
 			}
 		} else { // not as good as our best so far
@@ -781,13 +747,14 @@ void solve(double **qubo, const int maxNodes, int nRepeats)
 
 	// all done print results if needed and free allocated arrays
 	if (WriteMatrix_)
-		print_V_Q_Qval(Q, maxNodes, qubo);
+		print_V_Q_Qval(solution, qubo_size, qubo);
 
 	if ( Verbose_ == 0 )
-		print_output(maxNodes, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
+		print_output(qubo_size, Qbest, numPartCalls, Vbest * fmin, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
-    free(Q); free(Qt); free(flip_cost); free(Row); free(Col); free(index); free(TabuK); free(QVs); free(Qcounts);
-    free(Qindex); free(Icompress); free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(qubo); free(val_s);
+    free(solution); free(tabu_solution); free(flip_cost); free(row); free(col);
+	free(index); free(TabuK); free(QVs); free(Qcounts); free(Qindex); free(Icompress);
+	free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(qubo); free(val_s);
     free(Qval_s); free(Row_s); free(Col_s); free (index_s); free(Qlist);
 	return;
 }
