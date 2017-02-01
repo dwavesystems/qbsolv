@@ -131,18 +131,18 @@ double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_siz
 //
 // @param energy The current objective function value
 // @param[in,out] solution inputs a current solution, modified by local search
-// @param size is the number of variables in the QUBO matrix
-// @param qubo the QUBO matrix being solved
+// @param[in] size is the number of variables in the QUBO matrix
+// @param[in] qubo the QUBO matrix being solved
 // @param[out] flip_cost The change in energy from flipping a bit
 // @param[out] row contributions to flip_cost from qubo rows
 // @param[out] col contributions to flip_cost from qubo columns
-// @param t is the number of candidate bit flips performed in the entire algorithm so far
+// @param[in,out] t is the number of candidate bit flips performed in the entire algorithm so far
 // @returns New energy of the modified solution
 double local_search_1bit(double energy, short *solution, uint qubo_size,
 	double **qubo, double *flip_cost, double *row, double *col, long long *t)
 {
-	int   kkstr = 0, kkend = qubo_size, kkinc;
-	int   index[qubo_size];
+	int kkstr = 0, kkend = qubo_size, kkinc;
+	int index[qubo_size];
 
 	for (uint kk = 0; kk < qubo_size; kk++) {
 		index[kk] = kk;
@@ -232,7 +232,6 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 	uint      last_bit = 0;	// Track what the previously flipped bit was
 	bool      brk; // flag to mark a break and not a fall thru of the loop
 	double    best_energy; // best solution so far
-	double    Vss;         // best solution in neighbour
 	double    Vlastchange; // working solution variable
 	int       nTabu;
 	double    fmin;
@@ -244,7 +243,7 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 	// setup nTabu
 	// these nTabu numbers might need to be adjusted to work correctly
 	if (Tlist_ != -1) {
-		nTabu = MIN(Tlist_, qubo_size + 1 ); // tabu use set tenure
+		nTabu = MIN(Tlist_, (int)qubo_size + 1 ); // tabu use set tenure
 	} else {
 		if      (qubo_size < 100)  nTabu = 10;
 		else if (qubo_size < 250)  nTabu = 12;
@@ -272,7 +271,8 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 
 	int kk, kkstr = 0, kkend = qubo_size, kkinc;
 	while (*t < iter_max) {
-		Vss = BIGNEGFP; // initialized most negative number
+		// best solution in neighbour, initialized most negative number
+		double neighbour_best = BIGNEGFP;
 		brk = false;
 		if ( kkstr == 0 ) { // sweep top to bottom
 			kkstr = qubo_size - 1; kkinc = -1; kkend = 0;
@@ -316,9 +316,9 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 					break;
 				}
 				// Q vector unchanged
-				if (new_energy > Vss) { // check for improved neighbor solution
+				if (new_energy > neighbour_best) { // check for improved neighbor solution
 					last_bit = bit;   // record position
-					Vss = new_energy;   // record neighbor solution value
+					neighbour_best = new_energy;   // record neighbor solution value
 				}
 			}
 		}
@@ -360,63 +360,69 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 // It does this by fixing all variables outside the subregion to their current values,
 // and adding the influence of the fixed variables to the linear (diagonal) terms in the subQUBO.
 //
-// @param Icompress is the list of variables in the subregion
-// @param val is the large QUBO matrix to be solved
-// @param subMatrix is the number of variable in the subregion
-// @param maxNodes is the number of variables in the large QUBO matrix
-// @param val_s is the returned subQUBO
-// @param Q_s is a current solution on the subQUBO
-void reduce(int *Icompress, double **qubo, int subMatrix, int maxNodes, double **val_s, short *Q, short *Q_s)
+// @param Icompress is the list of variables in the subregion that will be extracted
+// @param qubo is the large QUBO matrix to be solved
+// @param sub_qubo_size is the number of variable in the subregion
+// @param qubo_size is the number of variables in the large QUBO matrix
+// @param[out] sub_qubo is the returned subQUBO
+// @param[out] sub_solution is a current solution on the subQUBO
+void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
+	double **sub_qubo, short *solution, short *sub_solution)
 {
-	int i, j; // scratch intergers looping
-
-	// using the Qcompress bit vector reduce the Val matrix
-
 	// clean out the subMatrix
-	for (i = 0; i < subMatrix; i++) { // for each column
-		for (j = 0; j < subMatrix; j++) val_s[i][j] = 0.0; // for each row
+	for (uint i = 0; i < sub_qubo_size; i++) { // for each column
+		for (uint j = 0; j < sub_qubo_size; j++)
+			sub_qubo[i][j] = 0.0; // for each row
 	}
+
 	// fill the subMatrix
-	for (i = 0; i < subMatrix; i++) { // for each column
-		Q_s[i] = Q[Icompress[i]];
-		for (j = i; j < subMatrix; j++) { // copy row
-			val_s[i][j] = qubo[Icompress[i]][Icompress[j]];
+	for (uint i = 0; i < sub_qubo_size; i++) { // for each column
+		sub_solution[i] = solution[Icompress[i]];
+		for (uint j = i; j < sub_qubo_size; j++) { // copy row
+			sub_qubo[i][j] = qubo[Icompress[i]][Icompress[j]];
 		}
 	}
 
-	// clamping
-	double clamp;
-	int    rc_s, rc; //rc = row/col (diag) rc_s submatrix version
-	int    ji;
+	// The remainder of the function is clamping the sub_qubo to the
+	// solution state surrounding it.
 
 	// Go over every variable that we are extracting
-	for (rc_s = 0; rc_s < subMatrix; rc_s++) {
+	for (uint sub_variable = 0; sub_variable < sub_qubo_size; sub_variable++) {
 		// Get the global index of the current variable
-		rc    = Icompress[rc_s];
-		clamp = 0;
+		int variable = Icompress[sub_variable];
+		double clamp = 0;
+
+		// this will keep track of the index of the next sub_qubo component,
+		// we don't include those in the clamping
+		int ji = sub_qubo_size - 1;
 
 		// Go over all other (non-extracted) variable
 		// from the highest until we reach the current variable
-		ji    = subMatrix - 1;
-		for ( j = maxNodes - 1; j > rc; j--) {
+		for (int j = qubo_size - 1; j > variable; j--) {
 			if ( j == Icompress[ji] ) {
+				// Found a sub_qubo element, skip it, watch for the next one
 				ji--;
 			} else {
-				clamp += qubo[rc][j] * Q[j];
+				clamp += qubo[variable][j] * solution[j];
 			}
 		}
 
 		// Go over all other (non-extracted) variable
 		// from zero until we reach the current variable
 		ji = 0;
-		for ( j = 0; j < rc + 1; j++) {
+		for (int j = 0; j < variable + 1; j++) {
 			if ( j == Icompress[ji] ) {
+				// Found a sub_qubo element, skip it, watch for the next one
 				ji++;
 			} else {
-				clamp += qubo[j][rc] * Q[j];
+				clamp += qubo[j][variable] * solution[j];
 			}
 		}
-		val_s[rc_s][rc_s] += clamp;
+
+		// Now that we know what the effects of the non-extracted variables
+		// are on the sub_qubo we include it by adding it as a linear
+		// bias in the sub_qubo (a diagonal matrix entry)
+		sub_qubo[sub_variable][sub_variable] += clamp;
 	}
 	return;
 }
@@ -424,22 +430,23 @@ void reduce(int *Icompress, double **qubo, int subMatrix, int maxNodes, double *
 // solv_submatrix() performs QUBO optimization on a subregion.
 // In this function the subregion is optimized using tabu_search() rather than using the D-Wave hardware.
 //
-// @param[in,out] Q inputs a current solution and returns the best solution found
-// @param[out] Qt stores the best solution found during the algorithm
-// @param maxNodes is the number of variables in the QUBO matrix
-// @param val is the QUBO matrix to be solved
-// @param Qval is the impact vector (the chainge in objective function value that results from flipping each bit)
-// @param Row Contributions to Qval coming from the rows on val
-// @param Col Contributions to Qval coming from the columns on val
+// @param[in,out] solution inputs a current solution and returns the best solution found
+// @param[out] best stores the best solution found during the algorithm
+// @param qubo_size is the number of variables in the QUBO matrix
+// @param qubo is the QUBO matrix to be solved
+// @param flip_cost is the impact vector (the chainge in objective function value that results from flipping each bit)
+// @param row Contributions to Qval coming from the rows on val
+// @param col Contributions to Qval coming from the columns on val
 // @param t is the number of candidate bit flips performed in the entire algorithm so far
 // @param TabuK is stores the list of tabu moves
 // @param index is the order in which to perform candidate bit flips (determined by Qval).
-double solv_submatrix(short *Q, short *Qt, int maxNodes, double **qubo, double *flip_cost,
-                      double *Row, double *Col, long long *t, int *TabuK, int *index)
+double solv_submatrix(short *solution, short *best, uint qubo_size, double **qubo,
+	double *flip_cost, double *row, double *col, long long *t, int *TabuK, int *index)
 {
-	long long IterMax = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)maxNodes);
+	long long iter_max = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)qubo_size);
 
-	return tabu_search(Q, Qt, maxNodes, qubo, flip_cost, Row, Col, t, IterMax, TabuK, Target_, false, index);
+	return tabu_search(solution, best, qubo_size, qubo, flip_cost, row, col,
+		t, iter_max, TabuK, Target_, false, index);
 }
 
 // Entry into the overall solver from the main program

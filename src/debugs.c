@@ -96,7 +96,7 @@ void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, doub
 }
 
 // this DEBUG function checks the Qval vector
-void check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
+void check_Qval(short *Q, int maxNodes, double **val, double *Qval)
 {
 	//  checking the Qval vector
 	double result, just_result;

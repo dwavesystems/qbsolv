@@ -39,6 +39,8 @@
 #define BADMALLOC printf("\n  ------> Exit(%d) called by %s(%s.%d)\n\n", 9, __func__, __FILE__, __LINE__); exit(9);
 #define DL printf("-----> AT %s(%s.%d)\n",  __func__, __FILE__, __LINE__);
 #define DLT printf("%lf seconds ", (double)(clock() - start_) / CLOCKS_PER_SEC);
+#define uint unsigned int
+
 
 // ----------------------- STRUCTs -------------------------------------
 struct nodeStr_ {
@@ -71,7 +73,7 @@ void  shuffle_index(int *index, int n);
 void  shuffle_indexR(int *index, int n);
 double just_evaluate(short *Q, int maxNodes, double **val);
 void  check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
-void  check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
+void  check_Qval(short *Q, int maxNodes, double **val, double *Qval);
 void  print_output(int maxNodes, short *Q, long numPartCalls, double energy, double seconds);
 void  quick_sort_iterative_index(double arr[], int ind[], int n);
 void  val_index_sort(int *index, double *val, int n);
@@ -82,8 +84,7 @@ int is_Q_equal( short *Qnow, short *Qcompare, int nbits);
 void dw_init( );
 void dw_solver( double **val, int maxNodes, short *Q );
 void dw_close();
-void reduce(int *Icompress, double **val, int subMatrix, int maxNodes, double **val_s, short *Q, short *Q_s);
-
+void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size, double **sub_qubo, short *solution, short *sub_solution);
 #ifdef __cplusplus
 }
 #endif
