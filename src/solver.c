@@ -511,17 +511,17 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 
 	// get some memory for reduced sub matrices
-	short  *Q_s, *Qt_s, *Qbest;
-	double Vbest, *Qval_s, *Row_s, *Col_s, **val_s;
+	short  *sub_solution, *Qt_s, *Qbest;
+	double Vbest, *sub_flip_cost, *Row_s, *Col_s, **sub_qubo;
 	int    *TabuK_s, *Icompress;
 
-	val_s = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
+	sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
 	if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(Qbest, short, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(TabuK_s, int, SubMatrix_) == NULL) BADMALLOC
-	if (GETMEM(Q_s, short, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(sub_solution, short, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(Qt_s, short, SubMatrix_) == NULL) BADMALLOC
-	if (GETMEM(Qval_s, double, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(sub_flip_cost, double, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(Row_s, double, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(Col_s, double, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(index_s, int, SubMatrix_) == NULL) BADMALLOC
@@ -545,7 +545,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 	for (int i = 0; i < SubMatrix_; i++) {
 		index_s[i] = i; // initial index to 0,1,2,...SubMartix_
-		Q_s[i]     = 0;
+		sub_solution[i]     = 0;
 		Qt_s[i]    = tabu_solution[i];
 	}
 
@@ -604,7 +604,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	// outer loop begin
 	while ( ContinueWhile ) {
 		// use the first "remove" index values to remove rows and columns from new matrix
-		// initial TabuK to nothing tabu Q_s[i] = Q[i];
+		// initial TabuK to nothing tabu sub_solution[i] = Q[i];
 		// create compression bit vector
 
 		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
@@ -636,21 +636,21 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 				index_sort(Icompress, subMatrix, true); // sort it for effective reduction
 
 				// coarsen and reduce the problem
-				reduce(Icompress, qubo, subMatrix, qubo_size, val_s, solution, Q_s);
+				reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
 				if (Verbose_ > 3) {
 					printf("Bits as set before solve ");
 					for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]);
 					if (Verbose_ > 3) printf("\n");
 				}
 				if ( UseDwave_ ) {
-					dw_solver( val_s, subMatrix, Q_s );
+					dw_solver(sub_qubo, subMatrix, sub_solution);
 				} else {
-					solv_submatrix(Q_s, Qt_s, subMatrix, val_s, Qval_s, Row_s, Col_s, &t, TabuK_s, index_s);
+					solv_submatrix(sub_solution, Qt_s, subMatrix, sub_qubo, sub_flip_cost, Row_s, Col_s, &t, TabuK_s, index_s);
 				}
 				for (int j = 0; j < subMatrix; j++) {
 					int bit = Icompress[j];
-					if (solution[bit] != Q_s[j] ) change=true;
-					solution[bit] = Q_s[j];
+					if (solution[bit] != sub_solution[j] ) change=true;
+					solution[bit] = sub_solution[j];
 				}
 				if (Verbose_ > 3) {
 					printf("Bits set after solve     ");
@@ -754,7 +754,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     free(solution); free(tabu_solution); free(flip_cost); free(row); free(col);
 	free(index); free(TabuK); free(QVs); free(Qcounts); free(Qindex); free(Icompress);
-	free(Qbest); free(TabuK_s); free(Q_s); free(Qt_s); free(qubo); free(val_s);
-    free(Qval_s); free(Row_s); free(Col_s); free (index_s); free(Qlist);
+	free(Qbest); free(TabuK_s); free(sub_solution); free(Qt_s); free(qubo); free(sub_qubo);
+    free(sub_flip_cost); free(Row_s); free(Col_s); free (index_s); free(Qlist);
 	return;
 }
