@@ -41,7 +41,7 @@ void **malloc2D(uint rows, uint cols, uint size)
 		big_array[i] = ptr;
 		ptr         += space;
 	}
-	return (void*)big_array;
+	return (void**)big_array;
 }
 
 // this randomly sets the bit vector to 1 or 0

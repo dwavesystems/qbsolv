@@ -17,134 +17,183 @@
 #include "include.h"
 #include "extern.h"
 
-// this function evaluates the objective function for a given Q, It is called when the search
-// is starting over, such as after a projection in outer loop of solver
-// flip_cost = the change if a Q bit is flipped
-// Row and Col are used for fast flip_cost updates in other functions when the bit is flipped
-double evaluate(short *Q, int maxNodes, double **qubo, double *flip_cost, double *Row, double *Col)
+// This function evaluates the objective function for a given solution.
+//
+// It is called when the search is starting over, such as after a projection
+// in outer loop of solver.
+//
+// @param solution a current solution
+// @param qubo_size the number of variables in the QUBO matrix
+// @param qubo the QUBO matrix being solved
+// @param[out] flip_cost The change in energy from flipping a bit
+// @param[out] row contributions to flip_cost from qubo rows
+// @param[out] col contributions to flip_cost from qubo columns
+// @returns Energy of solution evaluated by qubo
+double evaluate(short *solution, uint qubo_size, double **qubo,
+	double *flip_cost, double *row, double *col)
 {
-	int    i, j;
 	double result = 0.0;
 
-	for (i = 0; i < maxNodes; i++) {
-		Row[i] = 0.0; Col[i] = 0.0;
+	for (uint ii = 0; ii < qubo_size; ii++) {
+		row[ii] = 0.0;
+		col[ii] = 0.0;
 
-		for ( j = i + 1; j < maxNodes; j++) {
-			Row[i] += qubo[i][j] * (double)Q[j];
+		// This is an upper triangular matrix, so start right of the diagonal
+		// for the rows, and stop at the diagonal for the columns
+		for (uint jj = ii + 1; jj < qubo_size; jj++) {
+			row[ii] += qubo[ii][jj] * (double)solution[jj];
 		}
-		for ( j = 0; j < i; j++) {
-			Col[i] += qubo[j][i] * (double)Q[j];
+		for (uint jj = 0; jj < ii; jj++) {
+			col[ii] += qubo[jj][ii] * (double)solution[jj];
 		}
 
-		if ( Q[i] == 1 ) {
-			result +=    Row[i] +          qubo[i][i];
-			flip_cost[i] = -( Row[i] + Col[i] + qubo[i][i] );
+		// If the variable is currently true, then by flipping it we lose
+		// what it is currently contributing (so we negate the contribution),
+		// when it is currently false, gain that ammount by flipping
+		if (solution[ii] == 1) {
+			result += row[ii] + qubo[ii][ii];
+			flip_cost[ii] = -(row[ii] + col[ii] + qubo[ii][ii]);
 		} else {
-			flip_cost[i] =  ( Row[i] + Col[i] + qubo[i][i] );
+			flip_cost[ii] =  (row[ii] + col[ii] + qubo[ii][ii]);
 		}
 	}
+
 	return result;
 }
 
-// this function evaluates change in the objective function and flip_cost for a given Q, and
-// flip_cost = the change if a Q single bit is flipped, Row and Col are updated so this function
-// can be optimal
-double evaluate_1bit(double V_old, int bit, short *Q, int maxNodes, double **qubo, double *flip_cost, double *Row, double *Col)
+
+// Flips a given bit in the solution, and calculates the new energy.
+//
+// All the auxillary informanion (flip_cost/row/col) is updated.
+//
+// @param old_energy The current objective function value
+// @param bit is the bit to be flipped
+// @param[in,out] solution inputs a current solution, flips the given bit
+// @param qubo_size is the number of variables in the QUBO matrix
+// @param qubo the QUBO matrix being solved
+// @param[out] flip_cost The change in energy from flipping a bit
+// @param[out] row contributions to flip_cost from qubo rows
+// @param[out] col contributions to flip_cost from qubo columns
+// @returns New energy of the modified solution
+double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_size,
+	double **qubo, double *flip_cost, double *row, double *col)
 {
-	int i, j;
+	double result = old_energy + flip_cost[bit];
 
-	double result;
+	solution[bit] = 1 - solution[bit];
 
-	result = V_old + flip_cost[bit];
-
-	Q[bit] = 1 - Q[bit];
-
-	if (Q[bit] == 0 ) {
+	if (solution[bit] == 0 ) {
 		// then it was a 1 before and we have to reduce all the rows from 0 to bit by qubo[bit][j]*Q[j]
 		// from bit+1 to maxNodes reduce cols by qubo[j][bit]*Q[j]
-		for (i = 0; i < bit; i++) {
-			Row[i] -= qubo[i][bit];
-		}
-		for (i = bit + 1; i < maxNodes; i++) {
-			Col[i] -= qubo[bit][i];
-		}
+		for (uint ii = 0; ii < bit; ii++)
+			row[ii] -= qubo[ii][bit];
+		for (uint ii = bit + 1; ii < qubo_size; ii++)
+			col[ii] -= qubo[bit][ii];
 
 	} else{
 		// then it was a 0 before and we have to increase all the rows from 0 to bit by qubo[bit][j]*Q[j]
 		// from bit+1 to maxNodes increase cols by qubo[j][bit]*Q[j]
-		for (i = 0; i < bit; i++) {
-			Row[i] += qubo[i][bit];
-		}
-		for (i = bit + 1; i < maxNodes; i++) {
-			Col[i] += qubo[bit][i];
-		}
+		for (uint ii = 0; ii < bit; ii++)
+			row[ii] += qubo[ii][bit];
+		for (uint ii = bit + 1; ii < qubo_size; ii++)
+			col[ii] += qubo[bit][ii];
+
 	}
 	// Col[bit] Row[bit] need recalculation
-	i = bit; { // recalculate
-		Col[i] = 0.0;
-		for ( j = 0; j < i; j++) {
-			Col[i] += qubo[j][i] * (double)Q[j];
-		}
-		Row[i] = 0.0;
-		for ( j = i + 1; j < maxNodes; j++) {
-			Row[i] += qubo[i][j] * (double)Q[j];
+	{ // recalculate
+		col[bit] = 0.0;
+		for (uint jj = 0; jj < bit; jj++)
+			col[bit] += qubo[jj][bit] * (double)solution[jj];
+		row[bit] = 0.0;
+		for (uint jj = bit + 1; jj < qubo_size; jj++) {
+			row[bit] += qubo[bit][jj] * (double)solution[jj];
 		}
 	}
-	for (i = 0; i < maxNodes; i++) {
-		if ( Q[i] == 1 ) {
-			flip_cost[i] = -( Row[i] + Col[i] + qubo[i][i] );
+
+	for (uint ii = 0; ii < qubo_size; ii++) {
+		if (solution[ii] == 1) {
+			flip_cost[ii] = -(row[ii] + col[ii] + qubo[ii][ii]);
 		} else {
-			flip_cost[i] =  ( Row[i] + Col[i] + qubo[i][i] );
+			flip_cost[ii] =  (row[ii] + col[ii] + qubo[ii][ii]);
 		}
 	}
 
 	return result;
 }
 
-// this function performs a local Max search but doesn't require an initial Evaluation
-// improving Q and returning the last Evaluated value
-double local_search_1bit(double V, short *Q, int maxNodes, double **qubo, double *flip_cost, double *Row, double *Col, long long *t)
+// Tries to improve the current solution Q by flipping single bits.
+// It flips a bit whenever a bit flip improves the objective function value,
+// terminating when a local optimum is found.
+// It returns the objective function value for the new solution.
+//
+// This routine does not perform a full evalution of the the state or auxillary
+// information, it assumes it is already up to date.
+//
+// @param energy The current objective function value
+// @param[in,out] solution inputs a current solution, modified by local search
+// @param size is the number of variables in the QUBO matrix
+// @param qubo the QUBO matrix being solved
+// @param[out] flip_cost The change in energy from flipping a bit
+// @param[out] row contributions to flip_cost from qubo rows
+// @param[out] col contributions to flip_cost from qubo columns
+// @param t is the number of candidate bit flips performed in the entire algorithm so far
+// @returns New energy of the modified solution
+double local_search_1bit(double energy, short *solution, uint qubo_size,
+	double **qubo, double *flip_cost, double *row, double *col, long long *t)
 {
-	short improve;
-	int   k, kk;
-	int   kkstr = 0, kkend = maxNodes, kkinc;
-	int   index[maxNodes];
+	int   kkstr = 0, kkend = qubo_size, kkinc;
+	int   index[qubo_size];
 
-	for (k = 0; k < maxNodes; k++) {
-		index[k] = k;
+	for (uint kk = 0; kk < qubo_size; kk++) {
+		index[kk] = kk;
 	}
 
-	// initial evaluate (flip_cost,Row,Col all primed)  needed before evaluate_1bit can be used
-	improve = true;
+	// The local search terminates at the local optima, so the moment we can't
+	// improve with a single bit flip
+	bool improve = true;
 	while (improve) {
 		improve = false;
-		if ( kkstr == 0 ) { // sweep top to bottom
-			shuffle_index(index, maxNodes);
-			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
-		}else{ // sweep bottom to top
-			kkstr = 0; kkinc = 1; kkend = maxNodes; // got thru it backwards then reshuffle
+
+		if (kkstr == 0) { // sweep top to bottom
+			shuffle_index(index, qubo_size);
+			kkstr = qubo_size - 1; kkinc = -1; kkend = 0;
+		} else { // sweep bottom to top
+			kkstr = 0; kkinc = 1; kkend = qubo_size; // got thru it backwards then reshuffle
 		}
-		for (kk = kkstr; kk != kkend; kk = kk + kkinc) {
-			k = index[kk];
+
+		for (int kk = kkstr; kk != kkend; kk = kk + kkinc) {
+			uint bit = index[kk];
 			(*t)++;
-			if ( V + flip_cost[k] > V ) {
-				V       = evaluate_1bit(V, k, Q, maxNodes, qubo, flip_cost, Row, Col);
+			if (energy + flip_cost[bit] > energy) {
+				energy  = evaluate_1bit(energy, bit, solution, qubo_size, qubo, flip_cost, row, col);
 				improve = true;
 			}
 		}
 	}
-	return V;
+	return energy;
 }
 
-// this function performance a local Max search improving Q and returning the last Evaluated value
-double local_search(short *Q, int maxNodes, double **qubo, double *flip_cost, double *Row, double *Col, long long *t)
+// Performance a local Max search improving the solution and returning the last evaluated value
+//
+// Mostly the same as local_search_1bit, except it first evaluates the
+// current solution and updates the auxillary information (flip_cost)
+//
+// @param[in,out] solution inputs a current solution, modified by local search
+// @param size is the number of variables in the QUBO matrix
+// @param[out] flip_cost The change in energy from flipping a bit
+// @param[out] row contributions to flip_cost from qubo rows
+// @param[out] col contributions to flip_cost from qubo columns
+// @param t is the number of candidate bit flips performed in the entire algorithm so far
+// @returns New energy of the modified solution
+double local_search(short *solution, int qubo_size, double **qubo,
+	double *flip_cost, double *row, double *col, long long *t)
 {
-	double V;
+	double energy;
 
 	// initial evaluate needed before evaluate_1bit can be used
-	V = evaluate(Q, maxNodes, qubo, flip_cost, Row, Col);
-	V = local_search_1bit(V, Q, maxNodes, qubo, flip_cost, Row, Col, t); // local search to polish the change
-	return V;
+	energy = evaluate(solution, qubo_size, qubo, flip_cost, row, col);
+	energy = local_search_1bit(energy, solution, qubo_size, qubo, flip_cost, row, col, t); // local search to polish the change
+	return energy;
 }
 
 // This function is called by solve to execute a tabu search, This is THE Tabu search
@@ -162,28 +211,28 @@ double local_search(short *Q, int maxNodes, double **qubo, double *flip_cost, do
 // it cannot be flipped again for another "nTabu" moves. The algorithm terminates
 // after sufficiently many bit flips without improvment.
 //
-// @param[in,out] Q inputs a current solution and returns the best solution found
-// @param[out] Qt stores the best solution found during the algorithm
-// @param maxNodes is the number of variables in the QUBO matrix
+// @param[in,out] solution inputs a current solution and returns the best solution found
+// @param[out] best stores the best solution found during the algorithm
+// @param qubo_size is the number of variables in the QUBO matrix
 // @param qubo is the QUBO matrix to be solved
 // @param flip_cost is the impact vector (the chainge in objective function value that results from flipping each bit)
-// @param Row Contributions to flip_cost coming from the rows on qubo
-// @param Col Contributions to flip_cost coming from the columns on qubo
+// @param row Contributions to flip_cost coming from the rows on qubo
+// @param col Contributions to flip_cost coming from the columns on qubo
 // @param t is the number of candidate bit flips performed in the entire algorithm so far
-// @param IterMax is the maximum size of t allowed before terminating
+// @param iter_max is the maximum size of t allowed before terminating
 // @param TabuK is stores the list of tabu moves
-// @param Target Halt if this energy is reached and TargetSet is true
-// @param TargetSet Do we have a target energy at which to terminate
+// @param target Halt if this energy is reached and TargetSet is true
+// @param target_set Do we have a target energy at which to terminate
 // @param index is the order in which to perform candidate bit flips (determined by flip_cost).
-double tabu_search(short *Q, short *Qt, int maxNodes, double **qubo, double *flip_cost,
- double *Row, double *Col, long long *t, long long IterMax, int *TabuK,
-            double Target, int TargetSet, int *index)
+double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
+	double *flip_cost, double *row, double *col, long long *t, long long iter_max,
+	int *TabuK, double target, bool target_set, int *index)
 {
-	int       i, k, K;     // iteration working vars
-	int       brk;         // flag to mark a break and not a fall thru of the loop
-	double    Vs;          // best solution so far
+
+	uint      last_bit = 0;	// Track what the previously flipped bit was
+	bool      brk; // flag to mark a break and not a fall thru of the loop
+	double    best_energy; // best solution so far
 	double    Vss;         // best solution in neighbour
-	double    V;           // working solution variable
 	double    Vlastchange; // working solution variable
 	int       nTabu;
 	double    fmin;
@@ -194,30 +243,16 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **qubo, double *fli
 
 	// setup nTabu
 	// these nTabu numbers might need to be adjusted to work correctly
-	if ( Tlist_ != -1 ) {
-		nTabu = MIN(Tlist_, maxNodes + 1 ); // tabu use set tenure
+	if (Tlist_ != -1) {
+		nTabu = MIN(Tlist_, qubo_size + 1 ); // tabu use set tenure
 	} else {
-		if ( maxNodes < 100 ) {
-			nTabu = 10;
-		}
-		else if ( maxNodes < 250) {
-			nTabu = 12;
-		}
-		else if ( maxNodes < 500) {
-			nTabu = 13;
-		}
-		else if ( maxNodes < 1000) {
-			nTabu = 21;
-		}
-		else if ( maxNodes < 2500) {
-			nTabu = 29;
-		}
-		else if ( maxNodes < 8000) {
-			nTabu = 34;
-		}
-		else { // maxNodes >= 8000
-			nTabu = 35;
-		}
+		if      (qubo_size < 100)  nTabu = 10;
+		else if (qubo_size < 250)  nTabu = 12;
+		else if (qubo_size < 500)  nTabu = 13;
+		else if (qubo_size < 1000) nTabu = 21;
+		else if (qubo_size < 2500) nTabu = 29;
+		else if (qubo_size < 8000) nTabu = 34;
+		else /*qubo_size >= 8000*/ nTabu = 35;
 	}
 
 	if ( findMax_ ) {
@@ -226,96 +261,111 @@ double tabu_search(short *Q, short *Qt, int maxNodes, double **qubo, double *fli
 		fmin = -1.0;
 	}
 
-	Vs = local_search(Q, maxNodes, qubo, flip_cost, Row, Col, t);
-	val_index_sort(index, flip_cost, maxNodes); // Create index array of sorted values
-	thisIter     = IterMax - (*t);
+	best_energy  = local_search(solution, qubo_size, qubo, flip_cost, row, col, t);
+	val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
+	thisIter     = iter_max - (*t);
 	increaseIter = thisIter / 2;
-	Vlastchange  = Vs; V = Vs;
-	K            = 0;
-	for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; // copy the best solution so far
-	for (i = 0; i < maxNodes; i++) TabuK[i] = 0; // zero out the Tabu vector
+	Vlastchange  = best_energy;
 
-	int kk, kkstr = 0, kkend = maxNodes, kkinc;
-	while (*t < IterMax) {
+	for (uint i = 0; i < qubo_size; i++) best[i] = solution[i]; // copy the best solution so far
+	for (uint i = 0; i < qubo_size; i++) TabuK[i] = 0; // zero out the Tabu vector
+
+	int kk, kkstr = 0, kkend = qubo_size, kkinc;
+	while (*t < iter_max) {
 		Vss = BIGNEGFP; // initialized most negative number
 		brk = false;
 		if ( kkstr == 0 ) { // sweep top to bottom
-			kkstr = maxNodes - 1; kkinc = -1; kkend = 0;
+			kkstr = qubo_size - 1; kkinc = -1; kkend = 0;
 		} else { // sweep bottom to top
-			kkstr = 0; kkinc = 1; kkend = maxNodes;
+			kkstr = 0; kkinc = 1; kkend = qubo_size;
 		}
 
 		for (kk = kkstr; kk != kkend; kk = kk + kkinc) {
-			k = index[kk];
-			if (TabuK[k] != (short)0 ) continue;
+			uint bit = index[kk];
+			if (TabuK[bit] != (short)0 ) continue;
 			{
 				(*t)++;
-				V = Vlastchange + flip_cost[k]; //  value if Q[k] bit is flipped
-				if (  V > Vs  ) {
+				double new_energy = Vlastchange + flip_cost[bit]; //  value if Q[k] bit is flipped
+				if (new_energy > best_energy) {
 					brk         = true;
-					K           = k;
-					V           = evaluate_1bit(Vlastchange, k, Q, maxNodes, qubo, flip_cost, Row, Col); // flip the bit and fix tables
-					Vlastchange = local_search_1bit(V, Q, maxNodes, qubo, flip_cost, Row, Col, t); // local search to polish the change
-					val_index_sort_ns(index, flip_cost, maxNodes); // update index array of sorted values, don't shuffle index
-					Vs = Vlastchange;
-					for (i = 0; i < maxNodes; i++) Qt[i] = Q[i]; // copy the best solution so far
+					last_bit    = bit;
+					new_energy  = evaluate_1bit(Vlastchange, bit, solution, qubo_size, qubo, flip_cost, row, col); // flip the bit and fix tables
+					Vlastchange = local_search_1bit(new_energy, solution, qubo_size, qubo, flip_cost, row, col, t); // local search to polish the change
+					val_index_sort_ns(index, flip_cost, qubo_size); // update index array of sorted values, don't shuffle index
+					best_energy = Vlastchange;
 
-					if ( TargetSet ) {
-						if ( Vlastchange >= (fmin * Target) ) {
+					for (uint i = 0; i < qubo_size; i++) best[i] = solution[i]; // copy the best solution so far
+
+					if (target_set) {
+						if (Vlastchange >= (fmin * target)) {
 							break;
 						}
 					}
-					howFar = ( (double)( IterMax - (*t) ) / (double)thisIter  );
+					howFar = ((double)(iter_max - (*t)) / (double)thisIter);
 					if (Verbose_ > 3) {
-						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", Vs * fmin, K, (*t), howFar, brk );
+						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", best_energy * fmin, last_bit, (*t), howFar, brk );
 					}
 					if ( howFar < 0.80  && numIncrease > 0 ) {
 						if (Verbose_ > 3) {
-							printf("Increase Itermax %lld, %lld\n", IterMax, IterMax + increaseIter);
+							printf("Increase Itermax %lld, %lld\n", iter_max, iter_max + increaseIter);
 						}
-						IterMax  += increaseIter;
+						iter_max  += increaseIter;
 						thisIter += increaseIter;
 						numIncrease--;
 					}
 					break;
 				}
 				// Q vector unchanged
-				if (V > Vss) { // check for improved neighbor solution
-					K   = k;   // record position
-					Vss = V;   // record neighbor solution value
+				if (new_energy > Vss) { // check for improved neighbor solution
+					last_bit = bit;   // record position
+					Vss = new_energy;   // record neighbor solution value
 				}
 			}
 		}
 
-		if ( TargetSet ) {
-			if ( Vlastchange >= (fmin * Target) ) {
+		if (target_set) {
+			if (Vlastchange >= (fmin * target)) {
 				break;
 			}
 		}
 		if ( !brk ) { // this is the fall thru case and we havent tripped interior If V> VS test so flip Q[K]
-			Vlastchange = evaluate_1bit(Vlastchange, K, Q, maxNodes, qubo, flip_cost, Row, Col);
+			Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, qubo, flip_cost, row, col);
 		}
-		for (i = 0; i < maxNodes; i++) TabuK [i] =  MAX(0, TabuK[i] - 1);
-		if (Q[i] == 0 ) {
-			TabuK[K] = nTabu + 1;
+
+		uint i;
+		for (i = 0; i < qubo_size; i++) TabuK [i] =  MAX(0, TabuK[i] - 1);
+
+		// add some asymetry
+		if (solution[qubo_size-1] == 0) {
+			TabuK[last_bit] = nTabu + 1;
 		} else {
-			TabuK[K] = nTabu - 1;
-		} // add some asymetry
+			TabuK[last_bit] = nTabu - 1;
+		}
 	}
 
-	for (i = 0; i < maxNodes; i++) Q[i] = Qt[i]; // copy over the best solution
+ 	// copy over the best solution
+	for (uint i = 0; i < qubo_size; i++) solution[i] = best[i];
 
 	// ok, we are leaving Tabu, we can do a for sure clean up run of evaluate, to be sure we
 	// return the true evaluation of the function (given that we only do this a handfull of times)
-	V = evaluate(Q, maxNodes, qubo, flip_cost, Row, Col);
+	double final_energy = evaluate(solution, qubo_size, qubo, flip_cost, row, col);
 
 	// Create index array of sorted values
-	val_index_sort(index, flip_cost, maxNodes);
-	return V;
+	val_index_sort(index, flip_cost, qubo_size);
+	return final_energy;
 }
 
-// given a bit vector Qcompress, remove the row and column of qubo, nodes and couplers
-// also returning the new maxNodes and nCouplers
+// reduce() computes a subQUBO (val_s) from large QUBO (val)
+// for the purposes of optimizing on a subregion (a subset of the variables).
+// It does this by fixing all variables outside the subregion to their current values,
+// and adding the influence of the fixed variables to the linear (diagonal) terms in the subQUBO.
+//
+// @param Icompress is the list of variables in the subregion
+// @param val is the large QUBO matrix to be solved
+// @param subMatrix is the number of variable in the subregion
+// @param maxNodes is the number of variables in the large QUBO matrix
+// @param val_s is the returned subQUBO
+// @param Q_s is a current solution on the subQUBO
 void reduce(int *Icompress, double **qubo, int subMatrix, int maxNodes, double **val_s, short *Q, short *Q_s)
 {
 	int i, j; // scratch intergers looping
@@ -371,7 +421,19 @@ void reduce(int *Icompress, double **qubo, int subMatrix, int maxNodes, double *
 	return;
 }
 
-// do the smaller matrix solver here, currently dummied not holding the Dwave part yet
+// solv_submatrix() performs QUBO optimization on a subregion.
+// In this function the subregion is optimized using tabu_search() rather than using the D-Wave hardware.
+//
+// @param[in,out] Q inputs a current solution and returns the best solution found
+// @param[out] Qt stores the best solution found during the algorithm
+// @param maxNodes is the number of variables in the QUBO matrix
+// @param val is the QUBO matrix to be solved
+// @param Qval is the impact vector (the chainge in objective function value that results from flipping each bit)
+// @param Row Contributions to Qval coming from the rows on val
+// @param Col Contributions to Qval coming from the columns on val
+// @param t is the number of candidate bit flips performed in the entire algorithm so far
+// @param TabuK is stores the list of tabu moves
+// @param index is the order in which to perform candidate bit flips (determined by Qval).
 double solv_submatrix(short *Q, short *Qt, int maxNodes, double **qubo, double *flip_cost,
                       double *Row, double *Col, long long *t, int *TabuK, int *index)
 {
