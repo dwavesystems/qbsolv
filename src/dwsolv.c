@@ -151,7 +151,7 @@ void dw_init()
 	}
 }
 
-void dw_solver(double **val, int maxNodes, short *Q)
+void dw_solver(double **val, int maxNodes, int8_t *Q)
 {
 	// bind to .epqmi
 	char filename_b[256];
@@ -190,9 +190,9 @@ void dw_solver(double **val, int maxNodes, short *Q)
 	if ((fr = fopen(filename_result, "r")) == NULL ) {
 		DL; printf("  Failed open %s\n", filename_result); exit(9);
 	}
-	short qtmp;
+	int8_t qtmp;
 	for (i = 0; i < maxNodes; i++) {
-		if ((fscanf(fr, "%hd", &qtmp)) == 0 ) {
+		if ((fscanf(fr, "%hhd", &qtmp)) == 0 ) {
 			DL; printf("fscanf error %s", filename_result); exit(9);
 		}
 		Q[i] = qtmp;

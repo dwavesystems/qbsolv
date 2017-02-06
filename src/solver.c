@@ -27,7 +27,7 @@
 // @param qubo the QUBO matrix being solved
 // @param[out] flip_cost The change in energy from flipping a bit
 // @returns Energy of solution evaluated by qubo
-double evaluate(short *solution, uint qubo_size, double **qubo, double *flip_cost)
+double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_cost)
 {
 	double result = 0.0;
 
@@ -69,7 +69,7 @@ double evaluate(short *solution, uint qubo_size, double **qubo, double *flip_cos
 // @param qubo the QUBO matrix being solved
 // @param[out] flip_cost The change in energy from flipping a bit
 // @returns New energy of the modified solution
-double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_size,
+double evaluate_1bit(double old_energy, uint bit, int8_t *solution, uint qubo_size,
 	double **qubo, double *flip_cost)
 {
 	double result = old_energy + flip_cost[bit];
@@ -118,7 +118,7 @@ double evaluate_1bit(double old_energy, uint bit, short *solution, uint qubo_siz
 // @param[out] flip_cost The change in energy from flipping a bit
 // @param[in,out] t is the number of candidate bit flips performed in the entire algorithm so far
 // @returns New energy of the modified solution
-double local_search_1bit(double energy, short *solution, uint qubo_size,
+double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
 	double **qubo, double *flip_cost, long long *t)
 {
 	int kkstr = 0, kkend = qubo_size, kkinc;
@@ -163,7 +163,7 @@ double local_search_1bit(double energy, short *solution, uint qubo_size,
 // @param[out] flip_cost The change in energy from flipping a bit
 // @param t is the number of candidate bit flips performed in the entire algorithm so far
 // @returns New energy of the modified solution
-double local_search(short *solution, int qubo_size, double **qubo,
+double local_search(int8_t *solution, int qubo_size, double **qubo,
 	double *flip_cost, long long *t)
 {
 	double energy;
@@ -200,7 +200,7 @@ double local_search(short *solution, int qubo_size, double **qubo,
 // @param target Halt if this energy is reached and TargetSet is true
 // @param target_set Do we have a target energy at which to terminate
 // @param index is the order in which to perform candidate bit flips (determined by flip_cost).
-double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
+double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
 	double *flip_cost, long long *t, long long iter_max,
 	int *TabuK, double target, bool target_set, int *index)
 {
@@ -258,7 +258,7 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 
 		for (kk = kkstr; kk != kkend; kk = kk + kkinc) {
 			uint bit = index[kk];
-			if (TabuK[bit] != (short)0 ) continue;
+			if (TabuK[bit] != (int8_t)0 ) continue;
 			{
 				(*t)++;
 				double new_energy = Vlastchange + flip_cost[bit]; //  value if Q[k] bit is flipped
@@ -343,7 +343,7 @@ double tabu_search(short *solution, short *best, uint qubo_size, double **qubo,
 // @param[out] sub_qubo is the returned subQUBO
 // @param[out] sub_solution is a current solution on the subQUBO
 void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
-	double **sub_qubo, short *solution, short *sub_solution)
+	double **sub_qubo, int8_t *solution, int8_t *sub_solution)
 {
 	// clean out the subMatrix
 	for (uint i = 0; i < sub_qubo_size; i++) { // for each column
@@ -414,7 +414,7 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
 // @param t is the number of candidate bit flips performed in the entire algorithm so far
 // @param TabuK is stores the list of tabu moves
 // @param index is the order in which to perform candidate bit flips (determined by Qval).
-double solv_submatrix(short *solution, short *best, uint qubo_size, double **qubo,
+double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
 	double *flip_cost, long long *t, int *TabuK, int *index)
 {
 	long long iter_max = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)qubo_size);
@@ -449,7 +449,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 {
 	double    *flip_cost, energy;
 	int       *TabuK, *index, *index_s, start_;
-	short     *solution, *tabu_solution;
+	int8_t     *solution, *tabu_solution;
 	long      numPartCalls = 0;
 	long long t = 0,  IterMax;
 
@@ -457,19 +457,19 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	t      = 0;
 
 	// Get some memory for the larger val matrix to solve
-	if (GETMEM(solution, short, qubo_size) == NULL) BADMALLOC
-	if (GETMEM(tabu_solution, short, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(solution, int8_t, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(tabu_solution, int8_t, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(flip_cost, double, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
 
 	// get some memory for storing and shorting Q bit vectors
 	const int QLEN=20;
-	short  **Qlist;
+	int8_t  **Qlist;
 	double *QVs;
 	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
 
-	Qlist = (short**)malloc2D(QLEN + 1, qubo_size, sizeof(short));
+	Qlist = (int8_t**)malloc2D(QLEN + 1, qubo_size, sizeof(int8_t));
 	if (GETMEM(QVs, double, QLEN + 1) == NULL) BADMALLOC
 	if (GETMEM(Qcounts, int, QLEN + 1) == NULL) BADMALLOC
 	if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
@@ -483,16 +483,16 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 
 	// get some memory for reduced sub matrices
-	short  *sub_solution, *Qt_s, *Qbest;
+	int8_t  *sub_solution, *Qt_s, *Qbest;
 	double Vbest, *sub_flip_cost, **sub_qubo;
 	int    *TabuK_s, *Icompress;
 
 	sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
 	if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
-	if (GETMEM(Qbest, short, qubo_size) == NULL) BADMALLOC
+	if (GETMEM(Qbest, int8_t, qubo_size) == NULL) BADMALLOC
 	if (GETMEM(TabuK_s, int, SubMatrix_) == NULL) BADMALLOC
-	if (GETMEM(sub_solution, short, SubMatrix_) == NULL) BADMALLOC
-	if (GETMEM(Qt_s, short, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(sub_solution, int8_t, SubMatrix_) == NULL) BADMALLOC
+	if (GETMEM(Qt_s, int8_t, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(sub_flip_cost, double, SubMatrix_) == NULL) BADMALLOC
 	if (GETMEM(index_s, int, SubMatrix_) == NULL) BADMALLOC
 

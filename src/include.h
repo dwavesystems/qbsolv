@@ -44,7 +44,7 @@
 
 // ----------------------- STRUCTs -------------------------------------
 struct nodeStr_ {
-	short n1, n2;
+	int32_t n1, n2;
 	double value;
 };
 
@@ -64,27 +64,27 @@ void  fill_val(double **val, int maxNodes, struct nodeStr_ *nodes, int nNodes, s
 void  print_qubo_format( void);
 void  print_help( void);
 int   DoesFileExist( const char *filename);
-void  print_V_Q_Qval(short *Q, int maxNodes, double **val);
-int   check_corrupt_Q(short *Q, int N);
+void  print_V_Q_Qval(int8_t *Q, int maxNodes, double **val);
+int   check_corrupt_Q(int8_t *Q, int N);
 int   check_corrupt_tabu(int *Q, int N, int nTabu);
-void  set_bit(short *Q, int nbits);
-void  set_bit_index(short *Q, int nbits, int *index);
+void  set_bit(int8_t *Q, int nbits);
+void  set_bit_index(int8_t *Q, int nbits, int *index);
 void  shuffle_index(int *index, int n);
 void  shuffle_indexR(int *index, int n);
-double just_evaluate(short *Q, int maxNodes, double **val);
-void  check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
-void  check_Qval(short *Q, int maxNodes, double **val, double *Qval);
-void  print_output(int maxNodes, short *Q, long numPartCalls, double energy, double seconds);
+double just_evaluate(int8_t *Q, int maxNodes, double **val);
+void  check_row_col_qval(int8_t *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
+void  check_Qval(int8_t *Q, int maxNodes, double **val, double *Qval);
+void  print_output(int maxNodes, int8_t *Q, long numPartCalls, double energy, double seconds);
 void  quick_sort_iterative_index(double arr[], int ind[], int n);
 void  val_index_sort(int *index, double *val, int n);
 void  val_index_sort_ns(int *index, double *val, int n);
 void  index_sort(int *index, int n, short FWD);
-int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits);
-int is_Q_equal( short *Qnow, short *Qcompare, int nbits);
+int manage_Q( int8_t *Qnow, int8_t **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits);
+int is_Q_equal( int8_t *Qnow, int8_t *Qcompare, int nbits);
 void dw_init( );
-void dw_solver( double **val, int maxNodes, short *Q );
+void dw_solver( double **val, int maxNodes, int8_t *Q );
 void dw_close();
-void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size, double **sub_qubo, short *solution, short *sub_solution);
+void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size, double **sub_qubo, int8_t *solution, int8_t *sub_solution);
 #ifdef __cplusplus
 }
 #endif

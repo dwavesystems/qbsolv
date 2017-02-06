@@ -46,7 +46,7 @@ void **malloc2D(uint rows, uint cols, uint size)
 
 // this randomly sets the bit vector to 1 or 0
 //
-void set_bit(short *Q, int nbits)
+void set_bit(int8_t *Q, int nbits)
 {
 	int  i;
 
@@ -57,7 +57,7 @@ void set_bit(short *Q, int nbits)
 
 // this randomly sets the bit vector to 1 or 0, with index
 //
-void set_bit_index(short *Q, int nbits, int *index)
+void set_bit_index(int8_t *Q, int nbits, int *index)
 {
 	int  i;
 
@@ -80,7 +80,7 @@ void shuffle_index(int *index, int n)
 
 //  print out the bit vector as row and column, surrounding the Qubo in triangular form  used in the -w option
 //
-void print_V_Q_Qval(short *Q, int maxNodes, double **val)
+void print_V_Q_Qval(int8_t *Q, int maxNodes, double **val)
 {
 	int    i, j;
 	double fmin;
@@ -127,7 +127,7 @@ void print_V_Q_Qval(short *Q, int maxNodes, double **val)
 
 //  This routine performs the standard output for qbsolv
 //
-void print_output(int maxNodes, short *Q, long numPartCalls, double energy, double seconds)
+void print_output(int maxNodes, int8_t *Q, long numPartCalls, double energy, double seconds)
 {
 	int i;
 
@@ -321,7 +321,7 @@ void index_sort(int *index, int n, short forward)
 }
 
 // compares two vectors, bit by bit
-int is_Q_equal( short *Qnow, short *Qcompare, int nbits)
+int is_Q_equal( int8_t *Qnow, int8_t *Qcompare, int nbits)
 {
 	int i;
 
@@ -333,7 +333,7 @@ int is_Q_equal( short *Qnow, short *Qcompare, int nbits)
 	return true;
 }
 
-int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits)
+int manage_Q( int8_t *Qnow, int8_t **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits)
 {
 	// Qnow is the Q vector being looked at
 	// Qlist is the 2d array of Q vectors being stored

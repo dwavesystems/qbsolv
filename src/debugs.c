@@ -18,7 +18,7 @@
 #include "extern.h"
 
 // this DEBUG function just checks for a corrupt Q bit vector
-int check_corrupt_Q(short *Q, int N)
+int check_corrupt_Q(int8_t *Q, int N)
 {
 	int i;
 	int ret;
@@ -52,7 +52,7 @@ int check_corrupt_tabu(int *T, int N, int nTabu)
 }
 
 // this DEBUG function evaluates the objective function for a given Q, with no optimizations ( the long way )
-double just_evaluate(short *Q, int maxNodes, double **val)
+double just_evaluate(int8_t *Q, int maxNodes, double **val)
 {
 	int    i, j;
 	double result = 0.0;
@@ -67,7 +67,7 @@ double just_evaluate(short *Q, int maxNodes, double **val)
 
 // this DEBUG function evaluates the validity of the Qval difference vector Qval, and it will abort if there is a problem
 // Qval = the change if a Q bit is flipped
-void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
+void check_row_col_qval(int8_t *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
 {
 	int    i, j;
 	double Cols, Rows, Qvals;
@@ -96,7 +96,7 @@ void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, doub
 }
 
 // this DEBUG function checks the Qval vector
-void check_Qval(short *Q, int maxNodes, double **val, double *Qval)
+void check_Qval(int8_t *Q, int maxNodes, double **val, double *Qval)
 {
 	//  checking the Qval vector
 	double result, just_result;
