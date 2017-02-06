@@ -18,7 +18,7 @@
 
 // read from inFile and parse the qubo file
 
-int        pFound = FALSE;
+int        pFound = false;
 int        lineNm = 0;
 const char s[2] = " "; // TODO: please comment what this variable is for
 int        i, j, k; // standard scratch ints
@@ -53,7 +53,7 @@ int read_qubo(const char *inFileName, FILE *inFile)
 						BADMALLOC
 					}
 				}
-				pFound = TRUE;
+				pFound = true;
 			} else {
 				continue; // not a comment line not a p line, so unknown, so skip it
 			}

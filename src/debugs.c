@@ -23,12 +23,12 @@ int check_corrupt_Q(short *Q, int N)
 	int i;
 	int ret;
 
-	ret = FALSE;
+	ret = false;
 	for (i = 0; i < N; i++) {
 		if (Q[i] / 2 != 0 ) {  // this is not a 1 or zero
 			printf("Q not 1 or zero , Q %d i %d\n", Q[i], i);
 			exit(9);
-			ret = TRUE;
+			ret = true;
 		}
 	}
 	return ret;
@@ -40,12 +40,12 @@ int check_corrupt_tabu(int *T, int N, int nTabu)
 	int i;
 	int ret;
 
-	ret = FALSE;
+	ret = false;
 	for (i = 0; i < N; i++) {
 		if ((T[i] > nTabu) | (T[i] < 0) ) {  // this is not out of Range
 			printf("Tabu is not in Range , Tabu[%d] = %d\n", i, T[i]);
 			exit(9);
-			ret = TRUE;
+			ret = true;
 		}
 	}
 	return ret;
@@ -96,7 +96,7 @@ void check_row_col_qval(short *Q, int maxNodes, double **val, double *Qval, doub
 }
 
 // this DEBUG function checks the Qval vector
-void check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col)
+void check_Qval(short *Q, int maxNodes, double **val, double *Qval)
 {
 	//  checking the Qval vector
 	double result, just_result;
@@ -105,7 +105,7 @@ void check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row,
 	check_corrupt_Q(Q, maxNodes);
 	result = just_evaluate(Q, maxNodes, val);
 	check_corrupt_Q(Q, maxNodes);
-	int fail = FALSE;
+	int fail = false;
 	for (i = 0; i < maxNodes; i++) {
 		Q[i] = 1 - Q[i];
 		just_result = just_evaluate(Q, maxNodes, val);
@@ -114,7 +114,7 @@ void check_Qval(short *Q, int maxNodes, double **val, double *Qval, double *Row,
 			DL;
 			printf("Qval failure i=%d, just_result=%.10e, Qval + result = %.10e,Qval[i]= %.10e ,Q=%d\n", \
 			       i, just_result, result + Qval[i], Qval[i], Q[i]);
-			fail = TRUE;
+			fail = true;
 		}
 		Q[i] = 1 - Q[i];
 	}

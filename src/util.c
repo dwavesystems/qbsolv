@@ -41,7 +41,7 @@ void **malloc2D(uint rows, uint cols, uint size)
 		big_array[i] = ptr;
 		ptr         += space;
 	}
-	return (void*)big_array;
+	return (void**)big_array;
 }
 
 // this randomly sets the bit vector to 1 or 0
@@ -250,10 +250,10 @@ int is_index_sorted(double data[], int index[], int size)
 
 	for (i = 0; i < (size - 1); i++) {
 		if (data[index[i]] < data[index[i + 1]]) {
-			return FALSE;
+			return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 //
@@ -327,10 +327,10 @@ int is_Q_equal( short *Qnow, short *Qcompare, int nbits)
 
 	for (i = 0; i < nbits; i++) {
 		if ( Qnow[i] != Qcompare[i] ) {
-			return FALSE;
+			return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 int manage_Q( short *Qnow, short **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits)
