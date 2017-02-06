@@ -120,7 +120,7 @@ void check_Qval(int8_t *Q, int maxNodes, double **val, double *Qval)
 	}
 	if ( fail ) {
 
-		print_V_Q_Qval(Q, maxNodes, val);
+		print_solution_and_qubo(Q, maxNodes, val);
 		exit(9);
 	}
 }

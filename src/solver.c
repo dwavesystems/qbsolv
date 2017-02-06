@@ -507,7 +507,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	const int subMatrix    = SubMatrix_;
 	const int l_max        = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
 
-	set_bit(tabu_solution, qubo_size);
+	randomize_solution(tabu_solution, qubo_size);
 	for (int i = 0; i < qubo_size; i++) {
 		index[i]    = i;   // initial index to 0,1,2,...qubo_size
 		TabuK[i]    = 0;   // initial TabuK to nothing tabu
@@ -538,7 +538,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 	// save best result
 	Vbest = energy;
-	NU    = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
+	NU    = manage_solutions(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
 	for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 	val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
 	if ( Verbose_ > 0 ) {
@@ -584,7 +584,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		// begin submatrix passes
 		if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
 			// reset completely
-			set_bit(solution, qubo_size);
+			randomize_solution(solution, qubo_size);
 			for (int i = 0; i < qubo_size; i++) {
 				TabuK[i] = 0;
 			}
@@ -633,7 +633,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 			// submatrix search did not produce any new values, so randomize those bits
 			if (!change) {
-				set_bit_index(solution, l, index );
+				randomize_solution_by_index(solution, l, index );
 				if (Verbose_ > 3) {
 					printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
 				}
@@ -657,7 +657,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign, t);
 		}
 
-		NU = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
+		NU = manage_solutions(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
 		int repeats;
 		repeats = NU % 10;
 		NU      = NU - repeats;
@@ -674,7 +674,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 			}
 		} else if ( NU == 30 || NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
-			if (is_Q_equal(solution, Qbest, qubo_size)) {
+			if (is_array_equal(solution, Qbest, qubo_size)) {
 				NoProgress++;
 			} else {
 				for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
@@ -717,7 +717,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 	// all done print results if needed and free allocated arrays
 	if (WriteMatrix_)
-		print_V_Q_Qval(solution, qubo_size, qubo);
+		print_solution_and_qubo(solution, qubo_size, qubo);
 
 	if ( Verbose_ == 0 )
 		print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
