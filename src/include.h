@@ -79,7 +79,8 @@ void  quick_sort_iterative_index(double arr[], int ind[], int n);
 void  val_index_sort(int *index, double *val, int n);
 void  val_index_sort_ns(int *index, double *val, int n);
 void  index_sort(int *index, int n, short FWD);
-int manage_solutions( int8_t *Qnow, int8_t **Qlist, double Vnow, double *QVs, int *Qcounts, int *Qindex, int nMax, int nbits);
+int manage_solutions( int8_t *new_solution, int8_t **solution_list, double new_energy,
+	double *QVs, int *solution_counts, int *Qindex, int nMax, int nbits);
 bool is_array_equal( int8_t *solution_now, int8_t *solution_other, int nbits);
 void dw_init( );
 void dw_solver( double **val, int maxNodes, int8_t *Q );
