@@ -279,7 +279,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 					}
 					howFar = ((double)(iter_max - (*t)) / (double)thisIter);
 					if (Verbose_ > 3) {
-						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", best_energy * sign, last_bit, (*t), howFar, brk );
+						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n",
+							best_energy * sign, last_bit, (*t), howFar, brk );
 					}
 					if ( howFar < 0.80  && numIncrease > 0 ) {
 						if (Verbose_ > 3) {
@@ -716,9 +717,9 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	if ( Verbose_ == 0 )
 		print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
-    free(solution); free(tabu_solution); free(flip_cost);
+	free(solution); free(tabu_solution); free(flip_cost);
 	free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
 	free(Qbest); free(TabuK_s); free(sub_solution); free(Qt_s); free(qubo); free(sub_qubo);
-    free(sub_flip_cost); free (index_s); free(solution_list);
+	free(sub_flip_cost); free (index_s); free(solution_list);
 	return;
 }

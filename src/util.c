@@ -45,7 +45,7 @@ void **malloc2D(uint rows, uint cols, uint size)
 void randomize_solution(int8_t *solution, int nbits)
 {
 	for (int i = 0; i < nbits; i++) {
-        solution[i] = rand() % 2;
+		solution[i] = rand() % 2;
 	}
 }
 
@@ -53,7 +53,7 @@ void randomize_solution(int8_t *solution, int nbits)
 void randomize_solution_by_index(int8_t *solution, int nbits, int *indices)
 {
 	for (int i = 0; i < nbits; i++) {
-        solution[indices[i]] = rand() % 2;
+		solution[indices[i]] = rand() % 2;
 	}
 }
 
@@ -306,7 +306,7 @@ int compare_intsDes( const void *p, const void *q)
 	int y = *(const int*)q;
 
 	if (x < y) return 1;       // return -1 if you want ascending, 1 if you want descending order.
-	else if (x > y) return -1;   // return 1 if you want ascending, -1 if you want descending order.
+	else if (x > y) return -1; // return 1 if you want ascending, -1 if you want descending order.
 	return 0;
 }
 
