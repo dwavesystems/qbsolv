@@ -28,10 +28,10 @@ TEST(clamp_function, small_system){
 
     // selection variables
     int selectionMapping[1];
-    short globalState[2];
+    int8_t globalState[2];
 
     // output variables
-    short selectionState[1];
+    int8_t selectionState[1];
     double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
@@ -148,12 +148,12 @@ TEST(clamp_function, offset_small_system){
 
     // selection variables
     int selectionMapping[1];
-    short globalState[4];
+    int8_t globalState[4];
     globalState[0] = 0;
     globalState[1] = 0;
 
     // output variables
-    short selectionState[1];
+    int8_t selectionState[1];
     double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
@@ -280,10 +280,10 @@ TEST(clamp_function, five_system){
 
     // selection variables
     int selectionMapping[2];
-    short globalState[5];
+    int8_t globalState[5];
 
     // output variables
-    short selectionState[2];
+    int8_t selectionState[2];
     double ** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
 
     // -- part 1
@@ -488,10 +488,10 @@ TEST(clamp_function, non_contiguous_subsection){
 
     // selection variables
     int selectionMapping[2];
-    short globalState[5];
+    int8_t globalState[5];
 
     // output variables
-    short selectionState[2];
+    int8_t selectionState[2];
     double ** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
 
     // -- part 8

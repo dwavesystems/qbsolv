@@ -177,7 +177,7 @@ int  main( int argc,  char *argv[])
 	}
 
 	val = (double**)malloc2D(maxNodes_, maxNodes_, sizeof(double) ); // create a 2d double array
-	fill_val(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
+	fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
 
 	if ( UseDwave_ ) {
 		dw_init();

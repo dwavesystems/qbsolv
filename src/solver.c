@@ -279,7 +279,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 					}
 					howFar = ((double)(iter_max - (*t)) / (double)thisIter);
 					if (Verbose_ > 3) {
-						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n", best_energy * sign, last_bit, (*t), howFar, brk );
+						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n",
+							best_energy * sign, last_bit, (*t), howFar, brk );
 					}
 					if ( howFar < 0.80  && numIncrease > 0 ) {
 						if (Verbose_ > 3) {
@@ -449,7 +450,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 {
 	double    *flip_cost, energy;
 	int       *TabuK, *index, *index_s, start_;
-	int8_t     *solution, *tabu_solution;
+	int8_t    *solution, *tabu_solution;
 	long      numPartCalls = 0;
 	int64_t t = 0,  IterMax;
 
@@ -465,26 +466,26 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 	// get some memory for storing and shorting Q bit vectors
 	const int QLEN=20;
-	int8_t  **Qlist;
-	double *QVs;
-	int    *Qcounts, *Qindex, NU = 0; // NU = current count of items
+	int8_t  **solution_list;
+	double *energy_list;
+	int    *solution_counts, *Qindex, NU = 0; // NU = current count of items
 
-	Qlist = (int8_t**)malloc2D(QLEN + 1, qubo_size, sizeof(int8_t));
-	if (GETMEM(QVs, double, QLEN + 1) == NULL) BADMALLOC
-	if (GETMEM(Qcounts, int, QLEN + 1) == NULL) BADMALLOC
+	solution_list = (int8_t**)malloc2D(QLEN + 1, qubo_size, sizeof(int8_t));
+	if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
+	if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
 	if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
 
-	for (uint i = 0; i < QLEN + 1; i++) {
-		QVs[i]     = BIGNEGFP;
-		Qcounts[i] = 0;
+	for (int i = 0; i < QLEN + 1; i++) {
+		energy_list[i]     = BIGNEGFP;
+		solution_counts[i] = 0;
 		for (int j = 0; j < qubo_size; j++ ) {
-			Qlist[i][j] = 0;
+			solution_list[i][j] = 0;
 		}
 	}
 
 	// get some memory for reduced sub matrices
 	int8_t  *sub_solution, *Qt_s, *Qbest;
-	double Vbest, *sub_flip_cost, **sub_qubo;
+	double best_energy, *sub_flip_cost, **sub_qubo;
 	int    *TabuK_s, *Icompress;
 
 	sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
@@ -507,7 +508,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	const int subMatrix    = SubMatrix_;
 	const int l_max        = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
 
-	set_bit(tabu_solution, qubo_size);
+	randomize_solution(tabu_solution, qubo_size);
 	for (int i = 0; i < qubo_size; i++) {
 		index[i]    = i;   // initial index to 0,1,2,...qubo_size
 		TabuK[i]    = 0;   // initial TabuK to nothing tabu
@@ -515,18 +516,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 	for (int i = 0; i < SubMatrix_; i++) {
 		index_s[i] = i; // initial index to 0,1,2,...SubMartix_
-		sub_solution[i]     = 0;
+		sub_solution[i] = 0;
 		Qt_s[i]    = tabu_solution[i];
 	}
 
 	int    l = 0, DwaveQubo = 0;
-	double sign;
-
-	if ( findMax_ ) {
-		sign = 1.0;
-	} else {
-		sign = -1.0;
-	}
+	double sign = findMax_ ? 1.0 : -1.0;
 
 	// run initial Tabu Search to establish backbone
 	IterMax = t + (int64_t)MAX((int64_t)400, InitialTabuPass_factor * (int64_t)qubo_size);
@@ -537,23 +532,23 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		&t, IterMax, TabuK, Target_, TargetSet_, index);
 
 	// save best result
-	Vbest = energy;
-	NU    = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
+	best_energy = energy;
+	NU    = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size);
 	for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 	val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
 	if ( Verbose_ > 0 ) {
-		print_output(qubo_size, solution, numPartCalls, Vbest * sign,
+		print_output(qubo_size, solution, numPartCalls, best_energy * sign,
 			(double)(clock() - start_) / CLOCKS_PER_SEC);
 	}
 	if (Verbose_ > 1) {
-		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", Vbest * sign, t);
+		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", best_energy * sign, t);
 	}
 
 	// starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
 	short RepeatPass = 0, NoProgress = 0;
 	short ContinueWhile = false;
 	if ( TargetSet_ ) {
-		if ( Vbest >= (sign * Target_) ) {
+		if ( best_energy >= (sign * Target_) ) {
 			ContinueWhile = false;
 		} else {
 			ContinueWhile = true;
@@ -584,7 +579,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		// begin submatrix passes
 		if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
 			// reset completely
-			set_bit(solution, qubo_size);
+			randomize_solution(solution, qubo_size);
 			for (int i = 0; i < qubo_size; i++) {
 				TabuK[i] = 0;
 			}
@@ -633,7 +628,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 			// submatrix search did not produce any new values, so randomize those bits
 			if (!change) {
-				set_bit_index(solution, l, index );
+				randomize_solution_by_index(solution, l, index );
 				if (Verbose_ > 3) {
 					printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
 				}
@@ -657,12 +652,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign, t);
 		}
 
-		NU = manage_Q(solution, Qlist, energy, QVs, Qcounts, Qindex, QLEN, qubo_size);
+		NU = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size);
 		int repeats;
 		repeats = NU % 10;
 		NU      = NU - repeats;
 		if ( NU == 10 ) { // better solution
-			Vbest = energy;
+			best_energy = energy;
 			for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 			RepeatPass = 0;
 
@@ -670,16 +665,16 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 				DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);
 			}
 			if ( Verbose_ > 0 ) {
-				print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
+				print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 			}
 		} else if ( NU == 30 || NU == 20  ) { // equal solution, but how it is different?
 			RepeatPass++;
-			if (is_Q_equal(solution, Qbest, qubo_size)) {
+			if (is_array_equal(solution, Qbest, qubo_size)) {
 				NoProgress++;
 			} else {
 				for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 				if ( repeats == 1 && Verbose_ > 0) { // we haven't printed this out before
-					print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
+					print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 				}
 			}
 		} else { // not as good as our best so far
@@ -691,12 +686,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		}
 
 		if ( Verbose_ > 1) {
-			DLT; printf("V Best outer loop =%lf iterations %lld\n", Vbest * sign, t);
+			DLT; printf("V Best outer loop =%lf iterations %lld\n", best_energy * sign, t);
 		}
 
 		// check on, if to continue the outer loop
 		if ( TargetSet_ ) {
-			if ( Vbest >= (sign * Target_) ) {
+			if ( best_energy >= (sign * Target_) ) {
 				ContinueWhile = false;
 			} else {
 				ContinueWhile = true;
@@ -717,14 +712,14 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
 	// all done print results if needed and free allocated arrays
 	if (WriteMatrix_)
-		print_V_Q_Qval(solution, qubo_size, qubo);
+		print_solution_and_qubo(solution, qubo_size, qubo);
 
 	if ( Verbose_ == 0 )
-		print_output(qubo_size, Qbest, numPartCalls, Vbest * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
+		print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, (double)(clock() - start_) / CLOCKS_PER_SEC);
 
-    free(solution); free(tabu_solution); free(flip_cost);
-	free(index); free(TabuK); free(QVs); free(Qcounts); free(Qindex); free(Icompress);
+	free(solution); free(tabu_solution); free(flip_cost);
+	free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
 	free(Qbest); free(TabuK_s); free(sub_solution); free(Qt_s); free(qubo); free(sub_qubo);
-    free(sub_flip_cost); free (index_s); free(Qlist);
+	free(sub_flip_cost); free (index_s); free(solution_list);
 	return;
 }
