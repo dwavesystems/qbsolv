@@ -87,11 +87,11 @@ int read_qubo(const char *inFileName, FILE *inFile)
 
 	int errors = 0;
 	if ( icoupler != nCouplers_ ) {
-		fprintf(stderr, " Number of couplers too small couplers = %d, Ncouplers =%d\n", icoupler, nCouplers_);
+		fprintf(stderr, " Number of couplers too small: couplers = %d, Ncouplers =%d\n", icoupler, nCouplers_);
 		errors++;
 	}
 	if ( inode != nNodes_ ) {
-		fprintf(stderr, " Number of couplers too small nodes = %d, Nnodes =%d\n", inode, nNodes_);
+		fprintf(stderr, " Number of nodes too small: nodes = %d, Nnodes =%d\n", inode, nNodes_);
 		errors++;
 	}
 	if ( errors > 0 ) {
