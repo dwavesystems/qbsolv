@@ -194,18 +194,12 @@ int partition(double val[], int arr[], int l, int h)
 /* val[] --> Array to be sorted,
    arr[] --> index to point to order from largest to smallest
    n     --> number of elements in arrays */
-void quick_sort_iterative_index(double val[], int arr[], int n)
+void quick_sort_iterative_index(double val[], int arr[], int n, int *stack)
 {
 	int h, l;
 
 	h = n - 1; // last index
 	l = 0; // first index
-	int *stack; // temp space = n + 1
-	// Create an auxiliary stack
-	//int stack[ h - l + 1 ];
-	if ((GETMEM(stack, int, h - l + 1)) == NULL) {
-		BADMALLOC
-	}
 
 	// initialize top of stack
 	int top = -1;
@@ -238,7 +232,6 @@ void quick_sort_iterative_index(double val[], int arr[], int n)
 			stack[ ++top ] = h;
 		}
 	}
-	free(stack);
 }
 
 // routine to check the sort on index'ed sort
@@ -264,10 +257,16 @@ int is_index_sorted(double data[], int index[], int size)
 void val_index_sort(int *index, double *val, int n)
 {
 	int i;
+	int *stack; // temp space = n + 1
+	// Create an auxiliary stack
+	if ((GETMEM(stack, int, n + 1)) == NULL) {
+		BADMALLOC
+	}
 
 	for (i = 0; i < n; i++) index[i] = i;
 	shuffle_index(index, n);
-	quick_sort_iterative_index(val, index, n);
+	quick_sort_iterative_index(val, index, n, stack);
+	free(stack);
 	// check code:
 	// for (i=0;i<n-1;i++) { if (val[index[i]]<val[index[i+1]]) { DL; exit(9); } }
 	return;
@@ -276,10 +275,16 @@ void val_index_sort(int *index, double *val, int n)
 void val_index_sort_ns(int *index, double *val, int n)
 {
 	int i;
+	int *stack; // temp space = n + 1
+	// Create an auxiliary stack
+	if ((GETMEM(stack, int, n + 1)) == NULL) {
+		BADMALLOC
+	}
 
 	// Assure that the index array covers val[] completely
 	for (i = 0; i < n; i++) index[i] = i;
-	quick_sort_iterative_index(val, index, n);
+	quick_sort_iterative_index(val, index, n, stack);
+	free(stack);
 	// check code:
 	// for (i=0;i<n-1;i++) { if (val[index[i]]<val[index[i+1]]) { DL; exit(9); } }
 	return;

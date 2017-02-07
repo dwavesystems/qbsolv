@@ -62,7 +62,7 @@ int  main( int argc,  char *argv[])
 	TargetSet_   = false;
 	Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
 	Tlist_       = -1; // tabu list length  -1 signials go with defaults
-	long seed       = 17932241798878;
+	int64_t seed       = 17932241798878;
 	int  errorCount = 0;
 
 	static struct option longopts[] = {
