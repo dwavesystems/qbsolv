@@ -119,7 +119,7 @@ double evaluate_1bit(double old_energy, uint bit, int8_t *solution, uint qubo_si
 // @param[in,out] t is the number of candidate bit flips performed in the entire algorithm so far
 // @returns New energy of the modified solution
 double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
-	double **qubo, double *flip_cost, long long *t)
+	double **qubo, double *flip_cost, int64_t *t)
 {
 	int kkstr = 0, kkend = qubo_size, kkinc;
 	int index[qubo_size];
@@ -164,7 +164,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
 // @param t is the number of candidate bit flips performed in the entire algorithm so far
 // @returns New energy of the modified solution
 double local_search(int8_t *solution, int qubo_size, double **qubo,
-	double *flip_cost, long long *t)
+	double *flip_cost, int64_t *t)
 {
 	double energy;
 
@@ -201,7 +201,7 @@ double local_search(int8_t *solution, int qubo_size, double **qubo,
 // @param target_set Do we have a target energy at which to terminate
 // @param index is the order in which to perform candidate bit flips (determined by flip_cost).
 double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
-	double *flip_cost, long long *t, long long iter_max,
+	double *flip_cost, int64_t *t, int64_t iter_max,
 	int *TabuK, double target, bool target_set, int *index)
 {
 
@@ -211,8 +211,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 	double    Vlastchange; // working solution variable
 	int       nTabu;
 	double    sign;
-	long long thisIter;
-	long long increaseIter;
+	int64_t thisIter;
+	int64_t increaseIter;
 	int       numIncrease = 900;
 	double    howFar;
 
@@ -415,9 +415,9 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
 // @param TabuK is stores the list of tabu moves
 // @param index is the order in which to perform candidate bit flips (determined by Qval).
 double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
-	double *flip_cost, long long *t, int *TabuK, int *index)
+	double *flip_cost, int64_t *t, int *TabuK, int *index)
 {
-	long long iter_max = (*t) + (long long)MAX((long long)3000, (long long)20000 * (long long)qubo_size);
+	int64_t iter_max = (*t) + (int64_t)MAX((int64_t)3000, (int64_t)20000 * (int64_t)qubo_size);
 
 	return tabu_search(solution, best, qubo_size, qubo, flip_cost,
 		t, iter_max, TabuK, Target_, false, index);
@@ -451,7 +451,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	int       *TabuK, *index, *index_s, start_;
 	int8_t     *solution, *tabu_solution;
 	long      numPartCalls = 0;
-	long long t = 0,  IterMax;
+	int64_t t = 0,  IterMax;
 
 	start_ = clock();
 	t      = 0;
@@ -500,8 +500,8 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	//
 	const int Progress_check = 12;                 // number of non progresive passes thru main loop before reset
 	const float SubMatrix_span = 0.214; // percent of the total size will be covered by the subMatrix pass
-	const long long InitialTabuPass_factor=6500; // initial pass factor for tabu iterations
-	const long long TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
+	const int64_t InitialTabuPass_factor=6500; // initial pass factor for tabu iterations
+	const int64_t TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
 
 	const int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * qubo_size);
 	const int subMatrix    = SubMatrix_;
@@ -529,7 +529,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	}
 
 	// run initial Tabu Search to establish backbone
-	IterMax = t + (long long)MAX((long long)400, InitialTabuPass_factor * (long long)qubo_size);
+	IterMax = t + (int64_t)MAX((int64_t)400, InitialTabuPass_factor * (int64_t)qubo_size);
 	if (Verbose_ > 2) {
 		DLT; printf(" Starting Full initial Tabu\n");
 	}
@@ -647,7 +647,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		}
 		// FULL TABU run here
 
-		IterMax = t + TabuPass_factor * (long long)qubo_size;
+		IterMax = t + TabuPass_factor * (int64_t)qubo_size;
 		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 		energy = tabu_search(solution, tabu_solution, qubo_size, qubo, flip_cost,
 			&t, IterMax, TabuK, Target_, TargetSet_ ,index);
