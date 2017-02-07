@@ -280,11 +280,12 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 					howFar = ((double)(iter_max - (*t)) / (double)thisIter);
 					if (Verbose_ > 3) {
 						printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n",
-							best_energy * sign, last_bit, (*t), howFar, brk );
+							best_energy * sign, last_bit,(long long) (*t), howFar, brk );
 					}
 					if ( howFar < 0.80  && numIncrease > 0 ) {
 						if (Verbose_ > 3) {
-							printf("Increase Itermax %lld, %lld\n", iter_max, iter_max + increaseIter);
+							printf("Increase Itermax %lld, %lld\n", (long long) iter_max, 
+                                    (long long) (iter_max + increaseIter));
 						}
 						iter_max  += increaseIter;
 						thisIter += increaseIter;
@@ -541,7 +542,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 			(double)(clock() - start_) / CLOCKS_PER_SEC);
 	}
 	if (Verbose_ > 1) {
-		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", best_energy * sign, t);
+		DLT; printf(" V Starting outer loop =%lf iterations %lld\n", best_energy * sign, (long long) t);
 	}
 
 	// starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
@@ -649,7 +650,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 
 		if ( Verbose_ > 1 ) {
-			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign, t);
+			DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign,(long long) t);
 		}
 
 		NU = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size);
@@ -686,7 +687,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 		}
 
 		if ( Verbose_ > 1) {
-			DLT; printf("V Best outer loop =%lf iterations %lld\n", best_energy * sign, t);
+			DLT; printf("V Best outer loop =%lf iterations %lld\n", best_energy * sign,(long long) t);
 		}
 
 		// check on, if to continue the outer loop
