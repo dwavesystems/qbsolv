@@ -476,7 +476,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 	if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
 	if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
 
-	for (int i = 0; i < QLEN + 1; i++) {
+	for (int i = 0; i < QLEN ; i++) {
 		energy_list[i]     = BIGNEGFP;
 		solution_counts[i] = 0;
 		for (int j = 0; j < qubo_size; j++ ) {
