@@ -1,5 +1,5 @@
 /*
- Copyright 2016 D-Wave Systems Inc.
+ Copyright 2017 D-Wave Systems Inc.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 FILE            *outFile_;
 int             maxNodes_, nCouplers_, nNodes_, findMax_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
-char            *outFileNm_, pgmName_[16];
+char            *outFileNm_, pgmName_[16], algo_[4];
 double          **val;
 double          Target_, Time_;
 struct nodeStr_ *nodes_;
@@ -57,6 +57,8 @@ int  main( int argc,  char *argv[])
 	Verbose_     = 0;
 	int nRepeats = defaultRepeats;
 	SubMatrix_   = 46; // submatrix default
+	strcpy(pgmName_, "o"); //algorithm default
+
 	WriteMatrix_ = false;
 	outFile_     = stdout;
 	TargetSet_   = false;
@@ -80,14 +82,17 @@ int  main( int argc,  char *argv[])
 		{ "quboFormat",     no_argument,       NULL, 'q'},
 		{ "tlist",          required_argument, NULL, 'l'},
 		{ "seed",           required_argument, NULL, 'r'},
+		{ "Algo",           required_argument, NULL, 'a'},
 		{ NULL,             no_argument,       NULL, 0}
 	};
 
 	int  opt, option_index = 0;
 	char *chx; // used as exit ptr in strto(x) functions
 
-	while ((opt = getopt_long(argc, argv, "Hhi:o:v:VS:T:l:n:wmo:t:qr:", longopts, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "Hhi:o:v:VS:T:l:n:wmo:t:qr:o:", longopts, &option_index)) != -1) {
 		switch (opt) {
+		case 'a':
+			break;
 		case 'H':
 		case 'h':
 			print_help();
@@ -199,7 +204,7 @@ int  main( int argc,  char *argv[])
 void  print_help(void)
 {
 	printf("\n\t%s -i infile [-o outfile] [-m] [-T] [-n] [-S SubMatrix] [-w] \n"
-	       "\t\t[-h] [-v verbosityLevel] [-V] [-q] [-t seconds]\n"
+	       "\t\t[-h] [-a] [-v verbosityLevel] [-V] [-q] [-t seconds]\n"
 	       "\nDESCRIPTION \n"
 	       "\tqbsolv executes a quadratic unconstrained binary optimization \n"
 	       "\t(QUBO) problem represented in a file, providing bit-vector \n"
@@ -216,6 +221,8 @@ void  print_help(void)
 	       "\t\tThis optional argument denotes the name of the file to \n"
 	       "\t\twhich the output will be written.  The default is the \n"
 	       "\t\tstandard output. \n"
+	       "\t-a algo \n"
+           "\t\t algorithm choice  default is o for original\n"
 	       "\t-m \n"
 	       "\t\tThis optional argument denotes to find the maximum instead \n"
 	       "\t\tof the minimum. \n"
