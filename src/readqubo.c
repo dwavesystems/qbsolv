@@ -69,6 +69,12 @@ int read_qubo(const char *inFileName, FILE *inFile)
 					nodes_[inode].n2      = j;
 					nodes_[inode++].value = f;
 				}else {
+                    if ( i > j ) {
+						fprintf(stderr, " couplers first value must be > second value; at line %d:  %s"
+                              " coordinates  %d > %d \n", lineNm, line, i, j );
+						exit(9);
+					}
+
 					if ( icoupler > nCouplers_ ) {
 						fprintf(stderr, " Number of couplers exceeded at line %d %s,\n Couplers= %d\n", lineNm, line, icoupler);
 						exit(9);
