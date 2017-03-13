@@ -97,6 +97,8 @@ license (https://creativecommons.org/licenses/by-sa/3.0/legalcode).
             fout.write( line[-1] )
             fout.write("\n")
 
+    fout.write(lines[-4])
+    fout.write("\n")
     fout.write(lines[-3])
     fout.write("\n")
     fout.write(lines[-2])

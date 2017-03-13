@@ -1,8 +1,7 @@
 # Author Gregg Lind
 # License:  Public Domain.    I would love to hear about any projects you use if it for though!
 # 
-AK
-HI
+AK,HI
 AL,MS,TN,GA,FL
 AR,MO,TN,MS,LA,TX,OK
 AZ,CA,NV,UT,CO,NM
@@ -12,6 +11,7 @@ CT,NY,MA,RI
 DE,MD,PA,NJ
 FL,AL,GA
 GA,FL,AL,TN,NC,SC
+HI,AK
 IA,MN,WI,IL,MO,NE,SD
 ID,MT,WY,UT,NV,OR,WA
 IL,IN,KY,MO,IA,WI
