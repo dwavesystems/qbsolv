@@ -225,7 +225,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 	if (Tlist_ != -1) {
 		nTabu = MIN(Tlist_, (int)qubo_size + 1 ); // tabu use set tenure
 	} else {
-		if      (qubo_size < 100)  nTabu = 10;
+		if      (qubo_size <  20)  nTabu = 5;
+        else if (qubo_size < 100)  nTabu = 10;
 		else if (qubo_size < 250)  nTabu = 12;
 		else if (qubo_size < 500)  nTabu = 13;
 		else if (qubo_size < 1000) nTabu = 21;
