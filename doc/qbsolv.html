@@ -1,155 +1,42 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
-	<TITLE></TITLE>
-	<meta name="keywords" content="man qbsolv,qbsolv man page" />
-	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.2  (Unix)">
-	<META NAME="AUTHOR" CONTENT="ddahl">
-	<META NAME="CREATED" CONTENT="20160114;19480000">
-	<META NAME="CHANGEDBY" CONTENT="Steve Reinhardt">
-	<META NAME="CHANGED" CONTENT="20161109;23270000">
-	<META NAME="AppVersion" CONTENT="15.0000">
-	<META NAME="DocSecurity" CONTENT="0">
-	<META NAME="HyperlinksChanged" CONTENT="false">
-	<META NAME="LinksUpToDate" CONTENT="false">
-	<META NAME="ScaleCrop" CONTENT="false">
-	<META NAME="ShareDoc" CONTENT="false">
-	<STYLE TYPE="text/css">
-	<!--
-		@page { margin: 1in }
-		P { margin-bottom: 0.08in; direction: ltr; color: #000000; widows: 2; orphans: 2 }
-		A:link { color: #0000ff; so-language: zxx }
-	-->
-	</STYLE>
-</HEAD>
-<BODY LANG="en-CA" TEXT="#000000" LINK="#0000ff" DIR="LTR">
-<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif">QBSOLV(1)
-                 User Commands                     QBSOLV(1)</FONT></P>
-<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>NAME</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-– minimize the objective function represented by a QUBO </FONT>
-</P>
-<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>SYNOPSIS</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in; line-height: 100%">
-<FONT FACE="Courier New, serif"><B>qbsolv </B></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><B>-i
-&lt;input_file.qubo&gt; [-o &lt;output_file&gt; [-w]] [-m] [-T
-&lt;target_value</B></SPAN></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><I><B>&gt;</B></I></SPAN></FONT><FONT FACE="Courier New, serif"><SPAN LANG="en-US"><B>]
-[-t &lt;num_seconds&gt;] [-n &lt;num_repeats&gt;] [-S
-&lt;subproblem_size&gt;] [-v &lt;verbosity_level&gt;] [-q] [-V] [-h]</B></SPAN></FONT></P>
-<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>DESCRIPTION</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-executes the quadratic unconstrained binary optimization (QUBO)
-problem in the specified file. It provides bit-vector results that
-minimize or, optionally, maximize the value of the objective function
-represented by the QUBO problem.  </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-typically executes in a hybrid fashion on a classical CPU and a
-quantum processing unit (QPU).</FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">The
-problem must be in the QUBO(5) file format and is not limited to the
-size (number of variables), connectivity pattern, or numerical
-precision of the D-Wave system on which it will be executed.</FONT></P>
-<P STYLE="margin-bottom: 0.14in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>OPTIONS</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in"><FONT FACE="Courier New, serif"><B>-i
-&lt;input_file.qubo&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Name
-of the file (relative or absolute pathname) containing the input
-QUBO.  The “.qubo” extension is by convention.  </FONT>
-</P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-o
-&lt;output_file&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
- Name of the file (relative or absolute pathname) to which qbsolv
-will write results.  If no file is specified, results are written to
-standard output.</FONT></P>
-<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-w</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional,
-in which case </FONT><FONT FACE="Courier New, serif"><B>-o</B></FONT><FONT FACE="Courier New, serif">
-must also be specified. Prints the input QUBO matrix and the output
-result in .csv format to</FONT><FONT FACE="Courier New, serif"><B>
-</B></FONT><FONT FACE="Courier New, serif">the specified output file.</FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-m</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
- Specifies that </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-is to return the maximum value of the objective function instead of
-the minimum (default).</FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-T
-&lt;target_value&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
-Target value of the objective function, expressed as an integer or
-floating-point number.  When target value is reached, </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-stops the optimization process.  Usually beneficial to specify only
-when the optimal value of the objective function has been
-analytically derived.</FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-t
-&lt;num_seconds&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif">Optional.
- Number of seconds of elapsed CPU time consumed by the classically
-executing portion of </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-after which it stops the optimization process. The value may be
-specified as an integer or floating-point value. The elapsed CPU time
-is only checked after completion of the main loop, so the actual stop
-time may be more than the value. If options </FONT><FONT FACE="Courier New, serif"><B>–T</B></FONT><FONT FACE="Courier New, serif">
-or </FONT><FONT FACE="Courier New, serif"><B>–n</B></FONT><FONT FACE="Courier New, serif">
-are also specified, those limits may (depending on their values) stop
-</FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-execution before the timeout is reached. The default value is
-2,592,000.0 seconds (30 days).</FONT></P>
-<P STYLE="margin-left: 0.5in; text-indent: 0.5in; margin-bottom: 0in; line-height: 100%">
-<BR>
-</P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-n
-&lt;num_repeats&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
- Number of times that </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-is to repeat the main loop of the algorithm after a new optimal value
-is found.  This value must be a positive integer. The default value
-is 40.</FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0in"><FONT FACE="Courier New, serif"><B>-S
-&lt;subproblem_size&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
-Size of the subproblems into which </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-is to decompose the QUBO.  Use </FONT><FONT FACE="Courier New, serif"><B>0</B></FONT><FONT FACE="Courier New, serif">
-to allow qbsolv to use the most effective size for the target D-Wave
-system. The default value is 45. Any value greater than zero causes
-</FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-to use its internal classical tabu solver instead of the D-Wave
-system.</FONT></P>
-<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-v
-&lt;verbosity_level&gt;</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
- Level of verbosity of the output. Values are as follows:<BR>- </FONT><FONT FACE="Courier New, serif"><B>0</B></FONT><FONT FACE="Courier New, serif">
-(default) outputs the number of bits in the solution, the solution
-itself, and the energy of the solution.  <BR>- </FONT><FONT FACE="Courier New, serif"><B>1</B></FONT><FONT FACE="Courier New, serif">
-outputs the same information as above for multiple solutions, if
-found. <BR>- </FONT><FONT FACE="Courier New, serif"><B>2</B></FONT><FONT FACE="Courier New, serif">
-outputs more detailed information at each step of the algorithm.  </FONT>
-</P>
-<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-q</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif">Optional.
-Prints the format of an arbitrary QUBO file and exits without running
-the program. </FONT>
-</P>
-<P STYLE="margin-left: 0.5in; text-indent: 0.5in; margin-bottom: 0in; line-height: 100%">
-<BR>
-</P>
-<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-V</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
- Prints the version number of the </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-program and exits without running the program.</FONT></P>
-<P STYLE="text-indent: 0.5in; margin-bottom: 0in; line-height: 100%"><FONT FACE="Courier New, serif"><B>-h</B></FONT></P>
-<P STYLE="margin-left: 1in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Optional.
-Prints the help message for </FONT><FONT FACE="Courier New, serif"><B>qbsolv</B></FONT><FONT FACE="Courier New, serif">
-and exits without running the program.</FONT></P>
-<P STYLE="margin-bottom: 0.07in; line-height: 100%"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>BUGS</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">Report
-any bugs to </FONT><A HREF="mailto:dwsupport@dwavesys.com"><FONT FACE="Courier New, serif">dwsupport@dwavesys.com</FONT></A><FONT FACE="Courier New, serif">.</FONT></P>
-<P STYLE="margin-bottom: 0.07in; line-height: 100%"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>COPYRIGHT</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><FONT FACE="Courier New, serif">©
-2016 D-Wave Systems Inc.</FONT></P>
-<P STYLE="margin-bottom: 0.07in"><FONT FACE="Courier New, serif"><FONT SIZE=4><B>SEE
-ALSO</B></FONT></FONT></P>
-<P STYLE="margin-left: 0.5in; margin-bottom: 0.14in"><A NAME="_GoBack"></A>
-<FONT FACE="Courier New, serif"><B>qubo</B></FONT><FONT FACE="Courier New, serif">(5)</FONT></P>
-</BODY>
-</HTML>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><!--This file was converted to xhtml by LibreOffice - see http://cgit.freedesktop.org/libreoffice/core/tree/filter/source/xslt for the code.--><head profile="http://dublincore.org/documents/dcmi-terms/"><meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8"/><title xml:lang="en-US">- no title specified</title><meta name="DCTERMS.title" content="" xml:lang="en-US"/><meta name="DCTERMS.language" content="en-US" scheme="DCTERMS.RFC4646"/><meta name="DCTERMS.source" content="http://xml.openoffice.org/odf2xhtml"/><meta name="DCTERMS.creator" content="ddahl"/><meta name="DCTERMS.issued" content="2016-01-14T19:48:00" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.modified" content="2017-04-21T09:49:58.703731000" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.provenance" content="" xml:lang="en-US"/><meta name="DCTERMS.subject" content="," xml:lang="en-US"/><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" hreflang="en"/><link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" hreflang="en"/><link rel="schema.DCTYPE" href="http://purl.org/dc/dcmitype/" hreflang="en"/><link rel="schema.DCAM" href="http://purl.org/dc/dcam/" hreflang="en"/><style type="text/css">
+	@page {  }
+	table { border-collapse:collapse; border-spacing:0; empty-cells:show }
+	td, th { vertical-align:top; font-size:12pt;}
+	h1, h2, h3, h4, h5, h6 { clear:both }
+	ol, ul { margin:0; padding:0;}
+	li { list-style: none; margin:0; padding:0;}
+	<!-- "li span.odfLiEnd" - IE 7 issue-->
+	li span. { clear: both; line-height:0; width:0; height:0; margin:0; padding:0; }
+	span.footnodeNumber { padding-right:1em; }
+	span.annotation_style_by_filter { font-size:95%; font-family:Arial; background-color:#fff000;  margin:0; border:0; padding:0;  }
+	* { margin:0;}
+	.P1 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0in; }
+	.P10 { font-size:11pt; line-height:115%; margin-bottom:0in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0in; font-weight:bold; }
+	.P11 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0in; font-weight:bold; }
+	.P12 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P13 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P14 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P15 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P16 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0in; margin-right:0in; text-indent:0.5in; font-weight:bold; }
+	.P17 { font-size:14pt; line-height:115%; margin-bottom:0.0693in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; font-weight:bold; }
+	.P18 { font-size:14pt; line-height:100%; margin-bottom:0.0693in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; font-weight:bold; }
+	.P19 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0in; margin-right:0in; text-indent:0in; font-weight:bold; }
+	.P2 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P3 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; margin-left:1in; margin-right:0in; text-indent:0in; }
+	.P4 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0.5in; }
+	.P5 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; }
+	.P6 { font-size:14pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; font-weight:bold; }
+	.P7 { font-size:14pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; font-weight:bold; }
+	.P8 { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Courier New; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0in; }
+	.P9 { font-size:11pt; line-height:100%; margin-bottom:0.139in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; margin-left:0.5in; margin-right:0in; text-indent:0in; }
+	.Internet_20_link { color:#0000ff; text-decoration:underline; }
+	.T1 { font-family:Courier New; }
+	.T2 { font-family:Courier New; font-weight:bold; }
+	.T3 { font-family:Courier New; font-weight:bold; }
+	.T4 { font-family:Courier New; font-weight:bold; }
+	.T5 { font-family:Courier New; font-weight:bold; }
+	.T6 { font-family:Courier New; font-style:italic; font-weight:bold; }
+	<!-- ODF styles with no properties representable as CSS -->
+	 { }
+	</style></head><body dir="ltr" style="max-width:8.5in;margin-top:1in; margin-bottom:1in; margin-left:1in; margin-right:1in; "><p class="P5">QBSOLV(1)                  User Commands                     QBSOLV(1)</p><p class="P6">NAME</p><p class="P1"><span class="T2">qbsolv</span><span class="T1"> – minimize the objective function represented by a QUBO </span></p><p class="P7">SYNOPSIS</p><p class="P9"><span class="T2">qbsolv </span><span class="T4">-i &lt;input_file.qubo&gt; [-o &lt;output_file&gt; [-w]] [-m] [-T &lt;target_value</span><span class="T6">&gt;</span><span class="T4">] </span><span class="T5">[-a &lt;algorithm&gt;] </span><span class="T4">[-t &lt;num_seconds&gt;] [-n &lt;num_repeats&gt;] [-S &lt;subproblem_size&gt;] [-v &lt;verbosity_level&gt;] [-q] [-V] [-h]</span></p><p class="P6">DESCRIPTION</p><p class="P1"><span class="T2">qbsolv</span><span class="T1"> executes the quadratic unconstrained binary optimization (QUBO) problem in the specified file. It provides bit-vector results that minimize or, optionally, maximize the value of the objective function represented by the QUBO problem.  </span><span class="T2">qbsolv</span><span class="T1"> typically executes in a hybrid fashion on a classical CPU and a quantum processing unit (QPU).</span></p><p class="P8">The problem must be in the QUBO(5) file format and is not limited to the size (number of variables), connectivity pattern, or numerical precision of the D-Wave system on which it will be executed.</p><p class="P6">OPTIONS</p><p class="P10">-i &lt;input_file.qubo&gt;</p><p class="P12">Name of the file (relative or absolute pathname) containing the input QUBO.  The “.qubo” extension is by convention.  </p><p class="P11">-o &lt;output_file&gt;</p><p class="P12">Optional.  Name of the file (relative or absolute pathname) to which qbsolv will write results.  If no file is specified, results are written to standard output.</p><p class="P19"><span> -a algorithm</span></p><p class="P13">Optional.  This optional argument chooses nuances of the outer loop algorithm.  The default is o. 'o' for original qbsolv method. Submatrix based upon change in energy. 'p' for path relinking.  Submatrix based upon differences of solutions</p><p class="P16">-w</p><p class="P2"><span class="T1">Optional, in which case </span><span class="T2">-o</span><span class="T1"> must also be specified. Prints the input QUBO matrix and the output result in .csv format to</span><span class="T2"> </span><span class="T1">the specified output file.</span></p><p class="P11">-m</p><p class="P2"><span class="T1">Optional.  Specifies that </span><span class="T2">qbsolv</span><span class="T1"> is to return the maximum value of the objective function instead of the minimum (default).</span></p><p class="P11">-T &lt;target_value&gt;</p><p class="P2"><span class="T1">Optional. Target value of the objective function, expressed as an integer or floating-point number.  When target value is reached, </span><span class="T2">qbsolv</span><span class="T1"> stops the optimization process.  Usually beneficial to specify only when the optimal value of the objective function has been analytically derived.</span></p><p class="P11">-t &lt;num_seconds&gt;</p><p class="P3"><span class="T1">Optional.  Number of seconds of elapsed CPU time consumed by the classically executing portion of </span><span class="T2">qbsolv</span><span class="T1"> after which it stops the optimization process. The value may be specified as an integer or floating-point value. The elapsed CPU time is only checked after completion of the main loop, so the actual stop time may be more than the value. If options </span><span class="T2">–T</span><span class="T1"> or </span><span class="T2">–n</span><span class="T1"> are also specified, those limits may (depending on their values) stop </span><span class="T2">qbsolv</span><span class="T1"> execution before the timeout is reached. The default value is 2,592,000.0 seconds (30 days).</span></p><p class="P4"> </p><p class="P11">-n &lt;num_repeats&gt;</p><p class="P2"><span class="T1">Optional.  Number of times that </span><span class="T2">qbsolv</span><span class="T1"> is to repeat the main loop of the algorithm after a new optimal value is found.  This value must be a positive integer. The default value is 40.</span></p><p class="P10">-S &lt;subproblem_size&gt;</p><p class="P14"><span class="T1">This optional argument indicates the size of the subproblems into which the </span><span class="T3">QUBO</span><span class="T1"> will be decomposed.  A "-S 0" or "-S" argument not present indicates to use the size specified in the embedding file found in the workspace set up by DW. If a DW environment has not been established, the value will default to (47) and will use the tabu solver for subproblem solutions.  If a value is specified, </span><span class="T3">qbsolv</span><span class="T1"> uses that value to create subproblem and solve with the tabu solver.</span></p><p class="P16">-v &lt;verbosity_level&gt;</p><p class="P2"><span class="T1">Optional.  Level of verbosity of the output. Values are as follows:<br/>- </span><span class="T2">0</span><span class="T1"> (default) outputs the number of bits in the solution, </span><span class="T1">the solution itself, and the energy of the solution.  <br/>- </span><span class="T2">1</span><span class="T1"> outputs the same information as above for multiple solutions, if found. <br/>- </span><span class="T2">2</span><span class="T1"> outputs more detailed information at each step of the algorithm.  </span></p><p class="P16">-q</p><p class="P15">Optional. Prints the format of an arbitrary QUBO file and exits without running the program. </p><p class="P4"> </p><p class="P16">-V</p><p class="P2"><span class="T1">Optional.  Prints the version number of the </span><span class="T2">qbsolv</span><span class="T1"> program and exits without running the program.</span></p><p class="P16">-h</p><p class="P2"><span class="T1">Optional. Prints the help message for </span><span class="T2">qbsolv</span><span class="T1"> and exits without running the program.</span></p><p class="P18">BUGS</p><p class="P1"><span class="T1">Report any bugs to </span><a href="mailto:dwsupport@dwavesys.com" class="Internet_20_link"><span class="T1">dwsupport@dwavesys.com</span></a><span class="T1">.</span></p><p class="P18">COPYRIGHT</p><p class="P8">© 2016 D-Wave Systems Inc.</p><p class="P17">SEE ALSO</p><p class="P1"><a id="_GoBack"/><span class="T2">qubo</span><span class="T1">(5)</span></p></body></html>
