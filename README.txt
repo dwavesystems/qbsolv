@@ -14,7 +14,7 @@ This directory contains the following files and directories:
 
 
     qbsolv -i infile [-o outfile] [-m] [-T] [-n] [-S SubMatrix] [-w] 
-        [-h] [-a] [-v verbosityLevel] [-V] [-q] [-t seconds]
+        [-h] [-a algorithm] [-v verbosityLevel] [-V] [-q] [-t seconds]
 
 DESCRIPTION 
     qbsolv executes a quadratic unconstrained binary optimization 

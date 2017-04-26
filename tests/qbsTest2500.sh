@@ -3,12 +3,12 @@
 function qbsTargetRun
 {
     startsec=${SECONDS}
-    ../src/qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} -T ${Target} ${tabu}  >  $tmp_file
+    ../src/qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} -T ${Target} ${option1} >  $tmp_file
     walltime=`echo "print ${SECONDS} - ${startsec}"|python`
     TIME=`grep second $tmp_file| cut -b1-8`
     ENERGY=`grep Energy $tmp_file       | cut -b1-11`
     PARTITIONS=`grep Partitioned $tmp_file       | cut -f1 -d\ `
-    echo $test"  "   $TIME "   "$walltime"   " $PARTITIONS"   "  $ENERGY $Local
+    echo $test"  "   $TIME "   "$walltime"   " $PARTITIONS"   "  $ENERGY $Local  $option1
     Totaltime=`echo "print  $Totaltime + $TIME " |python `
     rm $tmp_file      
 }
@@ -28,13 +28,13 @@ SECONDS=0
        if [ -e ${test_dir}/${test} ] 
        then
            startsec=${SECONDS}
-          ../src/qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} $numrepeats > $tmp_file      
+          ../src/qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} ${numrepeats} ${option1}> $tmp_file      
            walltime=`echo "print ${SECONDS} - ${startsec}"|python`
             TIME=`grep second $tmp_file       | cut -b1-8`
             PARTITIONS=`grep Partitioned $tmp_file       | cut -f1 -d\ `
               ENERGY=`grep Energy $tmp_file       | cut -b1-11`
               Denergy=`echo "print  ${ENERGY} - ${Energies[i]}"|python `
-                echo ${test}"  "   $TIME   "   "$walltime"   " $PARTITIONS"   " $ENERGY "   "$Denergy $Local 
+                echo ${test}"  "   $TIME   "   "$walltime"   " $PARTITIONS"   " $ENERGY "   "$Denergy $Local $option1
               Totaltime=`echo  "print $Totaltime + $TIME" |python ` 
               TotalDenergy=`echo  "print $TotalDenergy + $Denergy" |python` 
            startsec=${SECONDS}
@@ -68,14 +68,12 @@ echo "    "Total cpu time $Totaltime $Local
 echo "    "Elapsed time $SECONDS seconds
 }
 
-
+option1=$1
 test_dir="qubos"
 SubMatrix=""
 verbose="-v0"
 numrepeats=""
 tmp_file=$(mktemp)
-tabu="-t 33"
-tabu=""
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
