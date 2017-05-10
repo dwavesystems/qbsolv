@@ -60,12 +60,12 @@ void randomize_solution_by_index(int8_t *solution, int nbits, int *indices)
 void randomize_pop_solution(int8_t *solution, int nbits)
 {
     double pop_ratio;
-    int pop=0,pop_ran=0.0;
+    int pop=0,pop_ran=0;
     for (int i = 0; i < nbits; i++) {
         pop+=solution[i];
     }
     pop_ratio = (double)((double) pop / (double) nbits  ) ;
-    pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio + 0.5 ) ;
+    pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio  ) ;
 
     for (int i = 0; i < nbits; i++) {
         if (rand() < pop_ran ) {
@@ -79,12 +79,12 @@ void randomize_pop_solution(int8_t *solution, int nbits)
 void randomize_pop_solution_by_index(int8_t *solution, int nbits, int *indices )
 {
     double pop_ratio;
-    int pop=0,pop_ran=0.0;
+    int pop=0,pop_ran=0;
     for (int i = 0; i < nbits; i++) {
         pop+=solution[indices[i]];
     }
     pop_ratio = (double)((double) pop / (double) nbits  ) ;
-    pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio + 0.5 ) ;
+    pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio  ) ;
 
     for (int i = 0; i < nbits; i++) {
         if (rand() < pop_ran ) {
