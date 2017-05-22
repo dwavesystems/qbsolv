@@ -659,10 +659,8 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
                     for (int i = l, j = 0; i < l + subMatrix; i++) {
                         Icompress[j++] = Pcompress[i]; // create compression index
-                        //printf(" %d %d ",j,index[i]);DL;
                         TabuK[Pcompress[i]] = 0;
                     }
-                    //printf("\n");
                 }
                 reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
                 if (Verbose_ > 3) {
@@ -674,6 +672,10 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     dw_solver(sub_qubo, subMatrix, sub_solution);
                 } else {
                     solv_submatrix(sub_solution, Qt_s, subMatrix, sub_qubo, sub_flip_cost, &bit_flips, TabuK_s, index_s);
+                    //char subqubofile[sizeof "subqubo10000.qubo"]; // modification to write out subqubos
+                    //sprintf(subqubofile,"subqubo%05ld.qubo",numPartCalls);
+                    //write_qubo(sub_qubo,subMatrix,subqubofile);
+
                 }
                 for (int j = 0; j < subMatrix; j++) {
                     int bit = Icompress[j];

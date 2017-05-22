@@ -633,7 +633,7 @@ void write_qubo(double **qubo, int nMax, const char *filename)
 
     // Write out the details for all non zero linear/quadratic elements
     for (int i = 0; i < nMax; i++) {
-        if (qubo[i][i] != 0) fprintf(file, "%d %d %lf\n", i, i, qubo[i][i]);
+        if (qubo[i][i] != 0.0) fprintf(file, "%d %d %lf\n", i, i, qubo[i][i]);
     }
     for (int i = 0; i < nMax; i++) {
         for (int j = i + 1; j < nMax; j++) {
