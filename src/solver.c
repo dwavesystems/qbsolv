@@ -561,7 +561,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
         result    = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
             &num_nq_solutions);
 
-    } else if ( strncmp(&algo_[0],"p",strlen("p") )==0) {
+    } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
 
         // when using this method we need at least solutions for a "differental" backbone this 
         // step is to prime the solution sets with at least one more
@@ -622,7 +622,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             l_max = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
             if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
                                  l_max, subMatrix);
-        } else if ( strncmp(&algo_[0],"p",strlen("p") )==0) {
+        } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
             // pick "backbone" as an index of non matching bits in solutions
             //
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
@@ -655,7 +655,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     index_sort(Icompress, subMatrix, true); // sort it for effective reduction
 
                     // coarsen and reduce the problem
-                } else if ( strncmp(&algo_[0],"p",strlen("p") )==0) {
+                } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
                     if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
                     for (int i = l, j = 0; i < l + subMatrix; i++) {
                         Icompress[j++] = Pcompress[i]; // create compression index

@@ -100,11 +100,11 @@ int  main( int argc,  char *argv[])
                 case 'o' :
                     // Original Dwave algorithm
                     break;
-                case 'p' :
-                    // choose "Path Relinking"
+                case 'd' :
+                    // choose "Solution diversity"
                     break;
                 default: /* unknown */
-                    printf(" Unknown Algorithm choice: options are o:p cmdline had %s \n",algo_);
+                    printf(" Unknown Algorithm choice: options are o:d cmdline had %s \n",algo_);
                     exit(9);
                 break;
             }
@@ -245,7 +245,7 @@ void  print_help(void)
            "\t\t This optional argument chooses nuances of the outer loop\n"
            "\t\t algorithm.  The default is o.\n"
            "\t\t \'o\' for original qbsolv method. Submatrix based upon change in energy.\n"
-           "\t\t \'p\' for path relinking.  Submatrix based upon differences of solutions\n"
+           "\t\t \'d\' for solution diversity.  Submatrix based upon differences of solutions\n"
            "\t-m \n"
            "\t\tThis optional argument denotes to find the maximum instead \n"
            "\t\tof the minimum. \n"
