@@ -408,6 +408,43 @@ int index_solution_diff( int8_t *solution_A, int8_t *solution_B, int nbits , int
     return ndiff;
 }
 
+//  count, bit by bit between solutions and return the index of the value where
+//  they differ in index[] ( any one of the solutions not same as any other ).  
+//      Return the number number of values in the index vector
+//@param  popularSol[nbits] = bit vector solution, most popular setting on a bit
+//@param  solution[num_solutions][nbits] = bit vector solution
+//@param  num_solutions number of solutions in solution
+//@param  nbits = length of the solution vectors
+//@param  sol_index is integer index vector of solution differences, will be ordered 
+//@param  bias   between 0 and (num_solutions/2)   pattern = (5,2) (6,3) (7,3) (8,4) 
+//               ex bias=0 only all set to X, set to X, any set to Y , set to Y ( Y, X can be 0 or 1)
+//               ex bias=1 all but 1 set to X, set to X , more than 1 set to Y, set to Y
+void solution_population( int8_t *popularSol, int8_t **solution, int num_solutions, int nbits , int *sol_index, int bias )
+{
+    int i,j,sum_bits;
+    for ( i=0;i<nbits;i++ ) {
+        sum_bits=0;
+        for ( j=0; j< num_solutions; j++ ) {
+          sum_bits+= solution[sol_index[j]][i];
+        } 
+        //  ex. all bits set to 1, sum_bits = num_solutions, if all 0 sum_bits = 0
+        //    if > num_solutions/2 it is mirroring differences 
+            popularSol[i]=0;
+            if ( sum_bits >= num_solutions/2 ) popularSol[i]=1;// more than 1/2 1's
+        if ( sum_bits > (int) ((num_solutions+1)/2)-1 ) {
+            sum_bits = num_solutions - sum_bits;
+        }
+        if ( sum_bits > bias ) {    // so if bias is greater than favor fliping the bit
+            if ( popularSol[i] == 1 ) {
+                popularSol[i]=0;
+            } else {
+                popularSol[i]=1;
+            }
+        }
+        // now sum_bits = number of differences,, 
+    }
+    return ;
+}
 //  compare, bit by bit between solutions and save the index of the value where
 //  they differ in index[] ( any one of the solutions not same as any other ).  
 //      Return the number number of values in the index vector

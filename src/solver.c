@@ -470,7 +470,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 {
     double    *flip_cost, energy;
     int       *TabuK, *index, *index_s, start_;
-    int8_t    *solution, *tabu_solution;
+    int8_t    *solution, *tabu_solution, *popSolution;
     long      numPartCalls = 0;
     int64_t   bit_flips = 0,  IterMax;
 
@@ -480,6 +480,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     // Get some memory for the larger val matrix to solve
     if (GETMEM(solution, int8_t, qubo_size) == NULL) BADMALLOC
     if (GETMEM(tabu_solution, int8_t, qubo_size) == NULL) BADMALLOC
+    if (GETMEM(popSolution, int8_t, qubo_size) == NULL) BADMALLOC
     if (GETMEM(flip_cost, double, qubo_size) == NULL) BADMALLOC
     if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
@@ -575,10 +576,21 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             best_energy=MAX(best_energy,energy);
             result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, 
                     Qindex, QLEN, qubo_size, &num_nq_solutions);
+            if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL ) { // better solution
+               best_energy = energy;
+               for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
+            }
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
             if ( pass++ > 45 ) break;
             //printf(" len_index = %d  NU %d  energy %lf\n",len_index,NU,energy);
         }
+        solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex, 10);
+        IterMax = bit_flips + (int64_t)MAX((int64_t)40, InitialTabuPass_factor * (int64_t)qubo_size/2);
+        energy = tabu_search(solution, tabu_solution, qubo_size, qubo, flip_cost,
+            &bit_flips, IterMax, TabuK, Target_, TargetSet_, index, 0);
+        result    = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
+            &num_nq_solutions);
+
 
     }
     for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
@@ -626,12 +638,14 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             // pick "backbone" as an index of non matching bits in solutions
             //
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
-            l_max = len_index-len_index%subMatrix;
+            // need to cover all of len_index so we will pad out the Qindex to a multiple of subMatrix
+            l_max = len_index;
         }
 
         // begin submatrix passes
         if ( NoProgress % Progress_check == (Progress_check - 1) ) { // every Progress_check (th) loop without progess
             // reset completely
+            // solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex);
             randomize_solution(solution, qubo_size);
             for (int i = 0; i < qubo_size; i++) {
                 TabuK[i] = 0;
@@ -657,7 +671,9 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     // coarsen and reduce the problem
                 } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
                     if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
-                    for (int i = l, j = 0; i < l + subMatrix; i++) {
+                    int i_strt=l;
+                    if ( l + subMatrix > len_index ) i_strt=len_index-subMatrix-1; // cover all of len_index by backup on last pass
+                    for (int i = i_strt, j = 0; i < i_strt + subMatrix; i++) {
                         Icompress[j++] = Pcompress[i]; // create compression index
                         TabuK[Pcompress[i]] = 0;
                     }
@@ -693,7 +709,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
             // submatrix search did not produce any new values, so randomize those bits
             if (change == 0) {
-                randomize_solution_by_index(solution, l, index );
+                if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
+                    randomize_solution_by_index(solution, l, index );
+                } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
+                    len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
+                    randomize_solution_by_index(solution, len_index, Pcompress );
+                }
                 if (Verbose_ > 3) {
                     printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
                 } else {
@@ -723,11 +744,13 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
         result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
                 &num_nq_solutions);
+        if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL || result.code == DUPLICATE_HIGHEST_ENERGY  ) { // equal solution, but it is different
+            best_energy = energy;
+            for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
+        }
 
         //print_solutions( solution_list,energy_list,solution_counts,num_nq_solutions,qubo_size,Qindex);
         if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL ) { // better solution
-            best_energy = energy;
-            for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
             RepeatPass = 0;
 
             if ( Verbose_ > 1 ) {

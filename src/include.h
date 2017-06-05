@@ -98,6 +98,7 @@ void  val_index_sort(int *index, double *val, int n);
 void  val_index_sort_ns(int *index, double *val, int n);
 void  index_sort(int *index, int n, short FWD);
 int index_solution_diff( int8_t *solution_A, int8_t *solution_B, int nbits , int *index ) ;
+void solution_population( int8_t *popularSol, int8_t **solution, int num_solutions, int nbits , int *sol_index, int bias );
 int mul_index_solution_diff( int8_t **solution, int num_solutions, int nbits , int *index, int delta_bits, int *sol_index );
 void print_solutions( int8_t **solution, double *energy_list,int *solutions_counts, int num_solutions, int nbits , int *index );
 struct sol_man_rslt manage_solutions( int8_t *new_solution, int8_t **solution_list, double new_energy,
