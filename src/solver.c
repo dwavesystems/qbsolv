@@ -370,9 +370,6 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
 
     // The remainder of the function is clamping the sub_qubo to the
     // solution state surrounding it.
-
-    //double clamp_factor=roundit((double) sub_qubo_size/( double) maxNodes_, 4); 
-    double clamp_factor=1.; 
     // Go over every variable that we are extracting
     for (uint sub_variable = 0; sub_variable < sub_qubo_size; sub_variable++) {
         // Get the global index of the current variable
@@ -409,8 +406,7 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
         // Now that we know what the effects of the non-extracted variables
         // are on the sub_qubo we include it by adding it as a linear
         // bias in the sub_qubo (a diagonal matrix entry)
-        //sub_qubo[sub_variable][sub_variable] += roundit(clamp * clamp_factor,4);
-        sub_qubo[sub_variable][sub_variable] += clamp * clamp_factor;
+        sub_qubo[sub_variable][sub_variable] += clamp ;
     }
     return;
 }
@@ -534,7 +530,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     randomize_solution(tabu_solution, qubo_size);
     for (int i = 0; i < qubo_size; i++) {
         index[i]    = i;   // initial index to 0,1,2,...qubo_size
-        TabuK[i]    = 0;   // initial TabuK to nothing tabu
         solution[i] = 0;
     }
     for (int i = 0; i < SubMatrix_; i++) {
@@ -647,9 +642,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             // reset completely
             // solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex);
             randomize_solution(solution, qubo_size);
-            for (int i = 0; i < qubo_size; i++) {
-                TabuK[i] = 0;
-            }
             if (Verbose_ > 1) {
                 DLT; printf(" \n\n Reset Q and start over Repeat = %d/%d, as no progress is exhausted %d %d\n\n\n",
                             nRepeats, RepeatPass, NoProgress, NoProgress % Progress_check);
@@ -663,9 +655,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     for (int i = l, j = 0; i < l + subMatrix; i++) {
                         Icompress[j++] = index[i]; // create compression index
                     }
-                    for (int j = 0; j < subMatrix; j++) {
-                        TabuK[Icompress[j]] = 0;
-                    }
                     index_sort(Icompress, subMatrix, true); // sort it for effective reduction
 
                     // coarsen and reduce the problem
@@ -675,7 +664,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                     if ( l + subMatrix > len_index ) i_strt=len_index-subMatrix-1; // cover all of len_index by backup on last pass
                     for (int i = i_strt, j = 0; i < i_strt + subMatrix; i++) {
                         Icompress[j++] = Pcompress[i]; // create compression index
-                        TabuK[Pcompress[i]] = 0;
                     }
                 }
                 reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
@@ -763,9 +751,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             if ( result.pos > 4  ||   result.count > 8 ) {
                 randomize_solution(solution, qubo_size);
             }
-            for ( int i=0; i<qubo_size; i++) {
-                TabuK[i]=0;
-            }
             RepeatPass++;
             if (result.code == DUPLICATE_ENERGY) {
                 NoProgress++;
@@ -776,10 +761,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                 }
             }
         } else if ( result.code == NOTHING ) { // not as good as our worst so far
-            // reset the tabu list to have it start anew
-            for ( int l=0; l<qubo_size; l++ ) {
-                TabuK[l]=0;
-            }
             RepeatPass++;
             NoProgress++;
             if ( Verbose_ > 1) {
