@@ -482,7 +482,13 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
 
     // get some memory for storing and shorting Q bit vectors
-    const int QLEN=20;  // the max number of solutions to store in soltuion_lists
+    int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
+    if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
+        QLEN=20; // don't need a big que for this optimization
+    } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
+        QLEN=75; // this need a lot of diversity
+    }
+
     int8_t  **solution_list;
     double *energy_list;
     int    *solution_counts, *Qindex, num_nq_solutions=0;

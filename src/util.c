@@ -493,10 +493,16 @@ int mul_index_solution_diff( int8_t **solution, int num_solutions, int nbits , i
 void print_solutions( int8_t **solution, double *energy_list, int *solutions_counts, int num_solutions, int nbits , int *index )
 {
     int i,j,k;
+    double delta,energy,top_energy;
+    fprintf(outFile_, "delta energy  Energy of solution\tnfound\tindex\t i\t");
     fprintf(outFile_, " number of unique solutions %d\n",num_solutions);
-    for ( i=0;i<num_solutions;i++) {
+    k=index[0];
+    top_energy=energy_list[k];
+    for ( i=num_solutions-1;i>-1;i--) {
         k=index[i];
-        fprintf(outFile_, "%8.5f Energy of solution, found %d times, index %d i %d\n", energy_list[k],solutions_counts[k],k,i);
+        energy=energy_list[k];
+        delta=top_energy-energy_list[k];
+        fprintf(outFile_, "%8.5f \t  %8.5f \t %d \t %d \t %d \t", delta,energy,solutions_counts[k],k,i);
         for ( j=0;j< nbits;j++) {
             fprintf(outFile_, "%d", solution[k][j]);
         }
