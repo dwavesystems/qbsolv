@@ -439,6 +439,51 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
     return tabu_search(solution, best, qubo_size, qubo, flip_cost,
         bit_flips, iter_max, TabuK, Target_, false, index, nTabu);
 }
+// reduce_solv_projection reduces from a submatrix solves the QUBO projects the solution and 
+//      returns the number of changes
+// @param Icompress index vector , ordered lowest to highest, of the row/columns to extract subQubo
+// @param qubo is the QUBO matrix to extract from
+// @param qubo_size is the number of variables in the QUBO matrix                                                                    
+// @param subMatrix is the size of the subMatrix to create and solve 
+// @param @param[in,out] solution inputs a current solution and returns the projected solution 
+// @param[out] stores the new, projected solution found during the algorithm
+
+int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution )
+{
+    int change=0;
+    //get scratch memory needed by tabu solver
+    int8_t sub_solution[subMatrix], Best[subMatrix];
+    double **sub_qubo, flip_cost[subMatrix];
+    int64_t bit_flips;
+    int TabuK[subMatrix], index[subMatrix];
+
+    sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
+
+    reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
+    // solve
+    if ( UseDwave_ ) {
+        dw_solver(sub_qubo, subMatrix, sub_solution);
+    }else {
+        bit_flips=0;
+        for (int i = 0;i<subMatrix;i++ ) {
+            TabuK[i]=0;
+            index[i]=i;
+            sub_solution[i]=solution[Icompress[i]];
+            Best[i]=solution[Icompress[i]];
+        }
+        solv_submatrix(sub_solution, Best, subMatrix, sub_qubo, flip_cost, &bit_flips, TabuK, index);
+    } 
+                    //char subqubofile[sizeof "subqubo10000.qubo"]; // modification to write out subqubos
+                    //sprintf(subqubofile,"subqubo%05ld.qubo",numPartCalls);
+                    //write_qubo(sub_qubo,subMatrix,subqubofile);
+    // projection
+    for (int j = 0; j < subMatrix; j++) {
+        int bit = Icompress[j];
+        if (solution[bit] != sub_solution[j] ) change++;
+        solution[bit] = sub_solution[j];
+    }
+    return change;
+}
 
 // Entry into the overall solver from the main program
 //
@@ -465,8 +510,9 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
 void solve(double **qubo, const int qubo_size, int nRepeats)
 {
     double    *flip_cost, energy;
-    int       *TabuK, *index, *index_s, start_;
-    int8_t    *solution, *tabu_solution, *popSolution;
+    //int       *TabuK, *index, *index_s, start_;
+    int       *TabuK, *index, start_;
+    int8_t    *solution, *tabu_solution ;
     long      numPartCalls = 0;
     int64_t   bit_flips = 0,  IterMax;
 
@@ -476,7 +522,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     // Get some memory for the larger val matrix to solve
     if (GETMEM(solution, int8_t, qubo_size) == NULL) BADMALLOC
     if (GETMEM(tabu_solution, int8_t, qubo_size) == NULL) BADMALLOC
-    if (GETMEM(popSolution, int8_t, qubo_size) == NULL) BADMALLOC
     if (GETMEM(flip_cost, double, qubo_size) == NULL) BADMALLOC
     if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
@@ -507,20 +552,14 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     }
 
     // get some memory for reduced sub matrices
-    int8_t  *sub_solution, *Qt_s, *Qbest;
-    double best_energy, *sub_flip_cost, **sub_qubo;
-    int    *TabuK_s, *Icompress, *Pcompress;
+    //int8_t  *sub_solution, *Qt_s, *Qbest;
+    int8_t  *Qbest;
+    double best_energy;
+    int    *Icompress, *Pcompress;
 
-    sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
     if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(Pcompress, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(Qbest, int8_t, qubo_size) == NULL) BADMALLOC
-    if (GETMEM(TabuK_s, int, SubMatrix_) == NULL) BADMALLOC
-    if (GETMEM(sub_solution, int8_t, SubMatrix_) == NULL) BADMALLOC
-    if (GETMEM(Qt_s, int8_t, SubMatrix_) == NULL) BADMALLOC
-    if (GETMEM(sub_flip_cost, double, SubMatrix_) == NULL) BADMALLOC
-    if (GETMEM(index_s, int, SubMatrix_) == NULL) BADMALLOC
-
     // initialize and set some tuning parameters
     //
     const int Progress_check = 12;              // number of non progresive passes thru main loop before reset
@@ -536,12 +575,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     randomize_solution(tabu_solution, qubo_size);
     for (int i = 0; i < qubo_size; i++) {
         index[i]    = i;   // initial index to 0,1,2,...qubo_size
-        solution[i] = 0;
-    }
-    for (int i = 0; i < SubMatrix_; i++) {
-        index_s[i] = i; // initial index to 0,1,2,...SubMartix_
-        sub_solution[i] = 0;
-        Qt_s[i]    = tabu_solution[i];
+        solution[i]=0;
     }
 
     int    l = 0, DwaveQubo = 0;
@@ -570,7 +604,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
         //
         len_index=0;
         int pass=0;
-        while (len_index < MIN(2*SubMatrix_,qubo_size/2)  ) {
+        while (len_index < MIN(1*SubMatrix_,qubo_size/2)  ) {
             //DL;printf(" len_index %d %d \n",len_index,pass);
             randomize_solution(solution, qubo_size);
             energy = local_search( solution, qubo_size,  qubo, flip_cost, &bit_flips);
@@ -582,7 +616,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
             }
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
-            if ( pass++ > 45 ) break;
+            if ( pass++ > 40 ) break;
             //printf(" len_index = %d  NU %d  energy %lf\n",len_index,NU,energy);
         }
         solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex, 10);
@@ -672,31 +706,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                         Icompress[j++] = Pcompress[i]; // create compression index
                     }
                 }
-                reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
-                if (Verbose_ > 3) {
-                    printf("Bits as set before solve ");
-                    for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]);
-                    if (Verbose_ > 3) printf("\n");
-                }
-                if ( UseDwave_ ) {
-                    dw_solver(sub_qubo, subMatrix, sub_solution);
-                } else {
-                    solv_submatrix(sub_solution, Qt_s, subMatrix, sub_qubo, sub_flip_cost, &bit_flips, TabuK_s, index_s);
-                    //char subqubofile[sizeof "subqubo10000.qubo"]; // modification to write out subqubos
-                    //sprintf(subqubofile,"subqubo%05ld.qubo",numPartCalls);
-                    //write_qubo(sub_qubo,subMatrix,subqubofile);
-
-                }
-                for (int j = 0; j < subMatrix; j++) {
-                    int bit = Icompress[j];
-                    if (solution[bit] != sub_solution[j] ) change++;
-                    solution[bit] = sub_solution[j];
-                }
-                if (Verbose_ > 3) {
-                    printf("Bits set after solve     ");
-                    for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]);
-                    printf("\n");
-                }
+                change=change+reduce_solve_projection( Icompress, qubo, qubo_size, subMatrix, solution );
                 numPartCalls++;
                 DwaveQubo++;
             }
@@ -813,7 +823,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     free(solution); free(tabu_solution); free(flip_cost);
     free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
-    free(Qbest); free(TabuK_s); free(sub_solution); free(Qt_s); free(qubo); free(sub_qubo);
-    free(sub_flip_cost); free (index_s); free(solution_list);
+    free(Qbest); free(qubo); 
+    free(solution_list);
     return;
 }

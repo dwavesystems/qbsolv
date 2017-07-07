@@ -408,9 +408,8 @@ int index_solution_diff( int8_t *solution_A, int8_t *solution_B, int nbits , int
     return ndiff;
 }
 
-//  count, bit by bit between solutions and return the index of the value where
+//  count, bit by bit between solutions and return the solution of the value where
 //  they differ in index[] ( any one of the solutions not same as any other ).  
-//      Return the number number of values in the index vector
 //@param  popularSol[nbits] = bit vector solution, most popular setting on a bit
 //@param  solution[num_solutions][nbits] = bit vector solution
 //@param  num_solutions number of solutions in solution

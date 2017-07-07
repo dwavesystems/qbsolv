@@ -186,7 +186,6 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
     }
     fclose(f);
 
-    // What does this do?
     sprintf(DWcommand, "bash -c \'dw bind param_chain=15.0 /tmp/qbs%d.b  > /dev/null;"
             "dw exec num_reads=10 qbs%d.qmi  > /dev/null;"
             "dw val -s 1 qbs%d.sol |tail -n%d|cut -f3 -d\" \" > /tmp/qbs%d.xB\' \n",
