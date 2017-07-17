@@ -510,7 +510,6 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 void solve(double **qubo, const int qubo_size, int nRepeats)
 {
     double    *flip_cost, energy;
-    //int       *TabuK, *index, *index_s, start_;
     int       *TabuK, *index, start_;
     int8_t    *solution, *tabu_solution ;
     long      numPartCalls = 0;

@@ -157,6 +157,27 @@ void print_solution_and_qubo(int8_t *solution, int maxNodes, double **qubo)
         fprintf(outFile_, "\n");
     }
 }
+//  This routine prints without \n the options for the run
+//
+void print_opts(int maxNodes)
+{
+    fprintf(outFile_, "%d bits, ", maxNodes);
+    if ( UseDwave_ ) {
+        fprintf(outFile_,"Quantum solver,");
+    }else {
+        fprintf(outFile_,"Classical tabu solver,");
+    }
+    if ( findMax_ ) {
+        fprintf(outFile_," find Max,");
+    }else {
+        fprintf(outFile_," find Min,");
+    }
+    fprintf(outFile_," SubMatrix= %d,",SubMatrix_);
+    fprintf(outFile_," -a %s,",algo_);
+    if ( TargetSet_ )  fprintf(outFile_, " Target of %8.5f,", Target_);
+    fprintf(outFile_," timeout=%9.1f sec\n",Time_);
+
+}
 
 //  This routine performs the standard output for qbsolv
 //
@@ -164,13 +185,16 @@ void print_output(int maxNodes, int8_t *solution, long numPartCalls, double ener
 {
     int i;
 
-    fprintf(outFile_, "%d Number of bits in solution\n", maxNodes);
+    if ( numsolOut_ > 0 ) {
+        print_opts(maxNodes);
+    }
+    numsolOut_++;
     for (i = 0; i < maxNodes; i++) {
         fprintf(outFile_, "%d", solution[i]);
     }
     fprintf(outFile_, "\n");
     fprintf(outFile_, "%8.5f Energy of solution\n", energy);
-    fprintf(outFile_, "%ld Number of Partitioned calls\n", numPartCalls);
+    fprintf(outFile_, "%ld Number of Partitioned calls, %d output sample \n", numPartCalls,numsolOut_);
     fprintf(outFile_, "%8.5f seconds of classic cpu time", seconds);
     if ( TargetSet_ ) {
         fprintf(outFile_, " ,Target of %8.5f\n", Target_);

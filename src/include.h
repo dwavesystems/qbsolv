@@ -92,6 +92,7 @@ double just_evaluate(int8_t *Q, int maxNodes, double **val);
 double roundit(double x, int N);
 void  check_row_col_qval(int8_t *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
 void  check_Qval(int8_t *Q, int maxNodes, double **val, double *Qval);
+void  print_opts( );
 void  print_output(int maxNodes, int8_t *Q, long numPartCalls, double energy, double seconds);
 void  quick_sort_iterative_index(double arr[], int ind[], int n, int stack[]);
 void  val_index_sort(int *index, double *val, int n);

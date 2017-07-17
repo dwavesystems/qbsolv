@@ -20,7 +20,7 @@
 // define what will be used by "extern" in other functions
 //
 FILE            *outFile_;
-int             maxNodes_, nCouplers_, nNodes_, findMax_;
+int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16], algo_[4];
 double          **val;
@@ -207,7 +207,8 @@ int  main( int argc,  char *argv[])
     if ( UseDwave_ ) { // either -S not set and DW_INTERNAL__CONNECTION ev variable not NULL, or -S set to 0, 
         dw_init();  
     }
-
+    numsolOut_=0;
+    print_opts(maxNodes_);
     solve(val, maxNodes_, nRepeats);
 
     if ( UseDwave_ ) {
