@@ -209,7 +209,9 @@ int  main( int argc,  char *argv[])
     }
     numsolOut_=0;
     print_opts(maxNodes_);
-    solve(val, maxNodes_, nRepeats);
+    int8_t *bestSolution;  // best solution is written to file, but is also accessible here
+    solve(val, maxNodes_, nRepeats, bestSolution);
+    free(bestSolution);
 
     if ( UseDwave_ ) {
         dw_close();

@@ -507,7 +507,8 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 // @param qubo The QUBO matrix to be solved
 // @param qubo_size is the number of variables in the QUBO matrix
 // @param nRepeats is the number of iterations without improvement before giving up
-void solve(double **qubo, const int qubo_size, int nRepeats)
+// @param Qbest stores the best sample found
+void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
 {
     double    *flip_cost, energy;
     int       *TabuK, *index, start_;
@@ -552,7 +553,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     // get some memory for reduced sub matrices
     //int8_t  *sub_solution, *Qt_s, *Qbest;
-    int8_t  *Qbest;
     double best_energy;
     int    *Icompress, *Pcompress;
 
@@ -822,7 +822,17 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     free(solution); free(tabu_solution); free(flip_cost);
     free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
-    free(Qbest); free(qubo); 
+    free(qubo); 
     free(solution_list);
     return;
 }
+
+// // Three variable solve so as to not break compatibility
+// void solve(double **qubo, const int qubo_size, int nRepeats){
+//     int8_t *Qbest;
+
+//     solve(qubo, qubo_size, nRepeats, Qbest);
+
+//     free(Qbest);
+
+// }
