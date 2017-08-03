@@ -755,6 +755,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
         //print_solutions( solution_list,energy_list,solution_counts,num_nq_solutions,qubo_size,Qindex);
         if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL ) { // better solution
             RepeatPass = 0;
+            for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 
             if ( Verbose_ > 1 ) {
                 DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);

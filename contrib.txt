@@ -54,6 +54,6 @@ Please follow these steps:
         anonymous contributions.   
 
 License
-qbsolv is licensed under the terms in LICENSE.txt.  
+qbsolv is licensed under the terms in LICENSE.
 By contributing to the project, you agree to the terms of the license and to release your 
 contribution under those terms.

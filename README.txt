@@ -2,7 +2,7 @@ README.txt file for qbsolv
 
 This directory contains the following files and directories:
 - README.txt:       this file
-- License:          A copy of the Apache License Version 2.0
+- LICENSE:          A copy of the Apache License Version 2.0
 - src:              Source directory of the qbsolv program with Makefile
             that creates a binary read and solve "QUBO" files
 - doc:          OpenOffice, PDF, and HTML versions of the man page,
