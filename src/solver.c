@@ -1,4 +1,5 @@
 /*
+ *
  Copyright 2017 D-Wave Systems Inc
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,6 +16,33 @@
 #include "extern.h"
 #include <math.h>
 
+// This function Simply evaluates the objective function for a given solution.
+//  call this to double check that a solution = energy
+// @param solution a current solution
+// @param qubo_size the number of variables in the QUBO matrix
+// @param qubo the QUBO matrix being solved
+// @returns Energy of solution evaluated by qubo
+double Simple_evaluate(int8_t *solution, uint qubo_size, double **qubo)
+{
+    double result = 0.0;
+
+    for (uint ii = 0; ii < qubo_size; ii++) {
+        double row_sum = 0.0;
+        double col_sum = 0.0;
+
+        // qubo an upper triangular matrix, so start right of the diagonal
+        // for the rows, and stop at the diagonal for the columns
+        for (uint jj = ii + 1; jj < qubo_size; jj++)
+            row_sum += qubo[ii][jj] * (double)solution[jj];
+
+        for (uint jj = 0; jj < ii; jj++)
+            col_sum += qubo[jj][ii] * (double)solution[jj];
+
+        if (solution[ii] == 1) result += row_sum + qubo[ii][ii];
+    }
+
+    return result;
+}
 // This function evaluates the objective function for a given solution.
 //
 // It is called when the search is starting over, such as after a projection
@@ -54,8 +82,6 @@ double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_co
 
     return result;
 }
-
-
 // Flips a given bit in the solution, and calculates the new energy.
 //
 // All the auxillary informanion (flip_cost) is updated.
@@ -540,7 +566,6 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
 
     if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(Pcompress, int, qubo_size) == NULL) BADMALLOC
-    if (GETMEM(Qbest, int8_t, qubo_size) == NULL) BADMALLOC
     // initialize and set some tuning parameters
     //
     const int Progress_check = 12;              // number of non progresive passes thru main loop before reset
@@ -577,6 +602,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
         best_energy = energy;
         result    = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
             &num_nq_solutions);
+        Qbest=&solution_list[Qindex[0]][0];
 
     } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
 
@@ -592,9 +618,10 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
             best_energy=MAX(best_energy,energy);
             result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, 
                     Qindex, QLEN, qubo_size, &num_nq_solutions);
+            Qbest=&solution_list[Qindex[0]][0];
+            best_energy=energy_list[Qindex[0]];
             if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL ) { // better solution
                best_energy = energy;
-               for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
             }
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
             if ( pass++ > 40 ) break;
@@ -606,10 +633,11 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
             &bit_flips, IterMax, TabuK, Target_, TargetSet_, index, 0);
         result    = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
             &num_nq_solutions);
+        Qbest=&solution_list[Qindex[0]][0];
+        best_energy=energy_list[Qindex[0]];
 
 
     }
-    for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
     val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
     if ( Verbose_ > 0 ) {
         print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS);
@@ -729,15 +757,12 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
 
         result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
                 &num_nq_solutions);
-        if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL || result.code == DUPLICATE_HIGHEST_ENERGY  ) { // equal solution, but it is different
-            best_energy = energy;
-            for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
-        }
+        Qbest=&solution_list[Qindex[0]][0];
+        best_energy=energy_list[Qindex[0]];
 
         //print_solutions( solution_list,energy_list,solution_counts,num_nq_solutions,qubo_size,Qindex);
         if ( result.code == NEW_HIGH_ENERGY_UNIQUE_SOL ) { // better solution
             RepeatPass = 0;
-            for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
 
             if ( Verbose_ > 1 ) {
                 DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);
@@ -752,9 +777,9 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
             RepeatPass++;
             if (result.code == DUPLICATE_ENERGY) {
                 NoProgress++;
-            } else {
-                for (int i = 0; i < qubo_size; i++) Qbest[i] = solution[i];
-                if ( result.count == 1 && Verbose_ > 0) { // we haven't printed this out before
+            } 
+            if ( result.code == DUPLICATE_HIGHEST_ENERGY && result.count == 1 ) {
+                if ( Verbose_ > 0 ) {
                     print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS);
                 }
             }
@@ -795,12 +820,11 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
     if (WriteMatrix_)
         print_solution_and_qubo(solution, qubo_size, qubo);
 
-    if ( Verbose_ == 0 )
+    if ( Verbose_ == 0 ) {
+        Qbest=&solution_list[Qindex[0]][0];
+        best_energy=energy_list[Qindex[0]];
+        //    printf(" evaluated solution %8.2lf\n",sign*Simple_evaluate(Qbest,  qubo_size, qubo));
         print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS);
-    {
-            //printf(" len_index %d energy %lf num_nq %d \n",len_index,energy,num_nq_solutions);
-            if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
-                                 l_max, subMatrix);
     }
 
     free(solution); free(tabu_solution); free(flip_cost);

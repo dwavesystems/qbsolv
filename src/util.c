@@ -572,7 +572,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
         result.code= NEW_HIGH_ENERGY_UNIQUE_SOL;
         result.count= 1;
         result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-        if (Verbose_>3 ) {printf(" NEW_HIGH_ENERGY_UNIQUE_SOL   %lf %d %d", energy_now,result.count,result.pos) ;DL;}
+        if (Verbose_>3 ) {printf(" NEW_HIGH_ENERGY_UNIQUE_SOL   %lf %d %d\n", energy_now,result.count,result.pos) ;}
         return result;
     }
 
@@ -582,7 +582,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
         result.code= NOTHING;
         result.count= 0;
         result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-        if(Verbose_>3){printf(" NOTHING                      %lf %d %d", energy_now,result.count,result.pos) ;DL;}
+        if(Verbose_>3){printf(" NOTHING                      %lf %d %d\n", energy_now,result.count,result.pos) ;}
         return result;
     }
 
@@ -604,14 +604,14 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
                         result.code= DUPLICATE_HIGHEST_ENERGY;
                         result.count= solution_counts[list_order[0]];
                         result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-                        if(Verbose_>3) {printf(" DUPLICATE_HIGHEST_ENERGY     %lf %d %d",energy_now,result.count,result.pos);DL;}
+                        if(Verbose_>3) {printf(" DUPLICATE_HIGHEST_ENERGY     %lf %d %d\n",energy_now,result.count,result.pos);}
                         return result;
                     } else {
                         // duplicate energy matching older lower energy Q
                         result.code= DUPLICATE_ENERGY;
                         result.count= solution_counts[list_order[j]];
                         result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-                        if(Verbose_>3) {printf(" DUPLICATE_ENERGY             %lf %d %d",energy_now,result.count,result.pos);DL;}
+                        if(Verbose_>3) {printf(" DUPLICATE_ENERGY             %lf %d %d\n",energy_now,result.count,result.pos);}
                         return result;
                     }
                 }
@@ -636,13 +636,13 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
                 // duplicate highest energy unique Q and equal to best energy
                 result.code= DUPLICATE_HIGHEST_ENERGY;
                 result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-                if(Verbose_>3) {printf(" DUPLICATE_ENERGY             %lf %d %d",energy_now,result.count,result.pos);DL;}
+                if(Verbose_>3) {printf(" DUPLICATE_ENERGY             %lf %d %d\n",energy_now,result.count,result.pos);}
                 return result;
             } else {
                 // duplicate energy matching older lower energy Q
                 result.code= DUPLICATE_ENERGY_UNIQUE_SOL;
                 result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-                if(Verbose_>3) {printf(" DUPLICATE_ENERGY_UNIQUE_SOL  %lf %d %d",energy_now,result.count,result.pos);DL;}
+                if(Verbose_>3) {printf(" DUPLICATE_ENERGY_UNIQUE_SOL  %lf %d %d\n",energy_now,result.count,result.pos);}
                 return result;
             }
         }
@@ -664,7 +664,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
             result.code= NEW_ENERGY_UNIQUE_SOL;
             result.count= solution_counts[list_order[j]];
             result.pos= val_index_pos(list_order,energy_list,nMax ,energy_now);
-            if(Verbose_>3) {printf(" NEW_ENERGY_UNIQUE_SOL  %lf %d %d",energy_now,result.count,result.pos);DL;}
+            if(Verbose_>3) {printf(" NEW_ENERGY_UNIQUE_SOL  %lf %d %d\n",energy_now,result.count,result.pos);}
             return result;
         }
     }
