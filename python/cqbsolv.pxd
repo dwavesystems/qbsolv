@@ -7,7 +7,7 @@ cdef extern from "include.h":
         int32_t n1, n2;
         double value;
 
-    void  solve(double **Q_array, int n_variables, int n_repeats, int8_t *sample);
+    void  solve(double **val, int maxNodes, int nRepeats, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN);
 
     void  **malloc2D(unsigned int rows, unsigned int cols, unsigned int size)
 

@@ -28,10 +28,13 @@ def run_qbsolv(Q, repeats=50,
     Verbose_ = verbosity
 
     global algo_
+    cdef int n_solutions = 20  # the maximimum number of solutions returned
     if algorithm is None or algorithm == ENERGY_IMPACT:
         algo_ = "o"
+        # n_solutions = 20
     elif algorithm == SOLUTION_DIVERSITY:
         algo = "d"
+        n_solutions = 70
     else:
         raise ValueError('unknown algorithm given')
 
@@ -79,7 +82,10 @@ def run_qbsolv(Q, repeats=50,
     # we also set the inputs to qbsolv, using cython to make them proper C values
     cdef int n_variables = len(variables)
     cdef int n_repeats = repeats
-    cdef int8_t *output_sample = <int8_t *>malloc(n_variables * sizeof(int8_t))
+    cdef int8_t **solution_list = <int8_t **>malloc2D(n_solutions + 1, n_variables, sizeof(int8_t))
+    cdef double *energy_list = <double *>malloc((n_solutions + 1) * sizeof(double))
+    cdef int *solution_counts = <int *>malloc((n_solutions + 1) * sizeof(int))
+    cdef int *Qindex = <int *>malloc((n_solutions + 1) * sizeof(int))
 
     # create a matrix and set everything to 0
     cdef double **Qarr = <double **>malloc2D(n_variables, n_variables, sizeof(double))
@@ -96,14 +102,34 @@ def run_qbsolv(Q, repeats=50,
             Qarr[u][v] = -1. * Q[(u, v)]
 
     # Ok, solve using qbsolv! This puts the answer into output_sample
-    solve(Qarr, n_variables, repeats, output_sample)
+    solve(Qarr, n_variables, repeats, solution_list, energy_list, solution_counts, Qindex, n_solutions)
 
-    # read the output out of output_sample, also converting the values back into
-    # pure python objects
-    sample = {v: int(output_sample[v]) for v in variables}
+    # we have three things we are interested in, the samples, the energies and the number of times each
+    # sample appeared
+    samples = []
+    energies = []
+    counts = []
+
+    # it is actually faster to use a while loop here and keep everything as a C object
+    cdef int i = 0
+    while i < n_solutions:
+        soln_idx = Qindex[i]  # Qindex tracks where the order of the solutions
+
+        # if no solutions were found then we can stop
+        if solution_counts[soln_idx] == 0:
+            break
+
+        samples.append({v: int(solution_list[soln_idx][v]) for v in range(n_variables)})
+        energies.append(float(energy_list[soln_idx]))
+        counts.append(int(solution_counts[soln_idx]))
+
+        i += 1
 
     # free the allocated variables
-    free(output_sample)
+    free(solution_list)
+    free(energy_list)
+    free(solution_counts)
+    free(Qindex);
     free(Qarr)
 
-    return sample
+    return samples, energies, counts

@@ -1,12 +1,9 @@
 /*
  Copyright 2017 D-Wave Systems Inc
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -507,8 +504,7 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 // @param qubo The QUBO matrix to be solved
 // @param qubo_size is the number of variables in the QUBO matrix
 // @param nRepeats is the number of iterations without improvement before giving up
-// @param Qbest stores the best sample found
-void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
+void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN)
 {
     double    *flip_cost, energy;
     int       *TabuK, *index, start_;
@@ -526,22 +522,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
     if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
 
-    // get some memory for storing and shorting Q bit vectors
-    int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
-    if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
-        QLEN=20; // don't need a big que for this optimization
-    } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
-        QLEN=75; // this need a lot of diversity
-    }
-
-    int8_t  **solution_list;
-    double *energy_list;
-    int    *solution_counts, *Qindex, num_nq_solutions=0;
-
-    solution_list = (int8_t**)malloc2D(QLEN + 1, qubo_size, sizeof(int8_t));
-    if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
-    if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
-    if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
+    int num_nq_solutions=0;
 
     for (int i = 0; i < QLEN+1 ; i++) {
         energy_list[i]     = BIGNEGFP;
@@ -553,6 +534,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
 
     // get some memory for reduced sub matrices
     //int8_t  *sub_solution, *Qt_s, *Qbest;
+    int8_t  *Qbest;
     double best_energy;
     int    *Icompress, *Pcompress;
 
@@ -822,18 +804,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t *Qbest)
     }
 
     free(solution); free(tabu_solution); free(flip_cost);
-    free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
-    free(qubo); 
-    free(solution_list);
+    free(index); free(TabuK); free(Icompress);
+    free(Qbest);
     return;
 }
-
-// // Three variable solve so as to not break compatibility
-// void solve(double **qubo, const int qubo_size, int nRepeats){
-//     int8_t *Qbest;
-
-//     solve(qubo, qubo_size, nRepeats, Qbest);
-
-//     free(Qbest);
-
-// }
