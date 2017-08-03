@@ -829,6 +829,5 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
 
     free(solution); free(tabu_solution); free(flip_cost);
     free(index); free(TabuK); free(Icompress);
-    free(Qbest);
     return;
 }
