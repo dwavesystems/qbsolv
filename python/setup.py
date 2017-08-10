@@ -22,5 +22,6 @@ setup(name='dwave_qbsolv',
                                         '../src/readqubo.c',
                                         '../src/util.c'],
                                        include_dirs=['.', '../src'],
+                                       extra_compile_args=['-Ofast']
                                        # extra_compile_args=['-w', '-O0', '-g']
                                        )]))

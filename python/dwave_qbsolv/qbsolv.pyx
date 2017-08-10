@@ -4,11 +4,18 @@ from libc.stdlib cimport malloc, free, srand
 from cqbsolv cimport Verbose_, SubMatrix_, UseDwave_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, findMax_
 from cqbsolv cimport solve, malloc2D
 import random
+import sys
 
-ENERGY_IMPACT = 'energy impact'
-SOLUTION_DIVERSITY = 'solution diversity'
+ENERGY_IMPACT = 0
+SOLUTION_DIVERSITY = 1
 
-def run_qbsolv(Q, repeats=50,
+PY2 = sys.version_info[0] == 2
+if PY2:
+    iteritems = lambda d: d.iteritems()
+else:
+    iteritems = lambda d: d.items()
+
+def run_qbsolv(Q, repeats=50, 
                seed=17932241798878, verbosity=-1, algorithm=None, timeout=2592000):
     """TODO
     
@@ -71,7 +78,7 @@ def run_qbsolv(Q, repeats=50,
     # we also take the opporunity to set the random seed used by qbsolv. Qbsolv has a default random seed
     # so we mimic that behaviour here.
     if seed is None:
-        seed = random.randint(0, 1000)
+        seed = random.randint(0, 1L<<30)
     cdef int64_t c_seed = seed
     srand(c_seed)
     
@@ -93,13 +100,15 @@ def run_qbsolv(Q, repeats=50,
         for col in range(n_variables):
             Qarr[row][col] = 0.
 
+    cdef int u, v
+    cdef double bias
     # put the values from Q into Qarr
-    for u, v in Q:
+    for (u, v), bias in iteritems(Q):
         # upper triangular
         if v < u:
-            Qarr[v][u] = -1. * Q[(u, v)]
+            Qarr[v][u] = -bias
         else:
-            Qarr[u][v] = -1. * Q[(u, v)]
+            Qarr[u][v] = -bias
 
     # Ok, solve using qbsolv! This puts the answer into output_sample
     solve(Qarr, n_variables, repeats, solution_list, energy_list, solution_counts, Qindex, n_solutions)
