@@ -6,6 +6,17 @@ __all__ = ['QBSolv', 'ENERGY_IMPACT', 'SOLUTION_DIVERSITY']
 
 
 class QBSolv(dimod.TemplateSampler):
+    """Wraps the qbsolv C package for python.
+
+    Examples:
+        >>> h = {0: -1, 1: 1, 2: -1}
+        >>> J = {(0, 1): -1, (1, 2): -1}
+        >>> response = QBSolv().sample_ising(h, J)
+        >>> list(response.samples())
+        '[{0: 1, 1: 1, 2: 1}]'
+        >>> list(response.energies())
+        '[1.0]'
+    """
 
     @dimod.decorators.qubo(1)
     @dimod.decorators.qubo_index_labels(1)
@@ -27,14 +38,6 @@ class QBSolv(dimod.TemplateSampler):
             :obj:`BinaryResponse`
 
         Examples:
-            >>> h = {0: -1, 1: 1, 2: -1}
-            >>> J = {(0, 1): -1, (1, 2): -1}
-            >>> response = QBSolv().sample_ising(h, J)
-            >>> list(response.samples())
-            '[{0: 1, 1: 1, 2: 1}]'
-            >>> list(response.energies())
-            '[1.0]'
-
             >>> Q = {(0, 0): 1, (1, 1): 1, (0, 1): 1}
             >>> response = QBSolv().sample_qubo(Q)
             >>> list(response.samples())
