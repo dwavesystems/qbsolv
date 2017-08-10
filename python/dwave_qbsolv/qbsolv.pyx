@@ -17,12 +17,23 @@ else:
 
 def run_qbsolv(Q, repeats=50, 
                seed=17932241798878, verbosity=-1, algorithm=None, timeout=2592000):
-    """TODO
+    """Runs qbsolv.
     
     Args:
+        Q (dict): A dictionary defining the QUBO. Should be of the form
+            {(u, v): bias} where u, v are variables and bias is numeric.
+        repeats (int, optional): Determines the number of times to
+            repeat the main loop in qbsolv after determining a better
+            sample. Default 50.
+        seed (int, optional): Random seed. Default None.
+        algorithm (int, optional): Which algorithm to use. Defaut
+            None. Algorithms numbers can be imported from module
+            under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
 
     Returns:
-        solution (list):
+        (list, list, list): (samples, energies, counts) where samples is
+        a list of dics, energies is the energy for each sample and counts
+        is the number of times each sample was found by qbsolv.
 
     NB: relies on variables in Q being index valued and nonnegative, but not checked at this point
     """
