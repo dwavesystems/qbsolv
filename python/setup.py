@@ -6,11 +6,9 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
-from dwave_qbsolv import __version__
-
 setup(name='dwave_qbsolv',
-      version=__version__,
-      packages=['dwave_qbsolv', 'dwave_qbsolv.dimod_wrapper'],
+      version='0.1',
+      packages=['dwave_qbsolv'],
       requires=['cython',
                 'dimod'],
       ext_modules=cythonize([Extension("qbsolv",
