@@ -1,6 +1,6 @@
 import dimod
 
-from qbsolv import run_qbsolv, ENERGY_IMPACT, SOLUTION_DIVERSITY
+from dwave_qbsolv.qbsolv import run_qbsolv, ENERGY_IMPACT, SOLUTION_DIVERSITY
 
 __all__ = ['QBSolv', 'ENERGY_IMPACT', 'SOLUTION_DIVERSITY']
 
