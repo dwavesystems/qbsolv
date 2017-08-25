@@ -20,6 +20,7 @@
 // define what will be used by "extern" in other functions
 //
 FILE            *outFile_;
+FILE            *solution_input_;
 int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16], algo_[4];
@@ -76,6 +77,7 @@ int  main( int argc,  char *argv[])
         { "subproblemSize", required_argument, NULL, 'S'},
         { "target",         required_argument, NULL, 'T'},
         { "repeats",        required_argument, NULL, 'n'},
+        { "solutionIn",     required_argument, NULL, 's'},
         { "max",            no_argument,       NULL, 'm'},
         { "output",         required_argument, NULL, 'o'},
         { "timeout",        required_argument, NULL, 't'},
@@ -273,6 +275,11 @@ void  print_help(void)
            "\t\tthe value will default to (47) and will use the tabu solver\n"
            "\t\tfor subproblem solutions.  If a value is specified, qbsolv uses\n"
            "\t\tthat value to create subproblem and solve with the tabu solver. \n"
+           "\t-s  solutionIn   \n" 
+           "\t\tIf present, this optional argument is a filename that is\n"
+           "\t\tin the format of the first 2 records of the output solution file,\n"
+           "\t\tthe solution read from this file will be the initial solution used\n"
+           "\t\tin the solver\n"
            "\t-w \n"
            "\t\tIf present, this optional argument will print the QUBO \n"
            "\t\tmatrix and result in .csv format. \n"

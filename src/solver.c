@@ -312,13 +312,13 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     }
                     howFar = ((double)(iter_max - (*bit_flips)) / (double)thisIter);
                     if (Verbose_ > 3) {
-                        printf("Tabu new best %lf ,K=%d,iteration = %lld, %lf, %d\n",
-                            best_energy * sign, last_bit,(long long) (*bit_flips), howFar, brk );
+                        printf("Tabu new best %lf ,K=%d,iteration = %"LONGFORMAT", %lf, %d\n",
+                            best_energy * sign, last_bit,(int64_t) (*bit_flips), howFar, brk );
                     }
                     if ( howFar < 0.80  && numIncrease > 0 ) {
                         if (Verbose_ > 3) {
-                            printf("Increase Itermax %lld, %lld\n", (long long) iter_max, 
-                                    (long long) (iter_max + increaseIter));
+                            printf("Increase Itermax %"LONGFORMAT", %"LONGFORMAT"\n",  iter_max, 
+                                     (iter_max + increaseIter));
                         }
                         iter_max  += increaseIter;
                         thisIter += increaseIter;
@@ -508,6 +508,7 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
         if (solution[bit] != sub_solution[j] ) change++;
         solution[bit] = sub_solution[j];
     }
+    free( sub_qubo );
     return change;
 }
 
@@ -563,10 +564,10 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     double *energy_list;
     int    *solution_counts, *Qindex, num_nq_solutions=0;
 
-    solution_list = (int8_t**)malloc2D(QLEN + 1, qubo_size, sizeof(int8_t));
-    if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
-    if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
-    if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
+    solution_list = (int8_t**)malloc2D(QLEN + 2, qubo_size, sizeof(int8_t));
+    if (GETMEM(energy_list, double, (QLEN + 2)) == NULL) BADMALLOC
+    if (GETMEM(solution_counts, int, (QLEN + 2)) == NULL) BADMALLOC
+    if (GETMEM(Qindex, int, (QLEN + 2)) == NULL) BADMALLOC
 
     for (int i = 0; i < QLEN+1 ; i++) {
         energy_list[i]     = BIGNEGFP;
@@ -661,7 +662,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
         print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS);
     }
     if (Verbose_ > 1) {
-        DLT; printf(" V Starting outer loop =%lf iterations %lld\n", best_energy * sign, (long long) bit_flips);
+        DLT; printf(" V Starting outer loop =%lf iterations %"LONGFORMAT"\n", best_energy * sign, bit_flips);
     }
 
     // starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
@@ -770,7 +771,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
         val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 
         if ( Verbose_ > 1 ) {
-            DLT; printf("Latest answer  %4.5f iterations =%lld\n", energy * sign,(long long) bit_flips);
+            DLT; printf("Latest answer  %4.5f iterations =%"LONGFORMAT"\n", energy * sign,(int64_t) bit_flips);
         }
 
         result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
@@ -810,7 +811,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
         }
 
         if ( Verbose_ > 1) {
-            DLT; printf("V Best outer loop =%lf iterations %lld\n", best_energy * sign,(long long) bit_flips);
+            DLT; printf("V Best outer loop =%lf iterations %"LONGFORMAT"\n", best_energy * sign, bit_flips);
         }
 
         // check on, if to continue the outer loop
@@ -846,7 +847,8 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     }
 
     free(solution); free(tabu_solution); free(flip_cost);
-    free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); free(Icompress);
+    free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); 
+    free(Icompress); free(Pcompress);
     free(qubo); 
     free(solution_list);
     return;

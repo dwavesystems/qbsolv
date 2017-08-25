@@ -25,8 +25,7 @@ void **malloc2D(uint rows, uint cols, uint size)
     uintptr_t space = rows * (sizeof(char *) + (cols * size));
     char ** big_array = (char**)malloc(space);
     if (big_array == NULL) {
-        DL;
-        printf("\n\t%s error - memory request for X[%d][%d], %ld Mbytes  "
+        DL;printf("\n\t%s error - memory request for X[%d][%d], %ld Mbytes  "
                "denied\n\n", pgmName_, rows, cols, (long)space / 1024 / 1024 );
         exit(9);
     }
@@ -335,7 +334,7 @@ void val_index_sort(int *index, double *val, int n)
     int i;
     int *stack; // temp space = n + 1
     // Create an auxiliary stack
-    if ((GETMEM(stack, int, n + 1)) == NULL) {
+    if ((GETMEM(stack, int, (n + 1))) == NULL) {
         BADMALLOC
     }
 
@@ -353,7 +352,7 @@ void val_index_sort_ns(int *index, double *val, int n)
     int i;
     int *stack; // temp space = n + 1
     // Create an auxiliary stack
-    if ((GETMEM(stack, int, n + 1)) == NULL) {
+    if ((GETMEM(stack, int, (n + 1))) == NULL) {
         BADMALLOC
     }
 
@@ -717,3 +716,60 @@ void write_qubo(double **qubo, int nMax, const char *filename)
             double factor = pow(10.0, digits - ceil(log10(fabs(value))));
                 return round(value * factor) / factor;   
 }*/
+#if _WIN32
+/* This code is public domain -- Will Hartung 4/9/09 */
+#include <stdio.h>
+#include <stdlib.h>
+
+size_t getline(char **lineptr, size_t *n, FILE *stream) {
+    char *bufptr = NULL;
+    char *p = bufptr;
+    int size;
+    int c;
+
+    if (lineptr == NULL) {
+        return -1;
+    }
+    if (stream == NULL) {
+        return -1;
+    }
+    if (n == NULL) {
+        return -1;
+    }
+    bufptr = *lineptr;
+    size = *n;
+
+    c = fgetc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+    if (bufptr == NULL) {
+        bufptr = malloc(128);
+        if (bufptr == NULL) {
+            return -1;
+        }
+        size = 128;
+    }
+    p = bufptr;
+    while(c != EOF) {
+        if ((p - bufptr) > (size - 1)) {
+            size = size + 128;
+            bufptr = realloc(bufptr, size);
+            if (bufptr == NULL) {
+                return -1;
+            }
+        }
+        *p++ = c;
+        if (c == '\n') {
+            break;
+        }
+        c = fgetc(stream);
+    }
+
+    *p++ = '\0';
+    *lineptr = bufptr;
+    *n = size;
+
+    return p - bufptr - 1;
+}
+#endif
