@@ -153,7 +153,8 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
     double **qubo, double *flip_cost, int64_t *bit_flips)
 {
     int kkstr = 0, kkend = qubo_size, kkinc;
-    int index[qubo_size];
+    int *index;
+    if (GETMEM(index, int, qubo_size) == NULL) BADMALLOC
 
     for (uint kk = 0; kk < qubo_size; kk++) {
         index[kk] = kk;
@@ -181,6 +182,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
             }
         }
     }
+    free(index);
     return energy;
 }
 
@@ -481,9 +483,11 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
     int8_t sub_solution[subMatrix], Best[subMatrix];
     double **sub_qubo, flip_cost[subMatrix];
     int64_t bit_flips;
-    int TabuK[subMatrix], index[subMatrix];
+    int *TabuK, *index;
 
     sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
+    if (GETMEM(index, int, subMatrix) == NULL) BADMALLOC
+    if (GETMEM(TabuK, int, subMatrix) == NULL) BADMALLOC
 
     reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
     // solve
@@ -509,6 +513,8 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
         solution[bit] = sub_solution[j];
     }
     free( sub_qubo );
+    free( TabuK );
+    free( index );
     return change;
 }
 
