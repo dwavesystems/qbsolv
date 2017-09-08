@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// this is con
+// this is conditionally compiled
 #ifdef QOP
 #include "epqmi.h"
 static DW_epqmi *epqmi_;
@@ -104,7 +104,7 @@ void dw_init()
     }
 
     char filename_epqmi_max[256];
-    sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embeded file
+    sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embedded file
     if ((fs = fopen(filename_epqmi_max, "r")) == NULL) {
         printf(" no file %s\n", filename_epqmi_max);
         exit(9);
@@ -134,13 +134,13 @@ void dw_init()
     wspath = getenv("DW_INTERNAL__WSPATH");  // read again, as it was set
 
     if ( (SubMatrix_ < 10) | (SubMatrix_ > 100) ) {
-        DL; printf(" Retrieved a incorrect embedding size, %d  \n", SubMatrix_);
+        DL; printf(" Retrieved an incorrect embedding size, %d  \n", SubMatrix_);
         printf(" Exiting\n");
         exit(9);
     }
     // this is conditionally compiled as it needs externals supplied by Dwave tools group 
 #if QOP
-    epqmi_ = DW_epqmi_read(NULL);  // this call loads the pre embedded qmi "epqmi" 
+    epqmi_ = DW_epqmi_read(NULL);  // this call loads the pre-embedded qmi "epqmi"
     if ( epqmi_ == NULL ) 
     {
         DL; printf(" return from DW_epqmi_read was NULL\n");

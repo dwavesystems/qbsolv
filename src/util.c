@@ -268,7 +268,7 @@ void quick_sort_iterative_index(double val[], int arr[], int n, int *stack)
     stack[ ++top ] = l;
     stack[ ++top ] = h;
 
-    // Keep popping from stack while is not empty
+    // Keep popping from stack while it is not empty
     while ( top >= 0 ) {
         // Pop h and l
         h = stack[ top-- ];
@@ -308,7 +308,7 @@ int is_index_sorted(double data[], int index[], int size)
     return true;
 }
 //
-//  find the position withing the sorted(index) array for a value
+//  find the position within the sorted(index) array for a value
 //  index  how to traverse the array
 //  val  values to compare
 //  n  size of index array
@@ -327,7 +327,7 @@ int val_index_pos(int *index, double *val, int n, double compare)
 //  fill an ordered by size index array based on sizes of val
 //  a quick sort is used so that I can get speed and do a value
 //  index sort  ( measured as 2x faster than a qsort with
-//  tricks to do a index sort)
+//  tricks to do an index sort)
 //
 void val_index_sort(int *index, double *val, int n)
 {
@@ -456,7 +456,7 @@ void solution_population( int8_t *popularSol, int8_t **solution, int num_solutio
         if ( sum_bits > (int) ((num_solutions+1)/2)-1 ) {
             sum_bits = num_solutions - sum_bits;
         }
-        if ( sum_bits > bias ) {    // so if bias is greater than favor fliping the bit
+        if ( sum_bits > bias ) {    // so if bias is greater than favor flipping the bit
             if ( popularSol[i] == 1 ) {
                 popularSol[i]=0;
             } else {
@@ -469,7 +469,7 @@ void solution_population( int8_t *popularSol, int8_t **solution, int num_solutio
 }
 //  compare, bit by bit between solutions and save the index of the value where
 //  they differ in index[] ( any one of the solutions not same as any other ).  
-//      Return the number number of values in the index vector
+//      Return the number of values in the index vector
 //@param  solution[num_solutions][nbits] = bit vector solution
 //@param  num_solutions number of solutions in solution
 //@param  nbits = length of the solution vectors
@@ -502,8 +502,8 @@ int mul_index_solution_diff( int8_t **solution, int num_solutions, int nbits , i
     }
     return ndiff;
 }
-//  print out each soltuion in index order per qbsolve output format  
-//      Return the number number of values in the index vector
+//  print out each solution in index order per qbsolv output format
+//      Return the number of values in the index vector
 //@param  solution[num_solutions][nbits] = bit vector solution
 //@param  energy_list is the 1d array of energies corresponding to solution_lists
 //@param  num_solutions number of solutions in solution
@@ -539,7 +539,7 @@ void print_solutions( int8_t **solution, double *energy_list, int *solutions_cou
 //@param solution_counts is the 1d array of hits on the corresponding solution_lists
 //@param list_order is the order of solution_list based upon energies
 //@param nMax is size of the arrays (solution_list, energy_list...)
-//@param num_nq_soltuions is the number of unique soltuions in the solution_list...)
+//@param num_nq_solutions is the number of unique solutions in the solution_list...)
 // if solution_now is unique, and is better than or equal to the worst solution add it to solution_list
 // if solution_now is not unique ( equal energy )  increment number of times found
 struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_list, double energy_now,
@@ -696,7 +696,7 @@ void write_qubo(double **qubo, int nMax, const char *filename)
     // Write out the header line
     fprintf(file, "p qubo 0 %d %d %d\n", nMax, nNodes, nCouplers);
 
-    // Write out the details for all non zero linear/quadratic elements
+    // Write out the details for all non-zero linear/quadratic elements
     for (int i = 0; i < nMax; i++) {
         if (qubo[i][i] != 0.0) fprintf(file, "%d %d %lf\n", i, i, qubo[i][i]);
     }

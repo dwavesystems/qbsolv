@@ -58,7 +58,7 @@ int read_qubo(const char *inFileName, FILE *inFile)
                 continue; // not a comment line not a p line, so unknown, so skip it
             }
 
-        } else { // p is been found and parsed, not a comment line so must be an input line or blank
+        } else { // p has been found and parsed, not a comment line so must be an input line or blank
             if ( sscanf(line, "%d %d %lf", &i, &j, &f) == 3 ) {
                 if ( i == j ) {
                     if ( inode > nNodes_ ) {
