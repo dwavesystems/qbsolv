@@ -15,7 +15,7 @@
 #  if the libraries are present links will be made to those
 #   libraries via a link
 #  if the libraries are not present
-#   a file with stubs to those called routine will be 
+#   a file with stubs to those called routines will be
 #   supplied as part of the compile and link
 #  the libraries will be assumed to exist if $DWAVE_HOME
 #   is defined, if it is defined, and libraries don't exist

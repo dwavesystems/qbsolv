@@ -87,7 +87,7 @@ double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_co
 }
 // Flips a given bit in the solution, and calculates the new energy.
 //
-// All the auxillary informanion (flip_cost) is updated.
+// All the auxiliary information (flip_cost) is updated.
 //
 // @param old_energy The current objective function value
 // @param bit is the bit to be flipped
@@ -139,7 +139,7 @@ double evaluate_1bit(double old_energy, uint bit, int8_t *solution, uint qubo_si
 // terminating when a local optimum is found.
 // It returns the objective function value for the new solution.
 //
-// This routine does not perform a full evalution of the the state or auxillary
+// This routine does not perform a full evalution of the the state or auxiliary
 // information, it assumes it is already up to date.
 //
 // @param energy The current objective function value
@@ -186,10 +186,10 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
     return energy;
 }
 
-// Performance a local Max search improving the solution and returning the last evaluated value
+// Performs a local Max search improving the solution and returning the last evaluated value
 //
 // Mostly the same as local_search_1bit, except it first evaluates the
-// current solution and updates the auxillary information (flip_cost)
+// current solution and updates the auxiliary information (flip_cost)
 //
 // @param[in,out] solution inputs a current solution, modified by local search
 // @param size is the number of variables in the QUBO matrix
@@ -209,7 +209,7 @@ double local_search(int8_t *solution, int qubo_size, double **qubo,
 
 // This function is called by solve to execute a tabu search, This is THE Tabu search
 //
-// A tabu optmization algorithm tries find an approximately maximal solution
+// A tabu optimization algorithm tries to find an approximately maximal solution
 // to a QUBO problem. Tabu is an optimization algorithm which performs single
 // bit flips on a current solution in an attempt to improve it. For each
 // candidate bit flip, the change in objective function value is examined.
@@ -226,10 +226,10 @@ double local_search(int8_t *solution, int qubo_size, double **qubo,
 // @param[out] best stores the best solution found during the algorithm
 // @param qubo_size is the number of variables in the QUBO matrix
 // @param qubo is the QUBO matrix to be solved
-// @param flip_cost is the impact vector (the chainge in objective function value that results from flipping each bit)
+// @param flip_cost is the impact vector (the change in objective function value that results from flipping each bit)
 // @param bit_flips is the number of candidate bit flips performed in the entire algorithm so far
 // @param iter_max is the maximum size of bit_flips allowed before terminating
-// @param TabuK is stores the list of tabu moves
+// @param TabuK stores the list of tabu moves
 // @param target Halt if this energy is reached and TargetSet is true
 // @param target_set Do we have a target energy at which to terminate
 // @param index is the order in which to perform candidate bit flips (determined by flip_cost).
@@ -239,7 +239,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 {
 
     uint      last_bit = 0; // Track what the previously flipped bit was
-    bool      brk; // flag to mark a break and not a fall thru of the loop
+    bool      brk; // flag to mark a break and not a fall-thru of the loop
     double    best_energy; // best solution so far
     double    Vlastchange; // working solution variable
     double    sign;
@@ -329,9 +329,9 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     break;
                 }
                 // Q vector unchanged
-                if (new_energy > neighbour_best) { // check for improved neighbor solution
+                if (new_energy > neighbour_best) { // check for improved neighbour solution
                     last_bit = bit;   // record position
-                    neighbour_best = new_energy;   // record neighbor solution value
+                    neighbour_best = new_energy;   // record neighbour solution value
                 }
             }
         }
@@ -341,14 +341,14 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                 break;
             }
         }
-        if ( !brk ) { // this is the fall thru case and we havent tripped interior If V> VS test so flip Q[K]
+        if ( !brk ) { // this is the fall-thru case and we haven't tripped interior If V> VS test so flip Q[K]
             Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, qubo, flip_cost);
         }
 
         uint i;
         for (i = 0; i < qubo_size; i++) TabuK [i] =  MAX(0, TabuK[i] - 1);
 
-        // add some asymetry
+        // add some asymmetry
         if (solution[qubo_size-1] == 0) {
             TabuK[last_bit] = nTabu + 1;
         } else {
@@ -359,8 +359,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
     // copy over the best solution
     for (uint i = 0; i < qubo_size; i++) solution[i] = best[i];
 
-    // ok, we are leaving Tabu, we can do a for sure clean up run of evaluate, to be sure we
-    // return the true evaluation of the function (given that we only do this a handfull of times)
+    // ok, we are leaving Tabu, we can do a for-sure clean-up run of evaluate, to be sure we
+    // return the true evaluation of the function (given that we only do this a handful of times)
     double final_energy = evaluate(solution, qubo_size, qubo, flip_cost);
 
     // Create index array of sorted values
@@ -408,7 +408,7 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
         // we don't include those in the clamping
         int ji = sub_qubo_size - 1;
 
-        // Go over all other (non-extracted) variable
+        // Go over all other (non-extracted) variables
         // from the highest until we reach the current variable
         for (int j = qubo_size - 1; j > variable; j--) {
             if ( j == Icompress[ji] ) {
@@ -419,7 +419,7 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
             }
         }
 
-        // Go over all other (non-extracted) variable
+        // Go over all other (non-extracted) variables
         // from zero until we reach the current variable
         ji = 0;
         for (int j = 0; j < variable + 1; j++) {
@@ -446,9 +446,9 @@ void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size,
 // @param[out] best stores the best solution found during the algorithm
 // @param qubo_size is the number of variables in the QUBO matrix
 // @param qubo is the QUBO matrix to be solved
-// @param flip_cost is the impact vector (the chainge in objective function value that results from flipping each bit)
+// @param flip_cost is the impact vector (the change in objective function value that results from flipping each bit)
 // @param bit_flips is the number of candidate bit flips performed in the entire algorithm so far
-// @param TabuK is stores the list of tabu moves
+// @param TabuK stores the list of tabu moves
 // @param index is the order in which to perform candidate bit flips (determined by Qval).
 double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
     double *flip_cost, int64_t *bit_flips, int *TabuK, int *index)
@@ -530,7 +530,7 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 // Subregions are chosen based on increasing impact ("flip_cost"). Impact
 // is defined as the change in objective function value that occurs by flipping a bit.
 // The first subregion is chosen as the N least impactful variables, and so on.
-// When none of the variables any in the subregions change, a new solution
+// When none of the variables in any of the subregions change, a new solution
 // is chosen based on randomizing those variables.
 //
 // After Pchk = 8 iterations with no improvement, the algorithm is
@@ -559,11 +559,11 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     if (GETMEM(TabuK, int, qubo_size) == NULL) BADMALLOC
 
     // get some memory for storing and shorting Q bit vectors
-    int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
+    int QLEN=20 ;  // the max number of solutions to store in solution_lists
     if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
         QLEN=20; // don't need a big que for this optimization
     } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
-        QLEN=75; // this need a lot of diversity
+        QLEN=75; // this needs a lot of diversity
     }
 
     int8_t  **solution_list;
@@ -593,7 +593,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     if (GETMEM(Pcompress, int, qubo_size) == NULL) BADMALLOC
     // initialize and set some tuning parameters
     //
-    const int Progress_check = 12;              // number of non progresive passes thru main loop before reset
+    const int Progress_check = 12;              // number of non-progresive passes thru main loop before reset
     const float SubMatrix_span = 0.214;         // percent of the total size will be covered by the subMatrix pass
     const int64_t InitialTabuPass_factor=6500;  // initial pass factor for tabu iterations
     const int64_t TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
@@ -631,7 +631,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
 
-        // when using this method we need at least solutions for a "differental" backbone this 
+        // when using this method we need at least solutions for a "differential" backbone this
         // step is to prime the solution sets with at least one more
         //
         len_index=0;
@@ -704,7 +704,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
                                  l_max, subMatrix);
         } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
-            // pick "backbone" as an index of non matching bits in solutions
+            // pick "backbone" as an index of non-matching bits in solutions
             //
             len_index = mul_index_solution_diff(solution_list,num_nq_solutions,qubo_size,Pcompress,0,Qindex); 
             // need to cover all of len_index so we will pad out the Qindex to a multiple of subMatrix
