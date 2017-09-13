@@ -23,6 +23,6 @@ extensions = [Extension("dwave_qbsolv.qbsolv",
 setup(name='dwave_qbsolv',
       version='0.1.2',
       packages=find_packages(),
-      # requires=['cython',
-      #           'dimod'],
+      requires=['cython',
+                'dimod'],
       ext_modules=cythonize(extensions))
