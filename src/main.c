@@ -20,6 +20,7 @@
 // define what will be used by "extern" in other functions
 //
 FILE            *outFile_;
+FILE            *solution_input_;
 int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
 int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16], algo_[4];
@@ -62,8 +63,8 @@ int  main( int argc,  char *argv[])
     WriteMatrix_ = false;
     outFile_     = stdout;
     TargetSet_   = false;
-    Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
-    Tlist_       = -1; // tabu list length  -1 signials go with defaults
+    Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a month's worth of seconds)
+    Tlist_       = -1; // tabu list length  -1 signals go with defaults
     int64_t seed       = 17932241798878;
     int  errorCount = 0;
 
@@ -76,6 +77,7 @@ int  main( int argc,  char *argv[])
         { "subproblemSize", required_argument, NULL, 'S'},
         { "target",         required_argument, NULL, 'T'},
         { "repeats",        required_argument, NULL, 'n'},
+        { "solutionIn",     required_argument, NULL, 's'},
         { "max",            no_argument,       NULL, 'm'},
         { "output",         required_argument, NULL, 'o'},
         { "timeout",        required_argument, NULL, 't'},
@@ -127,7 +129,7 @@ int  main( int argc,  char *argv[])
             findMax_ = true; // go for the maximum value otherwise the minimum is found by default
             break;
         case 'n':
-            nRepeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeat without improvement
+            nRepeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeats without improvement
             break;
         case 'v':
             Verbose_ = strtol(optarg, &chx, 10); // this sets the value of the Verbose
@@ -195,7 +197,7 @@ int  main( int argc,  char *argv[])
 
     if ((errorCount > 0) ) {
         fprintf(stderr, "\n\t%d Input error(s) on file \"%s\"\n\n"
-                "\t%s has been stopped.\n\tThere is a desription "
+                "\t%s has been stopped.\n\tThere is a description "
                 "of the .qubo file format: use %s -q to print it\n\n",
                 errorCount, inFileName, pgmName_, pgmName_);
         exit(1);
@@ -204,7 +206,7 @@ int  main( int argc,  char *argv[])
     val = (double**)malloc2D(maxNodes_, maxNodes_, sizeof(double) ); // create a 2d double array
     fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
 
-    if ( UseDwave_ ) { // either -S not set and DW_INTERNAL__CONNECTION ev variable not NULL, or -S set to 0, 
+    if ( UseDwave_ ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
         dw_init();  
     }
     numsolOut_=0;
@@ -294,6 +296,11 @@ void  print_help(void)
            "\t\tthe value will default to (47) and will use the tabu solver\n"
            "\t\tfor subproblem solutions.  If a value is specified, qbsolv uses\n"
            "\t\tthat value to create subproblem and solve with the tabu solver. \n"
+           "\t-s  solutionIn   \n" 
+           "\t\tIf present, this optional argument is a filename that is\n"
+           "\t\tin the format of the first 2 records of the output solution file,\n"
+           "\t\tthe solution read from this file will be the initial solution used\n"
+           "\t\tin the solver\n"
            "\t-w \n"
            "\t\tIf present, this optional argument will print the QUBO \n"
            "\t\tmatrix and result in .csv format. \n"

@@ -13,13 +13,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-
-/*
- * More information needed, please provide
- *
- * Why is this only used when SubMatrix_ == 0?
-*/
-
+// this is conditionally compiled
+#ifdef QOP
+#include "epqmi.h"
+static DW_epqmi *epqmi_;
+#endif
 #include "include.h"
 #include "extern.h" // qubo header file: global variable declarations
 #include <stdio.h>
@@ -32,15 +30,8 @@
 #include <unistd.h>
 
 char       *workspace, *connection, *wspath, *solver, ws_tmp_path[256], tmp_path[256];
-const char *DW_INTERNAL__WORKSPACE = "DW_INTERNAL__WORKSPACE";
-const char *DW_INTERNAL__CONNECTION = "DW_INTERNAL__CONNECTION";
-const char *DW_INTERNAL__WSPATH = "DW_INTERNAL__WSPATH";
-const char *DW_INTERNAL__SOLVER = "DW_INTERNAL__SOLVER";
 
-// TODO: this should be made into a const and done correctly
-#define MINGWGINK C:/ MinGW / msys / 1.0
-static char *mingw_base = "MINGWGINK"; // ridiculous MinGw workaround
-int         mingw_base_len;
+    // this is conditionally compiled as it needs externals supplied by Dwave tools group 
 
 int  DW_setup_error = false;
 int  sysResult;
@@ -55,7 +46,7 @@ int  i, j, k, l; // working integer set
 // checks to see if a DW connection has been established, if yes, return true, else false;
 bool dw_established()
 {
-    connection = getenv(DW_INTERNAL__CONNECTION);
+    connection = getenv("DW_INTERNAL__CONNECTION");
     if ( connection == NULL ) {
         return false;
     }
@@ -68,27 +59,23 @@ void dw_init()
     char filename_max_full[256];
     char linebuf[256];
 
-    mingw_base_len = strlen("MINGWGINK"); // more Ridiculous MinGW workaround
     my_pid_ = getpid(); // will use for /tmp filename base
 
-    workspace = getenv(DW_INTERNAL__WORKSPACE);
+    workspace = getenv("DW_INTERNAL__WORKSPACE");
     if ( workspace == NULL ) {
         printf(" dw workspace not set \n");
         DW_setup_error = true;
     }
-    connection = getenv(DW_INTERNAL__CONNECTION);
+    connection = getenv("DW_INTERNAL__CONNECTION");
     if ( connection == NULL ) {
         printf(" dw connection not set \n");
         DW_setup_error = true;
     }
-    wspath = getenv(DW_INTERNAL__WSPATH);
+    wspath = getenv("DW_INTERNAL__WSPATH");
     if ( wspath == NULL ) {
         printf(" dw wspath not set \n");
         DW_setup_error = true;
     } else {
-
-        if (strncmp(wspath, mingw_base, mingw_base_len) == 0)
-            wspath += mingw_base_len; // completed RMWorkaround
 
         sprintf(filename_max_full, "%s/.max_full", workspace);
 
@@ -105,21 +92,23 @@ void dw_init()
         fclose(fs);
         sprintf(ws_tmp_path, "/%s", linebuf);
     }
-    solver = getenv(DW_INTERNAL__SOLVER);
+    solver = getenv("DW_INTERNAL__SOLVER");
     if ( solver == NULL ) {
         printf(" dw solver not set \n");
         DW_setup_error = true;
     }
     if ( DW_setup_error == true ) {
-        printf(" dw not setup not complete, and -S 0 set \n");
+        printf(" dw setup not complete, and -S 0 set \n");
+        printf(" if your pre-embeddings are not set up correctly contact \n");
+        printf(" your system adminstrator.\n");
         DL; printf(" Exiting\n");
         exit(9);
     }
 
     char filename_epqmi_max[256];
-    sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embeded file
+    sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embedded file
     if ((fs = fopen(filename_epqmi_max, "r")) == NULL) {
-        printf(" no file %s\n", filename_epqmi_max);
+        printf("No pre-embedding found, and hardware execution (-S 0) requested %s\n", filename_epqmi_max);
         exit(9);
     }
 
@@ -130,22 +119,36 @@ void dw_init()
     }
     SubMatrix_ = S_embed;
     fclose(fs);
+    // use putenv instead of setenv
+    int len_put = strlen(ws_tmp_path) +1 + strlen("DW_INTERNAL__WSPATH") +1;
+    char *put_str=malloc(len_put);
+    sprintf(put_str,"%s=%s","DW_INTERNAL__WSPATH",ws_tmp_path);
 
-    if ( (sysResult = setenv(DW_INTERNAL__WSPATH, ws_tmp_path, 1)) != 0 ) {
+    //if ( (sysResult = setenv("DW_INTERNAL__WSPATH", ws_tmp_path, 1)) != 0 ) {
+    if ( (sysResult = putenv(put_str)) != 0 ) {
         printf(" result of call %d\n", sysResult);
-        printf(" Error making setenv call %s %s \n", "DW_INTERNAL_WSPATH", ws_tmp_path);
-        DL; printf(" setenv command failed \n");
+        printf(" Error making putenv call to set DW path to pre embeddings %s \n", put_str);
+        DL; printf(" putenv command failed \n");
         exit(9);
     }
     strcpy(tmp_path, "/tmp");
 
-    wspath = getenv(DW_INTERNAL__WSPATH);  // read again, as it was set
+    wspath = getenv("DW_INTERNAL__WSPATH");  // read again, as it was set
 
     if ( (SubMatrix_ < 10) | (SubMatrix_ > 100) ) {
-        DL; printf(" Retrieved a incorrect embedding size, %d  \n", SubMatrix_);
+        DL; printf(" Retrieved an incorrect embedding size, %d  \n", SubMatrix_);
         printf(" Exiting\n");
         exit(9);
     }
+    // this is conditionally compiled as it needs externals supplied by Dwave tools group 
+#if QOP
+    epqmi_ = DW_epqmi_read(NULL);  // this call loads the pre-embedded qmi "epqmi"
+    if ( epqmi_ == NULL ) 
+    {
+        DL; printf(" return from DW_epqmi_read was NULL\n");
+        exit(9);
+    }
+#endif
 
     if (Verbose_ > 2) {
         DLT; DL;
@@ -155,86 +158,93 @@ void dw_init()
             printf(" UseDwave = false\n");
         }
         printf(" SubMatrix_ = %d\n", SubMatrix_);
-        printf(" %s %s \n", DW_INTERNAL__WORKSPACE, workspace);
-        printf(" %s %s \n", DW_INTERNAL__CONNECTION, connection);
-        printf(" %s %s \n", DW_INTERNAL__WSPATH, wspath);
-        printf(" %s %s \n", DW_INTERNAL__SOLVER, solver);
+        printf(" %s %s \n", "DW_INTERNAL__WORKSPACE", workspace);
+        printf(" %s %s \n", "DW_INTERNAL__CONNECTION", connection);
+        printf(" %s %s \n", "DW_INTERNAL__WSPATH", wspath);
+        printf(" %s %s \n", "DW_INTERNAL__SOLVER", solver);
     }
 }
 
 void dw_solver(double **val, int maxNodes, int8_t *Q)
 {
-    // bind to .epqmi
-    char filename_b[256];
-    char filename_result[256];
+#if LOCAL
+     DL;printf( " The program was called when it wasn't compiled with qOp libraries. \n"
+             " The request to call either the Dwave or the simulator cannot happen\n" );
+     val[1]=val[2];
+     Q[1]=Q[maxNodes];  /// these statements will do nothing but kill off warnings from compiler
+     exit(9);
+     return;
+     //  
+#endif
+#if QOP
 
-    sprintf(filename_b, "%s/qbs%d.b", tmp_path, my_pid_); // we will need to write b file to /tmp directory
-
-    if ((f = fopen(filename_b, "w")) == NULL ) {
-        DL; printf("  Failed open %s\n", filename_b);
-        exit(9);
-    }
+    float param_values[maxNodes*maxNodes];
 
     // dwave finds minimum, while our tabu finds max, so send negative to dwave
-    for (i = 0; i < maxNodes; i++) {
-        fprintf(f, "a_%d = %6.3f\n", i + 1, -val[i][i]);
-    }
-    for (i = 0; i < maxNodes; i++) {
-        for (j = i + 1; j < maxNodes; j++) {
-            fprintf(f, "b_%d_%d = %6.3f\n", i + 1, j + 1, -val[i][j]);
+    int k=0;
+    for (int i = 0; i < maxNodes; i++) {
+        param_values[k++]= -val[i][i];
+    }  // move the QUBO into param_values
+    for (int i = 0; i < maxNodes; i++) {
+        for (int j = i + 1; j < maxNodes; j++) {
+            param_values[k++]= -val[i][j];
         }
     }
-    fclose(f);
+    param_values[k]=15.0;
 
-    sprintf(DWcommand, "bash -c \'dw bind param_chain=15.0 /tmp/qbs%d.b  > /dev/null;"
-            "dw exec num_reads=10 qbs%d.qmi  > /dev/null;"
-            "dw val -s 1 qbs%d.sol |tail -n%d|cut -f3 -d\" \" > /tmp/qbs%d.xB\' \n",
-            my_pid_, my_pid_, my_pid_, maxNodes, my_pid_);
-    sysResult = system(DWcommand);
-    if (sysResult != 0 ) {
-        DL; printf("system call error %d\n %s\n", sysResult, DWcommand);
+    // bind to .epqmi
+    DW_epqmi_bind(epqmi_,param_values );
+    
+    if ( DW_epqmi_exec(epqmi_, 25))
+    {
+        DL;printf(" error execution of DW_epqmi_bind \n" );
         exit(9);
     }
-    if (Verbose_ > 2) printf("%s\n", DWcommand);
-    sprintf(filename_result, "%s/qbs%d.xB", tmp_path, my_pid_);
-    if ((fr = fopen(filename_result, "r")) == NULL ) {
-        DL; printf("  Failed open %s\n", filename_result); exit(9);
+
+    int solutions=0;
+    if (DW_epqmi_sols( epqmi_, &solutions ) )
+    { 
+        DL;printf(" error execution of DW_epqmi_sols \n"); 
+        exit(9); 
     }
-    int8_t qtmp;
-    for (i = 0; i < maxNodes; i++) {
-        if ((fscanf(fr, "%hhd", &qtmp)) == 0 ) {
-            DL; printf("fscanf error %s", filename_result); exit(9);
+    char var[maxNodes];
+    int valid=1;
+    int sol_num=0;
+
+    for ( sol_num=0 ; sol_num < solutions ; sol_num++ ) {
+        if (DW_epqmi_sol_vars(epqmi_, sol_num, var, &valid )) 
+        {
+            DL;printf(" DW error\n");
+            exit(9);
         }
-        Q[i] = qtmp;
+        if ( valid ) break;
     }
+    if ( ! valid ) 
+    { 
+        DW_epqmi_sol_vars(epqmi_, 0, var, &valid ) ;
+        if (Verbose_ > 3) {
+            DL;printf(" DW invalid, no valid solutions\n");
+            printf("\nBits set after Dwave solver   ");
+            for (i = 0; i < maxNodes; i++) printf("%d", Q[i]);
+            printf("\n");
+        }
+    } 
+
+    for ( int i=0; i < maxNodes; i++) {
+        Q[i]=var[i];
+    }
+
     if (Verbose_ > 3) {
         printf("\nBits set after Dwave solver   ");
         for (i = 0; i < maxNodes; i++) printf("%d", Q[i]);
         printf("\n");
     }
-    fclose(fr);
+#endif
 
     return;
 }
 
 void dw_close()
 {
-
-    sprintf(DWcommand, "rm -f %s/qbs%d* \n", tmp_path, my_pid_);
-
-    if (Verbose_ > 2) printf("%s", DWcommand);
-
-    if (system(DWcommand) != 0 ) {
-        DL; printf("system call error,%s", DWcommand);
-    } // clean up the /tmp directory
-
-    sprintf(DWcommand, "rm -f %s/%s/qbs%d.* \n", workspace, ws_tmp_path, my_pid_);
-
-    if (system(DWcommand) != 0 ) {
-        DL; printf("system call error,%s", DWcommand);
-    } // clean up the dw full.x directory
-
-    if (Verbose_ > 2) printf("%s", DWcommand);
-
     return;
 }

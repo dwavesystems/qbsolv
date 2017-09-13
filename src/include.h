@@ -27,7 +27,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
-#define  VERSION    "open source 2.4"
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#define  VERSION    "open source 2.5"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -35,12 +37,19 @@
 #define BIGNEGFP -1.225E308
 #define flt_equals(a, b) (fabs((a) - (b)) < EPSILON)
 
-#define GETMEM(P, T, N) (P = (T*)malloc(sizeof(T) * (N)))
+#define GETMEM(P, T, N) (P = (T*)malloc((sizeof(T) * N)))
 #define BADMALLOC {printf("\n  ------> Exit(%d) called by %s(%s.%d)\n\n", 9, __func__, __FILE__, __LINE__); exit(9); }
 #define DL printf("-----> AT %s(%s.%d)\n",  __func__, __FILE__, __LINE__);
 #define CPSECONDS ((double)(clock() - start_) / CLOCKS_PER_SEC)
 #define DLT printf("%lf seconds ", CPSECONDS);
 #define uint unsigned int
+#if _WIN32
+#define LONGFORMAT "lld"
+#elif defined (__unix__) || defined (__HAIKU__)
+#define LONGFORMAT "ld"
+#elif defined (__APPLE__)
+#define LONGFORMAT "lld"
+#endif
 
 
 // ----------------------- STRUCTs -------------------------------------
@@ -111,6 +120,9 @@ void dw_init( );
 void dw_solver( double **val, int maxNodes, int8_t *Q );
 void dw_close();
 void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size, double **sub_qubo, int8_t *solution, int8_t *sub_solution);
+#if _WIN32
+size_t getline(char **lineptr, size_t *n, FILE *stream) ;
+#endif
 #ifdef __cplusplus
 }
 #endif
