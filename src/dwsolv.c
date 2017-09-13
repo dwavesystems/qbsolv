@@ -108,7 +108,7 @@ void dw_init()
     char filename_epqmi_max[256];
     sprintf(filename_epqmi_max, "%s/%s/.epqmi_max", workspace, ws_tmp_path); // find the size of embedded file
     if ((fs = fopen(filename_epqmi_max, "r")) == NULL) {
-        printf(" no file %s\n", filename_epqmi_max);
+        printf("No pre-embedding found, and hardware execution (-S 0) requested %s\n", filename_epqmi_max);
         exit(9);
     }
 
@@ -127,7 +127,7 @@ void dw_init()
     //if ( (sysResult = setenv("DW_INTERNAL__WSPATH", ws_tmp_path, 1)) != 0 ) {
     if ( (sysResult = putenv(put_str)) != 0 ) {
         printf(" result of call %d\n", sysResult);
-        printf(" Error making putenv call %s \n", put_str);
+        printf(" Error making putenv call to set DW path to pre embeddings %s \n", put_str);
         DL; printf(" putenv command failed \n");
         exit(9);
     }

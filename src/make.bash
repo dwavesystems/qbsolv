@@ -47,6 +47,7 @@ fi
 # always a clean build. Why not, compilers are fast enough for such a small program.
 
 c_flags="-Wall -Ofast -Wextra -std=gnu99 "
+#"-fopenmp-use-tls"
 
 if [ "${env}" == "LOCAL" ]
 then   # make a set of stubs to satisfy the qOp calls
@@ -73,7 +74,6 @@ then
     echo "build for windoze"
 fi
 
-rm -f *.o
 
 l_flags="-lm ${epqmi_lib} ${dw_lib} ${link_lib} "
 

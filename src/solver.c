@@ -591,9 +591,8 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
     //int8_t  *sub_solution, *Qt_s, *Qbest;
     int8_t  *Qbest;
     double best_energy;
-    int    *Icompress, *Pcompress;
+    int    *Pcompress;
 
-    if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
     if (GETMEM(Pcompress, int, qubo_size) == NULL) BADMALLOC
     // initialize and set some tuning parameters
     //
@@ -726,6 +725,10 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
             }
         } else {
             int change=0;
+            { // scope of parallel region
+            int t_change=0;
+            int *Icompress;
+            if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
             for (l = 0; l < l_max; l += subMatrix) {
                 if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
                     if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
@@ -744,9 +747,15 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
                         Icompress[j++] = Pcompress[i]; // create compression index
                     }
                 }
-                change=change+reduce_solve_projection( Icompress, qubo, qubo_size, subMatrix, solution );
+                t_change=reduce_solve_projection( Icompress, qubo, qubo_size, subMatrix, solution );
+                // do the following in a critical region
+
+                change=change+t_change;
                 numPartCalls++;
                 DwaveQubo++;
+                // end critical region
+            }
+            free ( Icompress ) ;
             }
 
             // submatrix search did not produce any new values, so randomize those bits
@@ -858,7 +867,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats)
 
     free(solution); free(tabu_solution); free(flip_cost);
     free(index); free(TabuK); free(energy_list); free(solution_counts); free(Qindex); 
-    free(Icompress); free(Pcompress);
+    free(Pcompress);
     free(qubo); 
     free(solution_list);
     return;
