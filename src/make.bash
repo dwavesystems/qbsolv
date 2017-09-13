@@ -46,7 +46,7 @@ fi
 
 # always a clean build. Why not, compilers are fast enough for such a small program.
 
-c_flags="-Wall -Ofast -Wextra -std=gnu99"
+c_flags="-Wall -Ofast -Wextra -std=gnu99 "
 
 if [ "${env}" == "LOCAL" ]
 then   # make a set of stubs to satisfy the qOp calls

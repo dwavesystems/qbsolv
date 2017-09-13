@@ -29,7 +29,7 @@
 #include <time.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
-#define  VERSION    "open source 2.4"
+#define  VERSION    "open source 2.5"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))

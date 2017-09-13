@@ -98,7 +98,9 @@ void dw_init()
         DW_setup_error = true;
     }
     if ( DW_setup_error == true ) {
-        printf(" dw not setup not complete, and -S 0 set \n");
+        printf(" dw setup not complete, and -S 0 set \n");
+        printf(" if your pre-embeddings are not set up correctly contact \n");
+        printf(" your system adminstrator.\n");
         DL; printf(" Exiting\n");
         exit(9);
     }
@@ -179,10 +181,10 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
     float param_values[maxNodes*maxNodes];
 
     // dwave finds minimum, while our tabu finds max, so send negative to dwave
-    for (int i = 0; i < maxNodes; i++) {
-        param_values[i]= -val[i][i];
-    }  // move the QUBO into param_values
     int k=0;
+    for (int i = 0; i < maxNodes; i++) {
+        param_values[k++]= -val[i][i];
+    }  // move the QUBO into param_values
     for (int i = 0; i < maxNodes; i++) {
         for (int j = i + 1; j < maxNodes; j++) {
             param_values[k++]= -val[i][j];
@@ -193,13 +195,13 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
     // bind to .epqmi
     DW_epqmi_bind(epqmi_,param_values );
     
-    if ( DW_epqmi_exec(epqmi_, 20))
+    if ( DW_epqmi_exec(epqmi_, 25))
     {
         DL;printf(" error execution of DW_epqmi_bind \n" );
         exit(9);
     }
 
-    int solutions;
+    int solutions=0;
     if (DW_epqmi_sols( epqmi_, &solutions ) )
     { 
         DL;printf(" error execution of DW_epqmi_sols \n"); 
@@ -209,13 +211,24 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
     int valid=1;
     int sol_num=0;
 
-    while ( valid != 0 ) {
+    for ( sol_num=0 ; sol_num < solutions ; sol_num++ ) {
         if (DW_epqmi_sol_vars(epqmi_, sol_num, var, &valid )) 
         {
-            DL;printf(" DW error \n");
+            DL;printf(" DW error\n");
             exit(9);
         }
+        if ( valid ) break;
     }
+    if ( ! valid ) 
+    { 
+        DW_epqmi_sol_vars(epqmi_, 0, var, &valid ) ;
+        if (Verbose_ > 3) {
+            DL;printf(" DW invalid, no valid solutions\n");
+            printf("\nBits set after Dwave solver   ");
+            for (i = 0; i < maxNodes; i++) printf("%d", Q[i]);
+            printf("\n");
+        }
+    } 
 
     for ( int i=0; i < maxNodes; i++) {
         Q[i]=var[i];

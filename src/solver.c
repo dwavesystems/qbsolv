@@ -491,6 +491,10 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 
     reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
     // solve
+    if (Verbose_ > 3) { 
+        printf("\nBits set before solver        "); 
+        for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]); 
+    }
     if ( UseDwave_ ) {
         dw_solver(sub_qubo, subMatrix, sub_solution);
     }else {
