@@ -211,7 +211,28 @@ int  main( int argc,  char *argv[])
     }
     numsolOut_=0;
     print_opts(maxNodes_);
-    solve(val, maxNodes_, nRepeats);
+
+    // get some memory for storing and shorting Q bit vectors
+    int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
+    if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
+        QLEN=20; // don't need a big que for this optimization
+    } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
+        QLEN=75; // this need a lot of diversity
+    }
+    
+    int8_t  **solution_list;
+    double *energy_list;
+    int    *solution_counts, *Qindex;
+
+    solution_list = (int8_t**)malloc2D(QLEN + 1, maxNodes_, sizeof(int8_t));
+    if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
+    if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
+    if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
+    
+    solve(val, maxNodes_, nRepeats, solution_list, energy_list, solution_counts, Qindex, QLEN);
+    
+    free(solution_list); free(energy_list); free(solution_counts); free(Qindex);
+    free(val);
 
     if ( UseDwave_ ) {
         dw_close();
