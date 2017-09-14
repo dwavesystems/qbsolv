@@ -234,11 +234,6 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
         Q[i]=var[i];
     }
 
-    if (Verbose_ > 3) {
-        printf("\nBits set after Dwave solver   ");
-        for (i = 0; i < maxNodes; i++) printf("%d", Q[i]);
-        printf("\n");
-    }
 #endif
 
     return;

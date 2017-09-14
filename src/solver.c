@@ -489,11 +489,13 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
     reduce(Icompress, qubo, subMatrix, qubo_size, sub_qubo, solution, sub_solution);
     // solve
     if (Verbose_ > 3) { 
-        printf("\nBits set before solver        "); 
+        printf("\nBits set before solver "); 
         for (int j = 0; j < subMatrix; j++) printf("%d", solution[Icompress[j]]); 
     }
     if ( UseDwave_ ) {
         dw_solver(sub_qubo, subMatrix, sub_solution);
+        int64_t sub_bit_flips=0;  //  run a local search with higher precision than the Dwave
+        local_search(sub_solution, subMatrix, sub_qubo,flip_cost, &sub_bit_flips);
     }else {
         bit_flips=0;
         for (int i = 0;i<subMatrix;i++ ) {
@@ -508,6 +510,11 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
                     //sprintf(subqubofile,"subqubo%05ld.qubo",numPartCalls);
                     //write_qubo(sub_qubo,subMatrix,subqubofile);
     // projection
+    if (Verbose_ > 3) { 
+        printf("\nBits set after solver  "); 
+        for (int j = 0; j < subMatrix; j++) printf("%d", sub_solution[j]); 
+        printf("\n");
+    }
     for (int j = 0; j < subMatrix; j++) {
         int bit = Icompress[j];
         if (solution[bit] != sub_solution[j] ) change++;
@@ -740,8 +747,8 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
             free ( Icompress ) ;
             }
 
-            // submatrix search did not produce any new values, so randomize those bits
-            if (change == 0) {
+            // submatrix search did not produce enough new values, so randomize those bits
+            if (change <= 2) {
                 if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
                     randomize_solution_by_index(solution, l, index );
                 } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
@@ -749,7 +756,7 @@ void solve(double **qubo, const int qubo_size, int nRepeats, int8_t **solution_l
                     randomize_solution_by_index(solution, len_index, Pcompress );
                 }
                 if (Verbose_ > 3) {
-                    printf(" Submatrix search did not produce any new values, so randomize %d bits\n",l);
+                    printf(" Submatrix search did not produce enough new values, so randomize %d bits\n",l);
                 } else {
                     if (Verbose_ > 3) {
                         printf("Number of solution Bits changed %d \n ",change);

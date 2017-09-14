@@ -48,10 +48,12 @@ def run_qbsolv(Q, repeats=50,
     global algo_
     cdef int n_solutions = 20  # the maximimum number of solutions returned
     if algorithm is None or algorithm == ENERGY_IMPACT:
-        algo_ = "o"
+        algo_[0] = "o"
+        algo_[1] = 0
         # n_solutions = 20
     elif algorithm == SOLUTION_DIVERSITY:
-        algo = "d"
+        algo_[0] = "d"
+        algo_[1] = 0
         n_solutions = 70
     else:
         raise ValueError('unknown algorithm given')
