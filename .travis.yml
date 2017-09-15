@@ -23,7 +23,7 @@ install:
 
 script:
   - cd src
-  - ./make.bash
+  - make
   - cd ../tests
   - make test CC=$(CC) CXX=$(CXX)
   - mv *.gcno ../
