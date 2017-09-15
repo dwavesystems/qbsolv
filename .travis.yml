@@ -1,0 +1,33 @@
+language: c
+sudo: false
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    packages:
+      - libgtest-dev
+
+before_install:
+  - pip install --user cpp-coveralls
+
+install:
+  - mkdir ~/gtest
+  - cd ~/gtest
+  - export LIBRARY_PATH=$(pwd)
+  - cmake -D CMAKE_INSTALL_PREFIX:PATH=./ /usr/src/gtest/
+  - make CC=$(CC) CXX=$(CXX)
+  - cd -
+
+script:
+  - cd src
+  - make
+  - cd ../tests
+  - make test CC=$(CC) CXX=$(CXX)
+  - mv *.gcno ../
+  - cd ..
+
+after_success:
+  - coveralls --exclude tests --gcov-options '\-lp'

@@ -68,7 +68,7 @@ void randomize_pop_solution(int8_t *solution, int nbits)
 
     for (int i = 0; i < nbits; i++) {
         if (rand() < pop_ran ) {
-            solution[i] = 1; 
+            solution[i] = 1;
         } else {
             solution[i] = 0;
         }
@@ -87,7 +87,7 @@ void randomize_pop_solution_by_index(int8_t *solution, int nbits, int *indices )
 
     for (int i = 0; i < nbits; i++) {
         if (rand() < pop_ran ) {
-            solution[indices[i]] = 1; 
+            solution[indices[i]] = 1;
         } else {
             solution[indices[i]] = 0;
         }
@@ -413,7 +413,7 @@ bool is_array_equal( int8_t *solution_a, int8_t *solution_b, int nbits)
 //@param  solution_A = bit vector solution
 //@param  solution_B = bit vector solution
 //@param  nbits = length of the solution vectors
-//@param  index is integer index vector of (index_solution_diff) length, will be ordered 
+//@param  index is integer index vector of (index_solution_diff) length, will be ordered
 //      small to large
 //  ndiff number of differences between solution_A and B,, returned value
 //
@@ -432,13 +432,13 @@ int index_solution_diff( int8_t *solution_A, int8_t *solution_B, int nbits , int
 }
 
 //  count, bit by bit between solutions and return the solution of the value where
-//  they differ in index[] ( any one of the solutions not same as any other ).  
+//  they differ in index[] ( any one of the solutions not same as any other ).
 //@param  popularSol[nbits] = bit vector solution, most popular setting on a bit
 //@param  solution[num_solutions][nbits] = bit vector solution
 //@param  num_solutions number of solutions in solution
 //@param  nbits = length of the solution vectors
-//@param  sol_index is integer index vector of solution differences, will be ordered 
-//@param  bias   between 0 and (num_solutions/2)   pattern = (5,2) (6,3) (7,3) (8,4) 
+//@param  sol_index is integer index vector of solution differences, will be ordered
+//@param  bias   between 0 and (num_solutions/2)   pattern = (5,2) (6,3) (7,3) (8,4)
 //               ex bias=0 only all set to X, set to X, any set to Y , set to Y ( Y, X can be 0 or 1)
 //               ex bias=1 all but 1 set to X, set to X , more than 1 set to Y, set to Y
 void solution_population( int8_t *popularSol, int8_t **solution, int num_solutions, int nbits , int *sol_index, int bias )
@@ -448,9 +448,9 @@ void solution_population( int8_t *popularSol, int8_t **solution, int num_solutio
         sum_bits=0;
         for ( j=0; j< num_solutions; j++ ) {
           sum_bits+= solution[sol_index[j]][i];
-        } 
+        }
         //  ex. all bits set to 1, sum_bits = num_solutions, if all 0 sum_bits = 0
-        //    if > num_solutions/2 it is mirroring differences 
+        //    if > num_solutions/2 it is mirroring differences
             popularSol[i]=0;
             if ( sum_bits >= num_solutions/2 ) popularSol[i]=1;// more than 1/2 1's
         if ( sum_bits > (int) ((num_solutions+1)/2)-1 ) {
@@ -463,20 +463,20 @@ void solution_population( int8_t *popularSol, int8_t **solution, int num_solutio
                 popularSol[i]=1;
             }
         }
-        // now sum_bits = number of differences,, 
+        // now sum_bits = number of differences,,
     }
     return ;
 }
 //  compare, bit by bit between solutions and save the index of the value where
-//  they differ in index[] ( any one of the solutions not same as any other ).  
+//  they differ in index[] ( any one of the solutions not same as any other ).
 //      Return the number of values in the index vector
 //@param  solution[num_solutions][nbits] = bit vector solution
 //@param  num_solutions number of solutions in solution
 //@param  nbits = length of the solution vectors
-//@param  index is integer index vector of solution differences, will be ordered 
+//@param  index is integer index vector of solution differences, will be ordered
 //@param  delta_bits is integer to compare with to establish backbone in index.  if = 0 , all bits must be same, if =1, all but
 //            one bit must be the same for that column of  bits, and so on.  delta_bits  >= 0 and <= num_solutions/2
-//@param  sol_index is integer index vector of (index_solution_diff)  it is used to index into which solutions to 
+//@param  sol_index is integer index vector of (index_solution_diff)  it is used to index into which solutions to
 //              look at,, so that you might compare only a few of the solutions
 //      small to large
 //  ndiff number of differences between solution(s),, returned value
@@ -488,11 +488,11 @@ int mul_index_solution_diff( int8_t **solution, int num_solutions, int nbits , i
         sum_bits=0;
         for ( j=0; j< num_solutions; j++ ) {
           sum_bits+= solution[sol_index[j]][i];
-        } 
+        }
         //  ex. all bits set to 1, sum_bits = num_solutions, if all 0 sum_bits = 0
-        //    if > num_solutions/2 it is mirroring differences 
+        //    if > num_solutions/2 it is mirroring differences
         if ( sum_bits > (int) ((num_solutions+1)/2)-1) sum_bits = num_solutions - sum_bits;
-        // now sum_bits = number of differences,, 
+        // now sum_bits = number of differences,,
         if ( sum_bits > delta_bits )  {
                 index[ndiff++] = i;   // this bit is different by more than delta_bits
         }
@@ -508,7 +508,7 @@ int mul_index_solution_diff( int8_t **solution, int num_solutions, int nbits , i
 //@param  energy_list is the 1d array of energies corresponding to solution_lists
 //@param  num_solutions number of solutions in solution
 //@param  nbits = length of the solution vectors
-//@param  index is integer index vector of (index_solution_diff) length, will be ordered 
+//@param  index is integer index vector of (index_solution_diff) length, will be ordered
 //      small to large
 //  ndiff number of differences between solution(s),, returned value
 //
@@ -714,7 +714,7 @@ void write_qubo(double **qubo, int nMax, const char *filename)
                     return 0.0;
 
             double factor = pow(10.0, digits - ceil(log10(fabs(value))));
-                return round(value * factor) / factor;   
+                return round(value * factor) / factor;
 }*/
 #if _WIN32
 /* This code is public domain -- Will Hartung 4/9/09 */

@@ -148,7 +148,7 @@ int  main( int argc,  char *argv[])
                 }
             }
 
-            UseDwave_ = false;   // explicit setting of Submatrix says to use tabu solver, regardless of other 
+            UseDwave_ = false;   // explicit setting of Submatrix says to use tabu solver, regardless of other
             if ( SubMatrix_ == 0 ) {
                 UseDwave_ = true; // except where -S 0
             }
@@ -207,7 +207,7 @@ int  main( int argc,  char *argv[])
     fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
 
     if ( UseDwave_ ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
-        dw_init();  
+        dw_init();
     }
     numsolOut_=0;
     print_opts(maxNodes_);
@@ -219,7 +219,7 @@ int  main( int argc,  char *argv[])
     } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
         QLEN=75; // this need a lot of diversity
     }
-    
+
     int8_t  **solution_list;
     double *energy_list;
     int    *solution_counts, *Qindex;
@@ -228,9 +228,13 @@ int  main( int argc,  char *argv[])
     if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
-    
-    solve(val, maxNodes_, nRepeats, solution_list, energy_list, solution_counts, Qindex, QLEN);
-    
+
+    parameters_t param = default_parameters();
+    param.repeats = nRepeats;
+    if(UseDwave_) param.sub_sampler = &dw_sub_sample;
+
+    solve(val, maxNodes_, solution_list, energy_list, solution_counts, Qindex, QLEN, param);
+
     free(solution_list); free(energy_list); free(solution_counts); free(Qindex);
     free(val);
 
@@ -296,7 +300,7 @@ void  print_help(void)
            "\t\tthe value will default to (47) and will use the tabu solver\n"
            "\t\tfor subproblem solutions.  If a value is specified, qbsolv uses\n"
            "\t\tthat value to create subproblem and solve with the tabu solver. \n"
-           "\t-s  solutionIn   \n" 
+           "\t-s  solutionIn   \n"
            "\t\tIf present, this optional argument is a filename that is\n"
            "\t\tin the format of the first 2 records of the output solution file,\n"
            "\t\tthe solution read from this file will be the initial solution used\n"

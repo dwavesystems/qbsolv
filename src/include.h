@@ -53,19 +53,32 @@
 
 
 // ----------------------- STRUCTs -------------------------------------
+
 struct nodeStr_ {
     int32_t n1, n2;
     double value;
 };
+
 struct sol_man_rslt {
     int code;
     int count;
     int pos;
 };
 
+// typedef struct sub_parameters_t {
+//     // int8_t * current_best;
+// } sub_parameters_t;
+
+typedef void (*SubSampler)(double**, int, int8_t*);
+typedef struct parameters_t {
+    int32_t repeats;
+    SubSampler sub_sampler;
+} parameters_t;
+parameters_t default_parameters();
+
 // ------------------- Prototypes --------------------------------------
 enum  // of codes for sol_rslt.code
-{   
+{
     NOTHING = 0,                    // nothing new, do nothing
     NEW_HIGH_ENERGY_UNIQUE_SOL = 1, // solution is unique, highest new energy
     DUPLICATE_HIGHEST_ENERGY = 2,   // two cases, solution is unique, duplicate energy
@@ -78,12 +91,13 @@ enum  // of codes for sol_rslt.code
 extern "C" {
 #endif
 
-
-int   main( int argc,  char *argv[]);
 int   read_qubo(const char *inFileName, FILE *inFile);
 void  write_qubo(double **val, int nMax, const char *filename);
-void  solve( double **val,  int maxNodes, int nRepeats, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN);
-// void  solve( double **val,  int maxNodes, int nRepeats);
+
+void  solve( double **val,  int maxNodes, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN, parameters_t);
+void  dw_sub_sample(double**, int, int8_t*);
+void  tabu_sub_sample(double**, int, int8_t*); 
+
 void  **malloc2D(uint rows, uint cols, uint size  );
 void  fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes, int nNodes, struct nodeStr_ *couplers, int nCouplers);
 void  print_qubo_format( void);
