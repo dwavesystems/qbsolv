@@ -73,6 +73,7 @@ typedef void (*SubSampler)(double**, int, int8_t*);
 typedef struct parameters_t {
     int32_t repeats;
     SubSampler sub_sampler;
+    int32_t sub_size;
 } parameters_t;
 parameters_t default_parameters();
 
@@ -96,7 +97,7 @@ void  write_qubo(double **val, int nMax, const char *filename);
 
 void  solve( double **val,  int maxNodes, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN, parameters_t);
 void  dw_sub_sample(double**, int, int8_t*);
-void  tabu_sub_sample(double**, int, int8_t*); 
+void  tabu_sub_sample(double**, int, int8_t*);
 
 void  **malloc2D(uint rows, uint cols, uint size  );
 void  fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes, int nNodes, struct nodeStr_ *couplers, int nCouplers);
@@ -116,8 +117,8 @@ double just_evaluate(int8_t *Q, int maxNodes, double **val);
 double roundit(double x, int N);
 void  check_row_col_qval(int8_t *Q, int maxNodes, double **val, double *Qval, double *Row, double *Col);
 void  check_Qval(int8_t *Q, int maxNodes, double **val, double *Qval);
-void  print_opts( );
-void  print_output(int maxNodes, int8_t *Q, long numPartCalls, double energy, double seconds);
+// void  print_opts(parameters_t*);
+void  print_output(int maxNodes, int8_t *Q, long numPartCalls, double energy, double seconds, parameters_t*);
 void  quick_sort_iterative_index(double arr[], int ind[], int n, int stack[]);
 void  val_index_sort(int *index, double *val, int n);
 void  val_index_sort_ns(int *index, double *val, int n);

@@ -473,16 +473,11 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
 // @param @param[in,out] solution inputs a current solution and returns the projected solution
 // @param[out] stores the new, projected solution found during the algorithm
 
-int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution, parameters_t param)
+int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution, parameters_t *param)
 {
     int change=0;
-    //get scratch memory needed by tabu solver
     int8_t sub_solution[subMatrix];
-    // int8_t current_best[subMatrix];
     double **sub_qubo;
-    // double flip_cost[subMatrix];
-    // int64_t bit_flips;
-    // int *index;
 
     sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
 
@@ -495,12 +490,9 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
 
     for (int i = 0; i < subMatrix; i++) {
         sub_solution[i] = solution[Icompress[i]];
-        // current_best[i] = solution[Icompress[i]];
     }
 
-
-    param.sub_sampler(sub_qubo, subMatrix, sub_solution);
-
+    param->sub_sampler(sub_qubo, subMatrix, sub_solution);
 
     // modification to write out subqubos
     //char subqubofile[sizeof "subqubo10000.qubo"];
@@ -554,8 +546,9 @@ void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution){
 // Define the default set of parameters for the solve routine
 parameters_t default_parameters(){
     parameters_t param;
-    param.repeats = 10;
+    param.repeats = 50;
     param.sub_sampler = &tabu_sub_sample;
+    param.sub_size = 47;
     return param;
 }
 
@@ -623,9 +616,9 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     const int64_t InitialTabuPass_factor=6500;  // initial pass factor for tabu iterations
     const int64_t TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
 
-    int MaxNodes_sub = MAX(SubMatrix_ + 1, SubMatrix_span * qubo_size);
-    int subMatrix    = SubMatrix_;
-    int l_max        = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
+    const int subMatrix    = param.sub_size;
+    int MaxNodes_sub = MAX(subMatrix + 1, SubMatrix_span * qubo_size);
+    int l_max        = MIN(qubo_size - subMatrix, MaxNodes_sub);
     int len_index;
 
     randomize_solution(tabu_solution, qubo_size);
@@ -661,7 +654,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         //
         len_index=0;
         int pass=0;
-        while (len_index < MIN(1*SubMatrix_,qubo_size/2)  ) {
+        while (len_index < MIN(1*subMatrix,qubo_size/2)  ) {
             //DL;printf(" len_index %d %d \n",len_index,pass);
             randomize_solution(solution, qubo_size);
             energy = local_search( solution, qubo_size,  qubo, flip_cost, &bit_flips);
@@ -690,7 +683,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     }
     val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
     if ( Verbose_ > 0 ) {
-        print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS);
+        print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS, &param);
     }
     if (Verbose_ > 1) {
         DLT; printf(" V Starting outer loop =%lf iterations %"LONGFORMAT"\n", best_energy * sign, bit_flips);
@@ -725,7 +718,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             // initial TabuK to nothing tabu sub_solution[i] = Q[i];
             // create compression bit vector
             val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
-            l_max = MIN(qubo_size - SubMatrix_, MaxNodes_sub);
+            l_max = MIN(qubo_size - subMatrix, MaxNodes_sub);
             if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n",
                                  l_max, subMatrix);
         } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
@@ -769,7 +762,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
                         Icompress[j++] = Pcompress[i]; // create compression index
                     }
                 }
-                t_change=reduce_solve_projection( Icompress, qubo, qubo_size, subMatrix, solution, param);
+                t_change=reduce_solve_projection( Icompress, qubo, qubo_size, subMatrix, solution, &param);
                 // do the following in a critical region
 
                 change=change+t_change;
@@ -828,7 +821,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
                 DLT; printf(" IMPROVEMENT; RepeatPass set to %d\n", RepeatPass);
             }
             if ( Verbose_ > 0 ) {
-                print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS);
+                print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS, &param);
             }
         } else if ( result.code == DUPLICATE_ENERGY || result.code == DUPLICATE_HIGHEST_ENERGY  ) { // equal solution, but it is different
             if ( result.pos > 4  ||   result.count > 8 ) {
@@ -840,7 +833,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             }
             if ( result.code == DUPLICATE_HIGHEST_ENERGY && result.count == 1 ) {
                 if ( Verbose_ > 0 ) {
-                    print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS);
+                    print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS, &param);
                 }
             }
         } else if ( result.code == NOTHING ) { // not as good as our worst so far
@@ -884,7 +877,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         Qbest=&solution_list[Qindex[0]][0];
         best_energy=energy_list[Qindex[0]];
         //    printf(" evaluated solution %8.2lf\n",sign*Simple_evaluate(Qbest,  qubo_size, qubo));
-        print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS);
+        print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS, &param);
     }
 
     free(solution); free(tabu_solution); free(flip_cost);

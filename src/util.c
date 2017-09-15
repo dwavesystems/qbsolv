@@ -158,20 +158,20 @@ void print_solution_and_qubo(int8_t *solution, int maxNodes, double **qubo)
 }
 //  This routine prints without \n the options for the run
 //
-void print_opts(int maxNodes)
+void print_opts(int maxNodes, parameters_t* param)
 {
     fprintf(outFile_, "%d bits, ", maxNodes);
-    if ( UseDwave_ ) {
-        fprintf(outFile_,"Quantum solver,");
-    }else {
-        fprintf(outFile_,"Classical tabu solver,");
-    }
+    // if ( UseDwave_ ) {
+    //     fprintf(outFile_,"Quantum solver,");
+    // }else {
+    //     fprintf(outFile_,"Classical tabu solver,");
+    // }
     if ( findMax_ ) {
         fprintf(outFile_," find Max,");
     }else {
         fprintf(outFile_," find Min,");
     }
-    fprintf(outFile_," SubMatrix= %d,",SubMatrix_);
+    fprintf(outFile_," SubMatrix= %d,", param->sub_size);
     fprintf(outFile_," -a %s,",algo_);
     if ( TargetSet_ )  fprintf(outFile_, " Target of %8.5f,", Target_);
     fprintf(outFile_," timeout=%9.1f sec\n",Time_);
@@ -180,12 +180,12 @@ void print_opts(int maxNodes)
 
 //  This routine performs the standard output for qbsolv
 //
-void print_output(int maxNodes, int8_t *solution, long numPartCalls, double energy, double seconds)
+void print_output(int maxNodes, int8_t *solution, long numPartCalls, double energy, double seconds, parameters_t* param)
 {
     int i;
 
     if ( numsolOut_ > 0 ) {
-        print_opts(maxNodes);
+        print_opts(maxNodes, param);
     }
     numsolOut_++;
     for (i = 0; i < maxNodes; i++) {

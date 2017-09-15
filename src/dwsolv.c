@@ -31,7 +31,7 @@ static DW_epqmi *epqmi_;
 
 char       *workspace, *connection, *wspath, *solver, ws_tmp_path[256], tmp_path[256];
 
-    // this is conditionally compiled as it needs externals supplied by Dwave tools group 
+    // this is conditionally compiled as it needs externals supplied by Dwave tools group
 
 int  DW_setup_error = false;
 int  sysResult;
@@ -117,7 +117,7 @@ void dw_init()
         DL; printf("fscanf error");
         exit(9);
     }
-    SubMatrix_ = S_embed;
+    int subMatrix = S_embed;
     fclose(fs);
     // use putenv instead of setenv
     int len_put = strlen(ws_tmp_path) +1 + strlen("DW_INTERNAL__WSPATH") +1;
@@ -135,15 +135,15 @@ void dw_init()
 
     wspath = getenv("DW_INTERNAL__WSPATH");  // read again, as it was set
 
-    if ( (SubMatrix_ < 10) | (SubMatrix_ > 100) ) {
-        DL; printf(" Retrieved an incorrect embedding size, %d  \n", SubMatrix_);
+    if ( (subMatrix < 10) | (subMatrix > 100) ) {
+        DL; printf(" Retrieved an incorrect embedding size, %d  \n", subMatrix);
         printf(" Exiting\n");
         exit(9);
     }
-    // this is conditionally compiled as it needs externals supplied by Dwave tools group 
+    // this is conditionally compiled as it needs externals supplied by Dwave tools group
 #if QOP
     epqmi_ = DW_epqmi_read(NULL);  // this call loads the pre-embedded qmi "epqmi"
-    if ( epqmi_ == NULL ) 
+    if ( epqmi_ == NULL )
     {
         DL; printf(" return from DW_epqmi_read was NULL\n");
         exit(9);
@@ -152,12 +152,12 @@ void dw_init()
 
     if (Verbose_ > 2) {
         DLT; DL;
-        if ( UseDwave_ ) {
-            printf(" UseDwave = true\n");
-        } else{
-            printf(" UseDwave = false\n");
-        }
-        printf(" SubMatrix_ = %d\n", SubMatrix_);
+        // if ( UseDwave_ ) {
+        //     printf(" UseDwave = true\n");
+        // } else{
+        //     printf(" UseDwave = false\n");
+        // }
+        printf(" SubMatrix_ = %d\n", subMatrix);
         printf(" %s %s \n", "DW_INTERNAL__WORKSPACE", workspace);
         printf(" %s %s \n", "DW_INTERNAL__CONNECTION", connection);
         printf(" %s %s \n", "DW_INTERNAL__WSPATH", wspath);
@@ -174,7 +174,7 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
      Q[1]=Q[maxNodes];  /// these statements will do nothing but kill off warnings from compiler
      exit(9);
      return;
-     //  
+     //
 #endif
 #if QOP
 
@@ -194,7 +194,7 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
 
     // bind to .epqmi
     DW_epqmi_bind(epqmi_,param_values );
-    
+
     if ( DW_epqmi_exec(epqmi_, 25))
     {
         DL;printf(" error execution of DW_epqmi_bind \n" );
@@ -203,24 +203,24 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
 
     int solutions=0;
     if (DW_epqmi_sols( epqmi_, &solutions ) )
-    { 
-        DL;printf(" error execution of DW_epqmi_sols \n"); 
-        exit(9); 
+    {
+        DL;printf(" error execution of DW_epqmi_sols \n");
+        exit(9);
     }
     char var[maxNodes];
     int valid=1;
     int sol_num=0;
 
     for ( sol_num=0 ; sol_num < solutions ; sol_num++ ) {
-        if (DW_epqmi_sol_vars(epqmi_, sol_num, var, &valid )) 
+        if (DW_epqmi_sol_vars(epqmi_, sol_num, var, &valid ))
         {
             DL;printf(" DW error\n");
             exit(9);
         }
         if ( valid ) break;
     }
-    if ( ! valid ) 
-    { 
+    if ( ! valid )
+    {
         DW_epqmi_sol_vars(epqmi_, 0, var, &valid ) ;
         if (Verbose_ > 3) {
             DL;printf(" DW invalid, no valid solutions\n");
@@ -228,7 +228,7 @@ void dw_solver(double **val, int maxNodes, int8_t *Q)
             for (i = 0; i < maxNodes; i++) printf("%d", Q[i]);
             printf("\n");
         }
-    } 
+    }
 
     for ( int i=0; i < maxNodes; i++) {
         Q[i]=var[i];
