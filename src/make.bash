@@ -39,7 +39,7 @@ else
     env="QOP"
 fi
 
-if [ -e ~/qOp/libepqmi.a ] 
+if [ -e ${DWAVE_HOME}/libepqmi.a ] 
 then
     env="QOP"
 fi
