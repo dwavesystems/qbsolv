@@ -31,8 +31,11 @@ int read_qubo(const char *inFileName, FILE *inFile)
     size_t linecap = 0;
     char   *line = NULL;
     char   token[50], tokenp[50];
-
+#if _WIN32
+    while ((lineLen = getline_win(&line, &linecap, inFile)) > 0 ) {
+#else
     while ((lineLen = getline(&line, &linecap, inFile)) > 0 ) {
+#endif
         lineNm++;
         if ( strncmp(line, "c", 1) == 0 || strncmp(line, "C", 1) == 0) {
             continue; // comment line in file

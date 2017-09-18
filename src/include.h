@@ -121,7 +121,7 @@ void dw_solver( double **val, int maxNodes, int8_t *Q );
 void dw_close();
 void reduce(int *Icompress, double **qubo, uint sub_qubo_size, uint qubo_size, double **sub_qubo, int8_t *solution, int8_t *sub_solution);
 #if _WIN32
-size_t getline(char **lineptr, size_t *n, FILE *stream) ;
+size_t getline_win(char **lineptr, size_t *n, FILE *stream) ;
 #endif
 #ifdef __cplusplus
 }

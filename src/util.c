@@ -721,7 +721,7 @@ void write_qubo(double **qubo, int nMax, const char *filename)
 #include <stdio.h>
 #include <stdlib.h>
 
-size_t getline(char **lineptr, size_t *n, FILE *stream) {
+size_t getline_win(char **lineptr, size_t *n, FILE *stream) {
     char *bufptr = NULL;
     char *p = bufptr;
     int size;
