@@ -4,7 +4,10 @@
 
 Compatible with Python 2 and 3
 
-`python setup.py install`
+```
+pip install -r requirements.txt
+python setup.py install
+```
 
 ## Example Usage
 
