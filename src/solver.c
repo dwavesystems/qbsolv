@@ -877,7 +877,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     if ( Verbose_ == 0 ) {
         Qbest=&solution_list[Qindex[0]][0];
         best_energy=energy_list[Qindex[0]];
-        //    printf(" evaluated solution %8.2lf\n",sign*Simple_evaluate(Qbest,  qubo_size, qubo));
+           // printf(" evaluated solution %8.2lf\n",sign*Simple_evaluate(Qbest,  qubo_size, qubo));
         print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS, &param);
     }
 
