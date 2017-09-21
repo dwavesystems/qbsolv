@@ -13,8 +13,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-#include "include.h"
+
 #include "extern.h"
+#include "macros.h"
 
 // read from inFile and parse the qubo file
 

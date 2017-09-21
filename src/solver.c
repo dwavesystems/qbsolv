@@ -12,8 +12,9 @@
  limitations under the License.
 */
 
-#include "include.h"
+#include "util.h"
 #include "extern.h"
+#include "dwsolv.h"
 #include <math.h>
 
 // This function Simply evaluates the objective function for a given solution.
@@ -583,7 +584,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     int64_t   bit_flips = 0,  IterMax;
 
     start_ = clock();
-    bit_flips      = 0;
+    bit_flips = 0;
 
     // Get some memory for the larger val matrix to solve
     if (GETMEM(solution, int8_t, qubo_size) == NULL) BADMALLOC

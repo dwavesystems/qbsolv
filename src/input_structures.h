@@ -13,18 +13,31 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// -------  GLOBAL Variables  ------------------------------------------
 #pragma once
 
-#include <stdio.h>
-#include "input_structures.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern FILE   *outFile_;
-extern FILE   *solution_input_;
-extern int    maxNodes_, nCouplers_, nNodes_, findMax_, start_, numsolOut_;
-extern int    Verbose_, TargetSet_, WriteMatrix_, Tlist_;
-extern char   *outFileNm_, pgmName_[16], algo_[4];
-extern double Target_, Time_;
+struct nodeStr_ {
+    int32_t n1, n2;
+    double value;
+};
 
-extern struct nodeStr_ *nodes_;
-extern struct nodeStr_ *couplers_;
+// The pointer type for subsolver.
+// Its arguments are:
+// - a 2d double array that is the sub-problem,
+// - the size of the sub problem
+// - a state vector: on input is the current best state, and should be set to the output state
+typedef void (*SubSolver)(double**, int, int8_t*);
+
+typedef struct parameters_t {
+    int32_t repeats;
+    SubSolver sub_sampler;
+    int32_t sub_size;
+} parameters_t;
+parameters_t default_parameters();
+
+#ifdef __cplusplus
+}
+#endif

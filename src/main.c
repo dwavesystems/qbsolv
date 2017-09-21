@@ -14,8 +14,14 @@
  limitations under the License.
 */
 
-#include "include.h"
+#include "util.h"
+#include "readqubo.h"
+#include "solver.h"
+#include "dwsolv.h"
 #include <getopt.h>
+
+void print_help();
+void print_qubo_format();
 
 // define what will be used by "extern" in other functions
 //
@@ -213,7 +219,7 @@ int  main( int argc,  char *argv[])
         param.sub_sampler = &dw_sub_sample;
     }
     numsolOut_=0;
-    print_opts(maxNodes_);
+    print_opts(maxNodes_, &param);
 
     // get some memory for storing and shorting Q bit vectors
     int QLEN=20 ;  // the max number of solutions to store in soltuion_lists

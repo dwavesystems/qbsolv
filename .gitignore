@@ -4,3 +4,4 @@ qbsolv
 *.exe
 *.gch
 *.stackdump
+*.gcno

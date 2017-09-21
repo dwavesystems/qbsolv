@@ -13,18 +13,22 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// -------  GLOBAL Variables  ------------------------------------------
 #pragma once
+#include <stdint.h>
+#include <stdbool.h>
 
-#include <stdio.h>
-#include "input_structures.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern FILE   *outFile_;
-extern FILE   *solution_input_;
-extern int    maxNodes_, nCouplers_, nNodes_, findMax_, start_, numsolOut_;
-extern int    Verbose_, TargetSet_, WriteMatrix_, Tlist_;
-extern char   *outFileNm_, pgmName_[16], algo_[4];
-extern double Target_, Time_;
+bool dw_established();
 
-extern struct nodeStr_ *nodes_;
-extern struct nodeStr_ *couplers_;
+void dw_init();
+
+void dw_close();
+
+void dw_solver(double **val, int maxNodes, int8_t *Q);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,9 +1,12 @@
 language: c
 sudo: false
 
-compiler:
-  - gcc
-  - clang
+matrix:
+  include:
+    - os: linux
+      env: C_COMPILER=gcc CXX_COMPILER=g++
+    - os: linux
+      env: C_COMPILER=clang CXX_COMPILER=clang++
 
 addons:
   apt:
@@ -12,6 +15,8 @@ addons:
 
 before_install:
   - pip install --user cpp-coveralls
+  - export CC=$(C_COMPILER)
+  - export CXX=$(CXX_COMPILER)
 
 install:
   - mkdir ~/gtest

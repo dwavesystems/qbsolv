@@ -13,18 +13,16 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// -------  GLOBAL Variables  ------------------------------------------
 #pragma once
 
 #include <stdio.h>
-#include "input_structures.h"
 
-extern FILE   *outFile_;
-extern FILE   *solution_input_;
-extern int    maxNodes_, nCouplers_, nNodes_, findMax_, start_, numsolOut_;
-extern int    Verbose_, TargetSet_, WriteMatrix_, Tlist_;
-extern char   *outFileNm_, pgmName_[16], algo_[4];
-extern double Target_, Time_;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern struct nodeStr_ *nodes_;
-extern struct nodeStr_ *couplers_;
+int read_qubo(const char *inFileName, FILE *inFile);
+
+#ifdef __cplusplus
+}
+#endif
