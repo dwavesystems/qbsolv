@@ -5,3 +5,6 @@ qbsolv
 *.gch
 *.stackdump
 *.gcno
+
+*.sublime-project
+*.sublime-workspace
