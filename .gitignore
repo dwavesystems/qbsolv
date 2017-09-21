@@ -8,3 +8,5 @@ qbsolv
 
 *.sublime-project
 *.sublime-workspace
+
+venv/
