@@ -20,7 +20,7 @@ class QBSolv(dimod.TemplateSampler):
 
     @dimod.decorators.qubo(1)
     @dimod.decorators.qubo_index_labels(1)
-    def sample_qubo(self, Q, n_repeats=50, seed=None, algorithm=None):
+    def sample_qubo(self, Q, n_repeats=50, seed=None, algorithm=None, **kwargs):
         """Samples low energy states defined by a QUBO using qbsolv.
 
         Args:
@@ -51,10 +51,10 @@ class QBSolv(dimod.TemplateSampler):
             raise ValueError("n_repeats must be a positive integer")
 
         # pose the QUBO to qbsolv
-        samples, energies, counts = run_qbsolv(Q, n_repeats, seed, algorithm=algorithm)
+        samples, energies, counts = run_qbsolv(Q, n_repeats, seed, algorithm=algorithm, **kwargs)
 
         # load the response
         response = dimod.BinaryResponse()
-        response.add_samples_from(samples, energies, ({'count': n} for n in counts))
+        response.add_samples_from(samples, sample_data=({'count': n} for n in counts), Q=Q)
 
         return response

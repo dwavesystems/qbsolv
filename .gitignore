@@ -10,3 +10,5 @@ qbsolv
 *.sublime-workspace
 
 venv/
+
+scatch.py
