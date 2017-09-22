@@ -51,7 +51,7 @@ class QBSolv(dimod.TemplateSampler):
             raise ValueError("n_repeats must be a positive integer")
 
         # pose the QUBO to qbsolv
-        samples, energies, counts = run_qbsolv(Q, n_repeats, seed, algorithm=algorithm, **kwargs)
+        samples, counts = run_qbsolv(Q, n_repeats, seed, algorithm=algorithm, **kwargs)
 
         # load the response
         response = dimod.BinaryResponse()

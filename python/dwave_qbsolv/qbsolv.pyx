@@ -48,8 +48,6 @@ def run_qbsolv(Q,
 
     # cdef int32_t repeats = num_repeats
     # params.repeats = repeats
-    print(params.repeats)
-
 
     # qbsolv relies on a number of global variables that need to be set before the algorithm can
     # be run, so let's go ahead and set them here.
