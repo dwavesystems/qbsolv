@@ -12,3 +12,7 @@ qbsolv
 venv/
 
 scratch.py
+
+python/build
+python/dwave_qbsolv/qbsolv.c
+*.so
