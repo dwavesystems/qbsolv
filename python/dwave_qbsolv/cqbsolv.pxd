@@ -13,12 +13,13 @@ cdef extern from "input_structures.h":
     #   -the size of the sub-problem
     #   -a state vector: on input is the current best state
     #       and should be set to the output state
-    ctypedef void (*SubSolver)(double**, int, int8_t*)
+    ctypedef void (*SubSolver)(double**, int, int8_t*, void*)
 
     cdef struct parameters_t:
         int32_t repeats
         SubSolver sub_sampler
         int32_t sub_size
+        void* sub_sampler_data
 
     parameters_t default_parameters()
 

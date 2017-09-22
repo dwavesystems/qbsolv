@@ -493,7 +493,7 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
         sub_solution[i] = solution[Icompress[i]];
     }
 
-    param->sub_sampler(sub_qubo, subMatrix, sub_solution);
+    param->sub_sampler(sub_qubo, subMatrix, sub_solution, param->sub_sampler_data);
 
     // modification to write out subqubos
     //char subqubofile[sizeof "subqubo10000.qubo"];
@@ -515,14 +515,14 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
     return change;
 }
 
-void dw_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution){
+void dw_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution, void*sub_sampler_data){
     dw_solver(sub_qubo, subMatrix, sub_solution);
     int64_t sub_bit_flips=0;  //  run a local search with higher precision than the Dwave
     double flip_cost[subMatrix];
     local_search(sub_solution, subMatrix, sub_qubo, flip_cost, &sub_bit_flips);
 }
 
-void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution){
+void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution, void*sub_sampler_data){
     int *TabuK;
     int *index;
     double flip_cost[subMatrix];
@@ -550,6 +550,7 @@ parameters_t default_parameters(){
     param.repeats = 50;
     param.sub_sampler = &tabu_sub_sample;
     param.sub_size = 47;
+    param.sub_sampler_data = NULL;
     return param;
 }
 

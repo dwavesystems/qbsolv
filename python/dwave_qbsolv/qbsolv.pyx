@@ -1,5 +1,6 @@
 import sys
 import random
+import logging
 
 from libc.stdint cimport int8_t, int64_t, int32_t
 from libc.stdio cimport stdout
@@ -18,8 +19,11 @@ if PY2:
 else:
     iteritems = lambda d: d.items()
 
-def run_qbsolv(Q,
-               seed=17932241798878, num_repeats=50, verbosity=-1, algorithm=None, timeout=2592000):
+log = logging.getLogger(__name__)
+
+
+def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
+               algorithm=None, timeout=2592000):
     """TODO: update
 
     Runs qbsolv.
@@ -31,7 +35,7 @@ def run_qbsolv(Q,
             repeat the main loop in qbsolv after determining a better
             sample. Default 50.
         seed (int, optional): Random seed. Default None.
-        algorithm (int, optional): Which algorithm to use. Defaut
+        algorithm (int, optional): Which algorithm to use. Default
             None. Algorithms numbers can be imported from module
             under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
 
@@ -46,8 +50,9 @@ def run_qbsolv(Q,
     # first up, we want the default parameters for the solve function.
     params = default_parameters()
 
-    # cdef int32_t repeats = num_repeats
-    # params.repeats = repeats
+    log.debug('params.repeats = %d', num_repeats)
+    cdef int32_t repeats = num_repeats
+    params.repeats = repeats
 
     # qbsolv relies on a number of global variables that need to be set before the algorithm can
     # be run, so let's go ahead and set them here.
@@ -98,6 +103,7 @@ def run_qbsolv(Q,
     # so we mimic that behaviour here.
     if seed is None:
         seed = random.randint(0, 1L<<30)
+        log.debug('setting random seed to %d', seed)
     cdef int64_t c_seed = seed
     srand(c_seed)
     

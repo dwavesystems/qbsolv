@@ -31,12 +31,13 @@ struct nodeStr_ {
 // - a 2d double array that is the sub-problem,
 // - the size of the sub problem
 // - a state vector: on input is the current best state, and should be set to the output state
-typedef void (*SubSolver)(double**, int, int8_t*);
+typedef void (*SubSolver)(double**, int, int8_t*, void*);
 
 typedef struct parameters_t {
     int32_t repeats;
     SubSolver sub_sampler;
     int32_t sub_size;
+    void* sub_sampler_data;
 } parameters_t;
 parameters_t default_parameters();
 
