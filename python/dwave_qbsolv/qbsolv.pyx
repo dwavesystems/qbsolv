@@ -23,7 +23,8 @@ log = logging.getLogger(__name__)
 
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
-               algorithm=None, timeout=2592000):
+               algorithm=None, timeout=2592000,
+               solver=None):
     """TODO: update
 
     Runs qbsolv.
@@ -38,6 +39,9 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         algorithm (int, optional): Which algorithm to use. Default
             None. Algorithms numbers can be imported from module
             under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
+        solver (function, optional): A function that finds low energy
+            solutions from a small QUBO. Must be able to handle arbitrary
+            QUBOs of size <= subproblem_size. TODO: more definition
 
     Returns:
         (list, list): (samples, counts) where samples is
@@ -53,6 +57,11 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     log.debug('params.repeats = %d', num_repeats)
     cdef int32_t repeats = num_repeats
     params.repeats = repeats
+
+    if solver is not None:
+        log.debug('overwriting default solver')
+        params.sub_sampler = &solver_callback
+        params.sub_sampler_data = <void*>solver
 
     # qbsolv relies on a number of global variables that need to be set before the algorithm can
     # be run, so let's go ahead and set them here.
@@ -124,6 +133,9 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         for col in range(n_variables):
             Q_array[row][col] = 0.
 
+
+    # NB: for now we need to flip the sign of Q if we are doing minimization
+    # This also affects other locations (ctrl+f QFLIP)
     cdef int u, v
     cdef double bias
     # put the values from Q into Q_array
@@ -168,3 +180,45 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     free(Q_array)
 
     return samples, counts
+
+
+cdef void solver_callback(double** Q_array, int n_variables, int8_t* best_solution, void *py_solver):
+    log.debug('solver_callback invoked')
+
+    # first we need Q_array to be a dict
+    Q = {}
+    cdef int v = 0
+    cdef int u = 0
+    while v < n_variables:
+        u = 0
+        while u < n_variables:
+            bias = Q_array[u][v]
+
+            # NB: for now we need to flip the sign of Q if we are doing minimization
+            # This also affects other locations (ctrl+f QFLIP)
+            if bias:
+                if (u, v) in Q:
+                    Q[(u, v)] -= bias
+                elif (v, u) in Q:
+                    Q[(v, u)] -= bias
+                else:
+                    Q[(u, v)] = -bias
+            u += 1
+        v += 1
+
+    # next we want to convert our current best_solution into a single solution
+    # dict
+    solution = {}
+    v = 0
+    while v < n_variables:
+        solution[v] = best_solution[v]
+        v += 1
+
+    new_solution = (<object>py_solver)(Q, solution)
+
+    # finally we write new_solution back into best_solution which is also how
+    # we return the value
+    v = 0
+    while v < n_variables:
+        best_solution[v] = new_solution[v]
+        v += 1
