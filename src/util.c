@@ -559,7 +559,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
         for (int i = 0; i < nbits; i++) {
             solution_list[empty_row][i] = solution_now[i];
         }
-        (*num_nq_solutions)=MIN((*num_nq_solutions)++,nMax);
+        (*num_nq_solutions) = MIN((*num_nq_solutions) + 1, nMax);
 
         energy_list[empty_row] = energy_now;
         solution_counts[empty_row] = 1;
@@ -626,7 +626,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
             for (int i = 0; i < nbits; i++) {
                 solution_list[j][i] = solution_now[i];
             }
-            (*num_nq_solutions)=MIN((*num_nq_solutions)++,nMax);
+            (*num_nq_solutions) = MIN((*num_nq_solutions) + 1,nMax);
 
             // Create index array of sorted energies
             result.count= solution_counts[j];
@@ -656,7 +656,7 @@ struct sol_man_rslt manage_solutions( int8_t *solution_now, int8_t **solution_li
             for (int i = 0; i < nbits; i++) {
                 solution_list[j][i] = solution_now[i];
             }
-            (*num_nq_solutions)=MIN((*num_nq_solutions)++,nMax);
+            (*num_nq_solutions) = MIN((*num_nq_solutions) + 1,nMax);
 
             // create index array of sorted energies
             val_index_sort(list_order, energy_list, nMax);

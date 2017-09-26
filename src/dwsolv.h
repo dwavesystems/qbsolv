@@ -21,13 +21,13 @@
 extern "C" {
 #endif
 
-bool dw_established();
+extern bool dw_established(void);
 
-void dw_init();
+extern void dw_init(void);
 
-void dw_close();
+extern void dw_close(void);
 
-void dw_solver(double **val, int maxNodes, int8_t *Q);
+extern void dw_solver(double **val, int maxNodes, int8_t *Q);
 
 #ifdef __cplusplus
 }

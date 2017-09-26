@@ -26,20 +26,23 @@ struct nodeStr_ {
     double value;
 };
 
-// The pointer type for subsolver.
+// The pointer type for sub-solver.
 // Its arguments are:
 // - a 2d double array that is the sub-problem,
 // - the size of the sub problem
 // - a state vector: on input is the current best state, and should be set to the output state
 typedef void (*SubSolver)(double**, int, int8_t*, void*);
 
+// A parameter structure used to pass in optional arguments to the qbsolv: solve method.
 typedef struct parameters_t {
     int32_t repeats;
     SubSolver sub_sampler;
     int32_t sub_size;
     void* sub_sampler_data;
 } parameters_t;
-parameters_t default_parameters();
+
+// Get the default values for the optional parameters structure
+parameters_t default_parameters(void);
 
 #ifdef __cplusplus
 }

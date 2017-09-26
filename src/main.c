@@ -20,8 +20,8 @@
 #include "dwsolv.h"
 #include <getopt.h>
 
-void print_help();
-void print_qubo_format();
+void print_help(void);
+void print_qubo_format(void);
 
 // define what will be used by "extern" in other functions
 //

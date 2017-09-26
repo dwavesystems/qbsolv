@@ -317,7 +317,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     }
                     if ( howFar < 0.80  && numIncrease > 0 ) {
                         if (Verbose_ > 3) {
-                            printf("Increase Itermax %"LONGFORMAT", %"LONGFORMAT"\n",  iter_max,
+                            printf("Increase Itermax %"LONGFORMAT", %"LONGFORMAT"\n", iter_max,
                                      (iter_max + increaseIter));
                         }
                         iter_max  += increaseIter;
@@ -621,7 +621,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     const int subMatrix    = param.sub_size;
     int MaxNodes_sub = MAX(subMatrix + 1, SubMatrix_span * qubo_size);
     int l_max        = MIN(qubo_size - subMatrix, MaxNodes_sub);
-    int len_index;
+    int len_index = 0;
 
     randomize_solution(tabu_solution, qubo_size);
     for (int i = 0; i < qubo_size; i++) {
@@ -681,8 +681,12 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         Qbest=&solution_list[Qindex[0]][0];
         best_energy=energy_list[Qindex[0]];
 
-
+    } else {
+        fprintf(stderr, "Did not recognize algorithm %s\n", algo_);
+        exit(2);
     }
+
+
     val_index_sort(index, flip_cost, qubo_size); // create index array of sorted values
     if ( Verbose_ > 0 ) {
         print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS, &param);
