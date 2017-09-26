@@ -15,22 +15,22 @@ addons:
 
 before_install:
   - pip install --user cpp-coveralls
-  - export CC=$(C_COMPILER)
-  - export CXX=$(CXX_COMPILER)
+  - export CC=$C_COMPILER
+  - export CXX=$CXX_COMPILER
 
 install:
   - mkdir ~/gtest
   - cd ~/gtest
   - export LIBRARY_PATH=$(pwd)
   - cmake -D CMAKE_INSTALL_PREFIX:PATH=./ /usr/src/gtest/
-  - make CC=$(CC) CXX=$(CXX)
+  - make CC=$CC CXX=$CXX
   - cd -
 
 script:
   - cd src
   - ./make.bash
   - cd ../tests
-  - make test CC=$(CC) CXX=$(CXX)
+  - make test CC=$CC CXX=$CXX
   - mv *.gcno ../
   - cd ..
 
