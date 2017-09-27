@@ -16,11 +16,13 @@
 #pragma once
 
 #include "macros.h"
-#include "input_structures.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Forward declare parameter type
+typedef struct parameters_t parameters_t;
 
 enum  // of codes for sol_rslt.code
 {
@@ -64,10 +66,6 @@ void print_opts(int maxNodes, parameters_t* param);
 
 //  This routine performs the standard output for qbsolv
 void print_output(int maxNodes, int8_t *solution, long numPartCalls, double energy, double seconds, parameters_t* param);
-
-//  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
-void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
-    int nNodes, struct nodeStr_ *couplers, int nCouplers);
 
 /* val[] --> Array to be sorted,
    arr[] --> index to point to order from largest to smallest
@@ -119,4 +117,4 @@ size_t getline(char **lineptr, size_t *n, FILE *stream);
 
 #ifdef __cplusplus
 }
-#endif  
+#endif

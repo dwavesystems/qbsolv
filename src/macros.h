@@ -23,7 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <sys/types.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <time.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>

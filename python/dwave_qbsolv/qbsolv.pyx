@@ -28,7 +28,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     """TODO: update
 
     Runs qbsolv.
-    
+
     Args:
         Q (dict): A dictionary defining the QUBO. Should be of the form
             {(u, v): bias} where u, v are variables and bias is numeric.
@@ -115,7 +115,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         log.debug('setting random seed to %d', seed)
     cdef int64_t c_seed = seed
     srand(c_seed)
-    
+
     # ok, all of the globals are set, so let's get to actually solving the given problem. First we need the
     # list of variables used by Q
     variables = set().union(*Q)
@@ -147,7 +147,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
             Q_array[u][v] = -bias
 
     # Ok, solve using qbsolv! This puts the answer into output_sample
-    solve(Q_array, n_variables, solution_list, energy_list, solution_counts, Qindex, n_solutions, params)
+    solve(Q_array, n_variables, solution_list, energy_list, solution_counts, Qindex, n_solutions, &params)
 
     # we have three things we are interested in, the samples, the energies and the number of times each
     # sample appeared

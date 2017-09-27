@@ -10,9 +10,11 @@ qbsolv
 *.sublime-workspace
 
 venv/
+build/
 
 scratch.py
 
 python/build
 python/dwave_qbsolv/qbsolv.c
+python/dist
 *.so

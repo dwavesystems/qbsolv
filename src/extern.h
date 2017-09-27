@@ -17,7 +17,8 @@
 #pragma once
 
 #include <stdio.h>
-#include "input_structures.h"
+
+struct nodeStr_;
 
 extern FILE   *outFile_;
 extern FILE   *solution_input_;

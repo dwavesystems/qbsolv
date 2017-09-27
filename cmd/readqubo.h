@@ -21,6 +21,15 @@
 extern "C" {
 #endif
 
+struct nodeStr_ {
+    int32_t n1, n2;
+    double value;
+};
+
+//  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
+void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
+    int nNodes, struct nodeStr_ *couplers, int nCouplers);
+
 int read_qubo(const char *inFileName, FILE *inFile);
 
 #ifdef __cplusplus

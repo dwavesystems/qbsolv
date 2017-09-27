@@ -16,7 +16,7 @@
 
 #include "util.h"
 #include "readqubo.h"
-#include "solver.h"
+#include "qbsolv.h"
 #include "dwsolv.h"
 #include <getopt.h>
 
@@ -238,7 +238,7 @@ int  main( int argc,  char *argv[])
     if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
 
-    solve(val, maxNodes_, solution_list, energy_list, solution_counts, Qindex, QLEN, param);
+    solve(val, maxNodes_, solution_list, energy_list, solution_counts, Qindex, QLEN, &param);
 
     free(solution_list); free(energy_list); free(solution_counts); free(Qindex);
     free(val);

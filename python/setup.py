@@ -9,13 +9,11 @@ from Cython.Build import cythonize
 
 extensions = [Extension('dwave_qbsolv.qbsolv',
                         ['dwave_qbsolv/qbsolv.pyx',
-                         '../src/main.c',
                          '../src/solver.c',
                          '../src/debugs.c',
                          '../src/dwsolv.c',
-                         '../src/readqubo.c',
                          '../src/util.c'],
-                        include_dirs=['.', '../src'],
+                        include_dirs=['.', '../src', '../include'],
                         # extra_compile_args=['-Ofast']
                         # extra_compile_args=['-w', '-O0', '-g']
                         )]

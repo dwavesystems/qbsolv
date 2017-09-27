@@ -1,12 +1,7 @@
 from libc.stdint cimport int8_t, int32_t
 from libc.stdio cimport FILE
 
-cdef extern from "input_structures.h":
-    # a single node in the problem QUBO
-    cdef struct nodeStr_:
-        int32_t n1, n2
-        double value
-
+cdef extern from "qbsolv.h":
     # pointer type for subsolver.
     # Args:
     #   -a 2d double array that is the sub-problem
@@ -23,11 +18,9 @@ cdef extern from "input_structures.h":
 
     parameters_t default_parameters()
 
-
-cdef extern from "solver.h":
     void solve(double **qubo, const int qubo_size, int8_t **solution_list,
                double *energy_list, int *solution_counts, int *Qindex, int QLEN,
-               parameters_t param)
+               parameters_t *param)
 
 
 cdef extern from "util.h":
@@ -53,6 +46,5 @@ cdef extern from "extern.h":
     cdef double Target_
     cdef double  Time_;
 
-    cdef nodeStr_ *nodes_;
-    cdef nodeStr_ *couplers_;
-
+#    cdef nodeStr_ *nodes_;
+#    cdef nodeStr_ *couplers_;

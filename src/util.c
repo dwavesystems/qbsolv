@@ -15,6 +15,7 @@
 */
 #include "extern.h"
 #include "util.h"
+#include "qbsolv.h"
 #include <math.h>
 
 // create and pointer fill a 2d array of "size" for
@@ -199,37 +200,6 @@ void print_output(int maxNodes, int8_t *solution, long numPartCalls, double ener
         fprintf(outFile_, " ,Target of %8.5f\n", Target_);
     } else {
         fprintf(outFile_, "\n");
-    }
-}
-
-//  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
-//
-void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
-    int nNodes, struct nodeStr_ *couplers, int nCouplers)
-{
-    // Zero out the qubo
-    for (int i = 0; i < maxNodes; i++) {
-        for (int j = 0; j < maxNodes; j++) {
-            qubo[i][j] = 0.0;
-        }
-    }
-
-    // Copy the structs into the matrix, flip the sign if we are looking for the
-    // minimum value during the optimization.
-    if (findMax_) {
-        for (int i = 0; i < nNodes; i++) {
-            qubo[nodes[i].n1][nodes[i].n1] = nodes[i].value;
-        }
-        for (int i = 0; i < nCouplers; i++) {
-            qubo[couplers[i].n1][couplers[i].n2] = couplers[i].value;
-        }
-    } else {
-        for (int i = 0; i < nNodes; i++) {
-            qubo[nodes[i].n1][nodes[i].n1] = -nodes[i].value;
-        }
-        for (int i = 0; i < nCouplers; i++) {
-            qubo[couplers[i].n1][couplers[i].n2] = -couplers[i].value;
-        }
     }
 }
 

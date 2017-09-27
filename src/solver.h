@@ -37,9 +37,9 @@ double local_search(int8_t *solution, int qubo_size, double **qubo,
     double *flip_cost, int64_t *bit_flips);
 
 // This function is called by solve to execute a tabu search
-// double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
-//     double *flip_cost, int64_t *bit_flips, int64_t iter_max,
-//     int *TabuK, double target, bool target_set, int *index, int nTabu);
+double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo,
+    double *flip_cost, int64_t *bit_flips, int64_t iter_max,
+    int *TabuK, double target, bool target_set, int *index, int nTabu);
 
 
 // reduce() computes a subQUBO (val_s) from large QUBO (val)
@@ -52,17 +52,9 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
 
 // reduce_solv_projection reduces from a submatrix solves the QUBO projects the solution and
 //      returns the number of changes
-// int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution, parameters_t *param);
+int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution, parameters_t *param);
 
-void dw_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution);
-void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution);
-
-// Define the default set of parameters for the solve routine
-parameters_t default_parameters();
-
-// Entry into the overall solver from the main program
-void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN, parameters_t param);
 
 #ifdef __cplusplus
 }
-#endif  
+#endif
