@@ -16,5 +16,5 @@ scratch.py
 
 python/build
 python/dwave_qbsolv/qbsolv.c
-python/dist
+python/dwave_qbsolv
 *.so

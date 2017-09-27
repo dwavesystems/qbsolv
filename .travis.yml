@@ -29,7 +29,7 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake .. -D QBSOLV_BUILD_TESTS=ON
+  - cmake .. -DQBSOLV_BUILD_TESTS=ON
   - make CC=$CC CXX=$CXX
   - make test
   - find . -name '*.gcno' -exec mv {} .. \;
