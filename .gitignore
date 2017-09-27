@@ -4,7 +4,10 @@ qbsolv
 *.exe
 *.gch
 *.stackdump
-*.gcno
+
+# Test coverage files
+*.gcno*
+*.gcda*
 
 *.sublime-project
 *.sublime-workspace
@@ -17,4 +20,6 @@ scratch.py
 python/build
 python/dwave_qbsolv/qbsolv.c
 python/dwave_qbsolv
+
+*.whl
 *.so
