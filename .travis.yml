@@ -32,7 +32,7 @@ script:
   - cmake .. -DQBSOLV_BUILD_TESTS=ON
   - make CC=$CC CXX=$CXX
   - make test
-  - find . -name '*.gcno' -exec mv {} .. \;
+  - find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
   - cd ..
 
 after_success:
