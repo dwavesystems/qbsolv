@@ -36,4 +36,4 @@ script:
   - cd ..
 
 after_success:
-  - coveralls --exclude tests --gcov-options '\-lp'
+  - coveralls --exclude tests -E '.*gtest.*' --gcov-options '\-lp'
