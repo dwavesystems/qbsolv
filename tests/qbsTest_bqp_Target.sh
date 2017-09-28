@@ -8,7 +8,8 @@ function qbsTargetRun
     TIME=`grep second $tmp_file| cut -b1-8`
     ENERGY=`grep Energy $tmp_file       | cut -b1-11`
     PARTITIONS=`grep Partitioned $tmp_file       | cut -f1 -d\ `
-    echo $test"  "   $TIME "   "$walltime"   " $PARTITIONS"   "  $ENERGY $Local ${option1}
+    printf "%-15s  %9.5f  %3d  %5d  %11.3f          %s  %s\n" \
+       "${test}" ${TIME} ${walltime} ${PARTITIONS} ${ENERGY} "${Local}" "${option1}"
     Totaltime=`echo "print  $Totaltime + $TIME " |python `
     startsec=${SECONDS}
 #    echo "qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} -T ${Target} "
@@ -18,7 +19,8 @@ function qbsTargetRun
     ENERGY=`grep Energy $tmp_file       | cut -b1-11`
     PARTITIONS=`grep Partitioned $tmp_file       | cut -f1 -d\ `
     TotaltimeD=`echo "print  $TotaltimeD + $TIME " |python `
-    echo $test"  "   $TIME "   "$walltime"   " $PARTITIONS"   "  $ENERGY  $Default ${option2}
+    printf "%-15s  %9.5f  %3d  %5d  %11.3f          %s  %s\n" \
+       "${test}" ${TIME} ${walltime} ${PARTITIONS} ${ENERGY} "${Default}" "${option2}"
     #Totaltime=`echo "print  $Totaltime + $TIME " |python `
     #echo $Totaltime
     #rm $tmp_file      
@@ -27,7 +29,8 @@ function testDeltaEnergy
 {
 echo 
 echo " Test non target mode ${testnumber} $numrepeats "
-echo "    Test name    CPU sec W/C  Parts   Energy   Delta Energy "   " qbsolv version"
+echo "                                                      Delta"
+echo "Test name          CPU sec  W/C  Parts       Energy  Energy   qbsolv version"
 Totaltime=0.0
 TotaltimeD=0.0
 TotalDenergy=0.0
@@ -45,9 +48,10 @@ SECONDS=0
             PARTITIONS=`grep Partitioned $tmp_file       | cut -f1 -d\ `
               ENERGY=`grep Energy $tmp_file       | cut -b1-11`
               Denergy=`echo "print  ${ENERGY} - ${Energies[i]}"|python `
-                echo ${test}"  "   $TIME   "   "$walltime"   " $PARTITIONS"   " $ENERGY "   "$Denergy $Local ${option1}
               Totaltime=`echo  "print $Totaltime + $TIME" |python ` 
               TotalDenergy=`echo  "print $TotalDenergy + $Denergy" |python` 
+                printf "%-15s  %9.5f  %3d  %5d  %11.3f  %6.1f  %s  %s\n" \
+                   "${test}" ${TIME} ${walltime} ${PARTITIONS} ${ENERGY} ${Denergy} "${Local}" "${option1}"
            startsec=${SECONDS}
           qbsolv -i ${test_dir}/${test} -m ${SubMatrix} ${verbose} ${numrepeats} ${option2} > $tmp_file      
            walltime=`echo "print ${SECONDS} - ${startsec}"|python`
@@ -57,7 +61,8 @@ SECONDS=0
               Denergy=`echo "print  ${ENERGY} - ${Energies[i]}"|python `
               TotaltimeD=`echo  "print $TotaltimeD + $TIME" |python ` 
               TotalDenergyD=`echo  "print $TotalDenergyD + $Denergy" |python` 
-                echo ${test}"  "   $TIME  "   "$walltime"   " $PARTITIONS"   " $ENERGY "   "$Denergy $Default ${option2}
+                printf "%-15s  %9.5f  %3d  %5d  %11.3f  %6.1f  %s  %s\n" \
+                   "${test}" ${TIME} ${walltime} ${PARTITIONS} ${ENERGY} ${Denergy} "${Default}" "${option2}"
        fi 
     done
     rm $tmp_file      
@@ -76,7 +81,7 @@ TotaltimeD=0.0
 SECONDS=0
 echo 
 echo "    Test ${testnumber} with Target set "
-echo " Test name    CPU sec W/C   Parts     Energy  qbsolv version"
+echo "Test name          CPU sec  W/C  Parts       Energy           qbsolv version"
 for ((i=1;i<11;i++))
 do
     test=${testnumber}_${i}.qubo
