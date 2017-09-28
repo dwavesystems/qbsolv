@@ -1,0 +1,10 @@
+#!/bin/bash
+set -ev
+case "${1:?}" in
+    script)
+        RootDir="${2:?}"
+        Test="${3:?}"
+        ( cd "${RootDir:?}"/src && make qbsolv; )
+        ( cd "${RootDir:?}"/tests && PATH="${RootDir:?}/src:$PATH" ./"${Test:?}"; )
+        ;;
+esac
