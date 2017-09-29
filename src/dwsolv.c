@@ -28,7 +28,12 @@ static DW_epqmi *epqmi_;
 #include <time.h>
 #include <math.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <process.h>
+#define getpid _getpid
+#else
 #include <unistd.h>
+#endif
 
 char       *workspace, *connection, *wspath, *solver, ws_tmp_path[256], tmp_path[256];
 

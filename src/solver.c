@@ -473,13 +473,12 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
 // @param qubo is the QUBO matrix to extract from
 // @param qubo_size is the number of variables in the QUBO matrix
 // @param subMatrix is the size of the subMatrix to create and solve
-// @param @param[in,out] solution inputs a current solution and returns the projected solution
+// @param[in,out] solution inputs a current solution and returns the projected solution
 // @param[out] stores the new, projected solution found during the algorithm
-
 int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int subMatrix, int8_t *solution, parameters_t *param)
 {
     int change=0;
-    int8_t sub_solution[subMatrix];
+    int8_t* sub_solution = (int8_t*)malloc(sizeof(int8_t)*subMatrix);
     double **sub_qubo;
 
     sub_qubo = (double**)malloc2D(qubo_size, qubo_size, sizeof(double));
@@ -513,22 +512,25 @@ int reduce_solve_projection( int *Icompress, double **qubo, int qubo_size, int s
         if (solution[bit] != sub_solution[j] ) change++;
         solution[bit] = sub_solution[j];
     }
-    free( sub_qubo );
+
+    free(sub_solution);
+    free(sub_qubo);
     return change;
 }
 
 void dw_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution, void*sub_sampler_data){
     dw_solver(sub_qubo, subMatrix, sub_solution);
     int64_t sub_bit_flips=0;  //  run a local search with higher precision than the Dwave
-    double flip_cost[subMatrix];
+    double* flip_cost = (double*)malloc(sizeof(double) * subMatrix);
     local_search(sub_solution, subMatrix, sub_qubo, flip_cost, &sub_bit_flips);
+    free(flip_cost);
 }
 
 void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution, void*sub_sampler_data){
-    int *TabuK;
-    int *index;
-    double flip_cost[subMatrix];
-    int8_t current_best[subMatrix];
+    int* TabuK;
+    int* index;
+    double* flip_cost = (double*)malloc(sizeof(double) * subMatrix);
+    int8_t* current_best = (int8_t*)malloc(sizeof(int8_t) * subMatrix);
 
     if (GETMEM(TabuK, int, subMatrix) == NULL) BADMALLOC
     if (GETMEM(index, int, subMatrix) == NULL) BADMALLOC
@@ -541,7 +543,9 @@ void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution, void
     }
     solv_submatrix(sub_solution, current_best, subMatrix, sub_qubo, flip_cost, &bit_flips, TabuK, index);
 
-    free( index );
+    free(current_best);
+    free(flip_cost);
+    free(index);
     free(TabuK);
 }
 
@@ -620,10 +624,10 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     if (GETMEM(Pcompress, int, qubo_size) == NULL) BADMALLOC
     // initialize and set some tuning parameters
     //
-    const int Progress_check = 12;              // number of non-progresive passes thru main loop before reset
-    const float SubMatrix_span = 0.214;         // percent of the total size will be covered by the subMatrix pass
-    const int64_t InitialTabuPass_factor=6500;  // initial pass factor for tabu iterations
-    const int64_t TabuPass_factor=1600.;        // iterative pass factor for tabu iterations
+    const int Progress_check = 12;               // number of non-progresive passes thru main loop before reset
+    const float SubMatrix_span = 0.214f;         // percent of the total size will be covered by the subMatrix pass
+    const int64_t InitialTabuPass_factor = 6500; // initial pass factor for tabu iterations
+    const int64_t TabuPass_factor = 1600;        // iterative pass factor for tabu iterations
 
     const int subMatrix    = param->sub_size;
     int MaxNodes_sub = MAX(subMatrix + 1, SubMatrix_span * qubo_size);
