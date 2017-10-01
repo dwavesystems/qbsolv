@@ -173,7 +173,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
         for (int kk = kkstr; kk != kkend; kk = kk + kkinc) {
             uint bit = index[kk];
             (*bit_flips)++;
-            if (energy + flip_cost[bit] > energy) {
+            if (flip_cost[bit] > 0.0) {
                 energy  = evaluate_1bit(energy, bit, solution, qubo_size, qubo, flip_cost);
                 improve = true;
             }
