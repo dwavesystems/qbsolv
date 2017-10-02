@@ -262,11 +262,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
         }
     }
 
-    if ( findMax_ ) {
-        sign = 1.0;
-    } else {
-        sign = -1.0;
-    }
+    sign = findMax_ ? 1.0 : -1.0;
 
     best_energy  = local_search(solution, qubo_size, qubo, flip_cost, bit_flips);
     val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
