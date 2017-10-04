@@ -46,7 +46,7 @@ fi
 
 # always a clean build. Why not, compilers are fast enough for such a small program.
 
-c_flags="-Wall -O3 -Wextra -std=gnu99 "
+c_flags="-Wall -O3 -Wextra -std=gnu99 -I ../src -I ../cmd -I ../include "
 #"-fopenmp-use-tls"
 
 if [ "${env}" == "LOCAL" ]
@@ -77,5 +77,5 @@ fi
 
 l_flags="-lm ${epqmi_lib} ${dw_lib} ${link_lib} "
 
-echo "${CC} ${c_flags} -o qbsolv *.c  ${l_flags} "
-`${CC} ${c_flags} -o qbsolv *.c  ${l_flags} `
+echo "${CC} ${c_flags} -o qbsolv *.c ../cmd/*.c ${l_flags} "
+`${CC} ${c_flags} -o qbsolv *.c ../cmd/*.c ${l_flags} `
