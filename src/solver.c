@@ -168,7 +168,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
 
         if (kkstr == 0) { // sweep top to bottom
             shuffle_index(index, qubo_size);
-            kkstr = qubo_size - 1; kkinc = -1; kkend = 0;
+            kkstr = qubo_size - 1; kkinc = -1; kkend = -1;
         } else { // sweep bottom to top
             kkstr = 0; kkinc = 1; kkend = qubo_size; // got thru it backwards then reshuffle
         }
