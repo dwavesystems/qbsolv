@@ -22,6 +22,7 @@ cdef extern from "qbsolv.h":
                double *energy_list, int *solution_counts, int *Qindex, int QLEN,
                parameters_t *param)
 
+    void dw_sub_sample(double**, int, int8_t*, void*)
 
 cdef extern from "util.h":
     void  **malloc2D(unsigned int rows, unsigned int cols, unsigned int size)
@@ -46,5 +47,6 @@ cdef extern from "extern.h":
     cdef double Target_
     cdef double  Time_;
 
-#    cdef nodeStr_ *nodes_;
-#    cdef nodeStr_ *couplers_;
+cdef extern from "dwsolv.h":
+    void dw_close()
+    int dw_init()

@@ -6,7 +6,7 @@ from libc.stdint cimport int8_t, int64_t, int32_t
 from libc.stdio cimport stdout
 from libc.stdlib cimport malloc, free, srand
 
-from dwave_qbsolv.cqbsolv cimport default_parameters
+from dwave_qbsolv.cqbsolv cimport default_parameters, dw_init, dw_close, dw_sub_sample
 from dwave_qbsolv.cqbsolv cimport Verbose_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, findMax_
 from dwave_qbsolv.cqbsolv cimport solve, malloc2D
 
@@ -56,12 +56,30 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
 
     log.debug('params.repeats = %d', num_repeats)
     cdef int32_t repeats = num_repeats
-    params.repeats = repeats
+    params.repeats = num_repeats
 
-    if solver is not None:
-        log.debug('overwriting default solver')
+    # Look for keywords identifying methods implemnted in the qbsolv c library
+    if solver == 'tabu' or solver is None:
+        log.debug('Using builtin tabu sub problem solver.')
+    elif solver == 'dw':
+        log.debug('Using builtin dw interface sub problem solver.')
+        params.sub_sampler = &dw_sub_sample
+        params.sub_size = dw_init();
+
+    # Try to identify a dimod solver
+    elif hasattr(solver, 'sample_ising') and hasattr(solver, 'sample_qubo'):
+        log.debug('Using dimod as sub problem solver.')
+        params.sub_sampler = &solver_callback
+        params.sub_sampler_data = <void*>solver.sample_qubo
+
+    # Otherwise any callable should work
+    elif callable(solver):
+        log.debug('Using callback as sub problem solver.')
         params.sub_sampler = &solver_callback
         params.sub_sampler_data = <void*>solver
+
+    else:
+        raise ValueError("Invalid value for solver argument {}".format(solver))
 
     # qbsolv relies on a number of global variables that need to be set before the algorithm can
     # be run, so let's go ahead and set them here.
@@ -178,6 +196,10 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     free(solution_counts)
     free(Qindex)
     free(Q_array)
+
+    # Close dw session
+    if solver == 'dw':
+        dw_close();
 
     return samples, counts
 

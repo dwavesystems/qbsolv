@@ -60,7 +60,7 @@ bool dw_established()
 }
     // checks to see that all environment variables are in place, along with
     // .epqmi file and path needed to embed problems to the solver
-void dw_init()
+int dw_init()
 {
     char filename_max_full[256];
     char linebuf[256];
@@ -169,6 +169,8 @@ void dw_init()
         printf(" %s %s \n", "DW_INTERNAL__WSPATH", wspath);
         printf(" %s %s \n", "DW_INTERNAL__SOLVER", solver);
     }
+
+    return subMatrix;
 }
 
 void dw_solver(double **val, int maxNodes, int8_t *Q)

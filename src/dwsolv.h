@@ -23,7 +23,7 @@ extern "C" {
 
 extern bool dw_established(void);
 
-extern void dw_init(void);
+extern int dw_init(void);
 
 extern void dw_close(void);
 

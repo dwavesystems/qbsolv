@@ -215,7 +215,7 @@ int  main( int argc,  char *argv[])
     fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
 
     if ( use_dwave ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
-        dw_init();
+        param.sub_size = dw_init();
         param.sub_sampler = &dw_sub_sample;
     }
     numsolOut_=0;
