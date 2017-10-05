@@ -1,0 +1,39 @@
+language: c
+sudo: false
+
+matrix:
+  include:
+    - os: linux
+      env: C_COMPILER=gcc CXX_COMPILER=g++
+    - os: linux
+      env: C_COMPILER=clang CXX_COMPILER=clang++
+
+addons:
+  apt:
+    packages:
+      - libgtest-dev
+
+before_install:
+  - pip install --user cpp-coveralls
+  - export CC=$C_COMPILER
+  - export CXX=$CXX_COMPILER
+
+install:
+  - mkdir ~/gtest
+  - cd ~/gtest
+  - export LIBRARY_PATH=$(pwd)
+  - cmake -D CMAKE_INSTALL_PREFIX:PATH=./ /usr/src/gtest/
+  - make CC=$CC CXX=$CXX
+  - cd -
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DQBSOLV_BUILD_TESTS=ON
+  - make CC=$CC CXX=$CXX
+  - make test
+  - find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
+  - cd ..
+
+after_success:
+  - coveralls --exclude tests -E '.*gtest.*' --gcov-options '\-lp'
