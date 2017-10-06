@@ -68,11 +68,7 @@ void randomize_pop_solution(int8_t *solution, int nbits)
     pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio  ) ;
 
     for (int i = 0; i < nbits; i++) {
-        if (rand() < pop_ran ) {
-            solution[i] = 1;
-        } else {
-            solution[i] = 0;
-        }
+        solution[i] = (rand() < pop_ran) ? 1 : 0;
     }
 }
 // this randomly sets the bit vector to 1 or 0, with similar population counts with index
@@ -87,11 +83,7 @@ void randomize_pop_solution_by_index(int8_t *solution, int nbits, int *indices )
     pop_ran   = (int) ( (double) RAND_MAX *  pop_ratio  ) ;
 
     for (int i = 0; i < nbits; i++) {
-        if (rand() < pop_ran ) {
-            solution[indices[i]] = 1;
-        } else {
-            solution[indices[i]] = 0;
-        }
+        solution[indices[i]] = (rand() < pop_ran) ? 1 : 0;
     }
 }
 // shuffle the index vector before sort

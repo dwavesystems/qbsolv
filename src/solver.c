@@ -176,7 +176,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
         for (int kk = kkstr; kk != kkend; kk = kk + kkinc) {
             uint bit = index[kk];
             (*bit_flips)++;
-            if (energy + flip_cost[bit] > energy) {
+            if (flip_cost[bit] > 0.0) {
                 energy  = evaluate_1bit(energy, bit, solution, qubo_size, qubo, flip_cost);
                 improve = true;
             }
@@ -265,11 +265,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
         }
     }
 
-    if ( findMax_ ) {
-        sign = 1.0;
-    } else {
-        sign = -1.0;
-    }
+    sign = findMax_ ? 1.0 : -1.0;
 
     best_energy  = local_search(solution, qubo_size, qubo, flip_cost, bit_flips);
     val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
