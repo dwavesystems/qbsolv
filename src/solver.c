@@ -286,7 +286,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
         double neighbour_best = BIGNEGFP;
         brk = false;
         if ( kkstr == 0 ) { // sweep top to bottom
-            kkstr = qubo_size - 1; kkinc = -1; kkend = 0;
+            kkstr = qubo_size - 1; kkinc = -1; kkend = -1;
         } else { // sweep bottom to top
             kkstr = 0; kkinc = 1; kkend = qubo_size;
         }
