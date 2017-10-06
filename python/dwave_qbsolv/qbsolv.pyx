@@ -1,10 +1,14 @@
-from libc.stdint cimport int8_t, int64_t
+import sys
+import random
+import logging
+
+from libc.stdint cimport int8_t, int64_t, int32_t
 from libc.stdio cimport stdout
 from libc.stdlib cimport malloc, free, srand
-from cqbsolv cimport Verbose_, SubMatrix_, UseDwave_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, findMax_
-from cqbsolv cimport solve, malloc2D
-import random
-import sys
+
+from dwave_qbsolv.cqbsolv cimport default_parameters, dw_init, dw_close, dw_sub_sample
+from dwave_qbsolv.cqbsolv cimport Verbose_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, findMax_
+from dwave_qbsolv.cqbsolv cimport solve, malloc2D
 
 ENERGY_IMPACT = 0
 SOLUTION_DIVERSITY = 1
@@ -15,28 +19,67 @@ if PY2:
 else:
     iteritems = lambda d: d.items()
 
-def run_qbsolv(Q, repeats=50, 
-               seed=17932241798878, verbosity=-1, algorithm=None, timeout=2592000):
-    """Runs qbsolv.
-    
+log = logging.getLogger(__name__)
+
+
+def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
+               algorithm=None, timeout=2592000,
+               solver=None):
+    """TODO: update
+
+    Runs qbsolv.
+
     Args:
         Q (dict): A dictionary defining the QUBO. Should be of the form
             {(u, v): bias} where u, v are variables and bias is numeric.
-        repeats (int, optional): Determines the number of times to
+        num_repeats (int, optional): Determines the number of times to
             repeat the main loop in qbsolv after determining a better
             sample. Default 50.
         seed (int, optional): Random seed. Default None.
-        algorithm (int, optional): Which algorithm to use. Defaut
+        algorithm (int, optional): Which algorithm to use. Default
             None. Algorithms numbers can be imported from module
             under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
+        solver (function, optional): A function that finds low energy
+            solutions from a small QUBO. Must be able to handle arbitrary
+            QUBOs of size <= subproblem_size. TODO: more definition
 
     Returns:
-        (list, list, list): (samples, energies, counts) where samples is
+        (list, list): (samples, counts) where samples is
         a list of dics, energies is the energy for each sample and counts
         is the number of times each sample was found by qbsolv.
 
     NB: relies on variables in Q being index valued and nonnegative, but not checked at this point
     """
+
+    # first up, we want the default parameters for the solve function.
+    params = default_parameters()
+
+    log.debug('params.repeats = %d', num_repeats)
+    cdef int32_t repeats = num_repeats
+    params.repeats = num_repeats
+
+    # Look for keywords identifying methods implemnted in the qbsolv c library
+    if solver == 'tabu' or solver is None:
+        log.debug('Using builtin tabu sub problem solver.')
+    elif solver == 'dw':
+        log.debug('Using builtin dw interface sub problem solver.')
+        params.sub_sampler = &dw_sub_sample
+        params.sub_size = dw_init();
+
+    # Try to identify a dimod solver
+    elif hasattr(solver, 'sample_ising') and hasattr(solver, 'sample_qubo'):
+        log.debug('Using dimod as sub problem solver.')
+        params.sub_sampler = &solver_callback
+        params.sub_sampler_data = <void*>solver.sample_qubo
+
+    # Otherwise any callable should work
+    elif callable(solver):
+        log.debug('Using callback as sub problem solver.')
+        params.sub_sampler = &solver_callback
+        params.sub_sampler_data = <void*>solver
+
+    else:
+        raise ValueError("Invalid value for solver argument {}".format(solver))
 
     # qbsolv relies on a number of global variables that need to be set before the algorithm can
     # be run, so let's go ahead and set them here.
@@ -64,14 +107,9 @@ def run_qbsolv(Q, repeats=50,
     Time_ = timeout # the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
 
     # other global variables are fixed for our purposes here
-    global UseDwave_
-    UseDwave_ = False
 
     global outFile_
     outFile_ = stdout
-
-    global SubMatrix_
-    SubMatrix_ = 46
 
     global Tlist_
     Tlist_ = -1
@@ -92,44 +130,46 @@ def run_qbsolv(Q, repeats=50,
     # so we mimic that behaviour here.
     if seed is None:
         seed = random.randint(0, 1L<<30)
+        log.debug('setting random seed to %d', seed)
     cdef int64_t c_seed = seed
     srand(c_seed)
-    
+
     # ok, all of the globals are set, so let's get to actually solving the given problem. First we need the
     # list of variables used by Q
     variables = set().union(*Q)
 
     # we also set the inputs to qbsolv, using cython to make them proper C values
     cdef int n_variables = len(variables)
-    cdef int n_repeats = repeats
     cdef int8_t **solution_list = <int8_t **>malloc2D(n_solutions + 1, n_variables, sizeof(int8_t))
     cdef double *energy_list = <double *>malloc((n_solutions + 1) * sizeof(double))
     cdef int *solution_counts = <int *>malloc((n_solutions + 1) * sizeof(int))
     cdef int *Qindex = <int *>malloc((n_solutions + 1) * sizeof(int))
 
     # create a matrix and set everything to 0
-    cdef double **Qarr = <double **>malloc2D(n_variables, n_variables, sizeof(double))
+    cdef double **Q_array = <double **>malloc2D(n_variables, n_variables, sizeof(double))
     for row in range(n_variables):
         for col in range(n_variables):
-            Qarr[row][col] = 0.
+            Q_array[row][col] = 0.
 
+
+    # NB: for now we need to flip the sign of Q if we are doing minimization
+    # This also affects other locations (ctrl+f QFLIP)
     cdef int u, v
     cdef double bias
-    # put the values from Q into Qarr
+    # put the values from Q into Q_array
     for (u, v), bias in iteritems(Q):
         # upper triangular
         if v < u:
-            Qarr[v][u] = -bias
+            Q_array[v][u] = -bias
         else:
-            Qarr[u][v] = -bias
+            Q_array[u][v] = -bias
 
     # Ok, solve using qbsolv! This puts the answer into output_sample
-    solve(Qarr, n_variables, repeats, solution_list, energy_list, solution_counts, Qindex, n_solutions)
+    solve(Q_array, n_variables, solution_list, energy_list, solution_counts, Qindex, n_solutions, &params)
 
     # we have three things we are interested in, the samples, the energies and the number of times each
     # sample appeared
     samples = []
-    energies = []
     counts = []
 
     # it is actually faster to use a while loop here and keep everything as a C object
@@ -141,8 +181,11 @@ def run_qbsolv(Q, repeats=50,
         if solution_counts[soln_idx] == 0:
             break
 
+        # NB: in principle we have the energy list and could return them directly,
+        # right now it appears that QBSolv has a bug, so we will fix this on future
+        # release
+
         samples.append({v: int(solution_list[soln_idx][v]) for v in range(n_variables)})
-        energies.append(float(energy_list[soln_idx]))
         counts.append(int(solution_counts[soln_idx]))
 
         i += 1
@@ -151,7 +194,53 @@ def run_qbsolv(Q, repeats=50,
     free(solution_list)
     free(energy_list)
     free(solution_counts)
-    free(Qindex);
-    free(Qarr)
+    free(Qindex)
+    free(Q_array)
 
-    return samples, energies, counts
+    # Close dw session
+    if solver == 'dw':
+        dw_close();
+
+    return samples, counts
+
+
+cdef void solver_callback(double** Q_array, int n_variables, int8_t* best_solution, void *py_solver):
+    log.debug('solver_callback invoked')
+
+    # first we need Q_array to be a dict
+    Q = {}
+    cdef int v = 0
+    cdef int u = 0
+    while v < n_variables:
+        u = 0
+        while u < n_variables:
+            bias = Q_array[u][v]
+
+            # NB: for now we need to flip the sign of Q if we are doing minimization
+            # This also affects other locations (ctrl+f QFLIP)
+            if bias:
+                if (u, v) in Q:
+                    Q[(u, v)] -= bias
+                elif (v, u) in Q:
+                    Q[(v, u)] -= bias
+                else:
+                    Q[(u, v)] = -bias
+            u += 1
+        v += 1
+
+    # next we want to convert our current best_solution into a single solution
+    # dict
+    solution = {}
+    v = 0
+    while v < n_variables:
+        solution[v] = best_solution[v]
+        v += 1
+
+    new_solution = (<object>py_solver)(Q, solution)
+
+    # finally we write new_solution back into best_solution which is also how
+    # we return the value
+    v = 0
+    while v < n_variables:
+        best_solution[v] = new_solution[v]
+        v += 1
