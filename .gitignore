@@ -23,3 +23,5 @@ python/dwave_qbsolv.egg-info/*
 
 *.whl
 *.so
+
+dist/
