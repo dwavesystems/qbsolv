@@ -33,8 +33,8 @@ class build_ext_compiler_check(build_ext):
         build_ext.build_extensions(self)
 
 
-extensions = [Extension('dwave_qbsolv.qbsolv',
-                        ['dwave_qbsolv/qbsolv.pyx',
+extensions = [Extension('dwave_qbsolv.qbsolv_binding',
+                        ['dwave_qbsolv/qbsolv_binding.pyx',
                          './globals.c',
                          '../src/solver.c',
                          '../src/debugs.c',
@@ -49,7 +49,7 @@ setup(
     name='dwave_qbsolv',
     version='0.1.2',
     packages=packages,
-    install_requires=['dimod>=0.1.1', 'cython'],
+    install_requires=['dimod>=0.3.0', 'cython'],
     ext_modules=cythonize(extensions),
     cmdclass={'build_ext': build_ext_compiler_check}
 )
