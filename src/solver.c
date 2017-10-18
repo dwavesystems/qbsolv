@@ -25,7 +25,14 @@
 // @param qubo_size the number of variables in the QUBO matrix
 // @param qubo the QUBO matrix being solved
 // @returns Energy of solution evaluated by qubo
-double Simple_evaluate(int8_t *solution, uint qubo_size, double **qubo)
+//
+// Notes about const:
+// const int8_t * const solution
+// const double ** const qubo
+//     neither the pointer nor the data can be changed
+//
+double Simple_evaluate(const int8_t * const solution, const uint qubo_size,
+    const double ** const qubo)
 {
     double result = 0.0;
 
@@ -56,7 +63,16 @@ double Simple_evaluate(int8_t *solution, uint qubo_size, double **qubo)
 // @param qubo the QUBO matrix being solved
 // @param[out] flip_cost The change in energy from flipping a bit
 // @returns Energy of solution evaluated by qubo
-double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_cost)
+//
+// Notes about const:
+// int8_t * const solution
+// double * const flip_cost
+//     the pointer cannot be changed, but the data pointed to can be changed
+// const double ** const qubo
+//     neither the pointer nor the data can be changed
+//
+double evaluate(int8_t * const solution, const uint qubo_size,
+    const double ** const qubo, double * const flip_cost)
 {
     double result = 0.0;
 
@@ -96,8 +112,16 @@ double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_co
 // @param qubo the QUBO matrix being solved
 // @param[out] flip_cost The change in energy from flipping a bit
 // @returns New energy of the modified solution
-double evaluate_1bit(double old_energy, uint bit, int8_t *solution, uint qubo_size,
-    double **qubo, double *flip_cost)
+//
+// Notes about const:
+// int8_t * const solution
+// double * const flip_cost
+//     the pointer cannot be changed, but the data pointed to can be changed
+// const double ** const qubo
+//     neither the pointer nor the data can be changed
+//
+double evaluate_1bit(const double old_energy, const uint bit, int8_t * const solution,
+    const uint qubo_size, const double ** const qubo, double * const flip_cost)
 {
     double result = old_energy + flip_cost[bit];
 
@@ -177,7 +201,7 @@ double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
             uint bit = index[kk];
             (*bit_flips)++;
             if (flip_cost[bit] > 0.0) {
-                energy  = evaluate_1bit(energy, bit, solution, qubo_size, qubo, flip_cost);
+                energy  = evaluate_1bit(energy, bit, solution, qubo_size, (const double **)qubo, flip_cost);
                 improve = true;
             }
         }
@@ -202,7 +226,7 @@ double local_search(int8_t *solution, int qubo_size, double **qubo,
     double energy;
 
     // initial evaluate needed before evaluate_1bit can be used
-    energy = evaluate(solution, qubo_size, qubo, flip_cost);
+    energy = evaluate(solution, qubo_size, (const double **)qubo, flip_cost);
     energy = local_search_1bit(energy, solution, qubo_size, qubo, flip_cost, bit_flips); // local search to polish the change
     return energy;
 }
@@ -296,7 +320,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                 if (new_energy > best_energy) {
                     brk         = true;
                     last_bit    = bit;
-                    new_energy  = evaluate_1bit(Vlastchange, bit, solution, qubo_size, qubo, flip_cost); // flip the bit and fix tables
+                    new_energy  = evaluate_1bit(Vlastchange, bit, solution, qubo_size, (const double **)qubo, flip_cost); // flip the bit and fix tables
                     Vlastchange = local_search_1bit(new_energy, solution, qubo_size, qubo, flip_cost, bit_flips); // local search to polish the change
                     val_index_sort_ns(index, flip_cost, qubo_size); // update index array of sorted values, don't shuffle index
                     best_energy = Vlastchange;
@@ -338,7 +362,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
             }
         }
         if ( !brk ) { // this is the fall-thru case and we haven't tripped interior If V> VS test so flip Q[K]
-            Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, qubo, flip_cost);
+            Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, (const double **)qubo, flip_cost);
         }
 
         uint i;
@@ -357,7 +381,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 
     // ok, we are leaving Tabu, we can do a for-sure clean-up run of evaluate, to be sure we
     // return the true evaluation of the function (given that we only do this a handful of times)
-    double final_energy = evaluate(solution, qubo_size, qubo, flip_cost);
+    double final_energy = evaluate(solution, qubo_size, (const double **)qubo, flip_cost);
 
     // Create index array of sorted values
     val_index_sort(index, flip_cost, qubo_size);
@@ -889,7 +913,8 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     if ( Verbose_ == 0 ) {
         Qbest=&solution_list[Qindex[0]][0];
         best_energy=energy_list[Qindex[0]];
-           // printf(" evaluated solution %8.2lf\n",sign*Simple_evaluate(Qbest,  qubo_size, qubo));
+            // printf(" evaluated solution %8.2lf\n",
+            //     sign * Simple_evaluate(Qbest, qubo_size, (const double **)qubo));
         print_output(qubo_size, Qbest, numPartCalls, best_energy * sign, CPSECONDS, param);
     }
 
