@@ -83,19 +83,20 @@ double evaluate(int8_t * const solution, const uint qubo_size,
         // qubo an upper triangular matrix, so start right of the diagonal
         // for the rows, and stop at the diagonal for the columns
         for (uint jj = ii + 1; jj < qubo_size; jj++)
-            row_sum += qubo[ii][jj] * (double)solution[jj];
+            if (solution[jj]) row_sum += qubo[ii][jj];
 
         for (uint jj = 0; jj < ii; jj++)
-            col_sum += qubo[jj][ii] * (double)solution[jj];
+            if (solution[jj]) col_sum += qubo[jj][ii];
 
         // If the variable is currently 1, then by flipping it we lose
         // what it is currently contributing (so we negate the contribution),
         // when it is currently false, gain that ammount by flipping
+        double contrib = row_sum + col_sum + qubo[ii][ii];
         if (solution[ii] == 1) {
             result += row_sum + qubo[ii][ii];
-            flip_cost[ii] = -(row_sum + col_sum + qubo[ii][ii]);
+            flip_cost[ii] = -contrib;
         } else {
-            flip_cost[ii] =  (row_sum + col_sum + qubo[ii][ii]);
+            flip_cost[ii] =  contrib;
         }
     }
 
