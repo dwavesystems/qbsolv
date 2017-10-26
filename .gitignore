@@ -4,6 +4,7 @@ qbsolv
 *.exe
 *.gch
 *.stackdump
+*.m~
 
 # Test coverage files
 *.gcno*
