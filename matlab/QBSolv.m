@@ -25,6 +25,8 @@ methods (Static)
     
         if nargin < 2
             n_repeats = int32(50);
+        else
+            n_repeats = int32(n_repeats);
         end
         
         % we need to convert our Q array into a python dict
@@ -78,6 +80,8 @@ methods (Static)
         
         if nargin < 3
             n_repeats = int32(50);
+        else
+            n_repeats = int32(n_repeats);
         end
         
         % convert h and J
