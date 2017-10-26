@@ -8,6 +8,20 @@ end
 methods (Static)
     function response = sampleQubo(Q, n_repeats)
     % SAMPLEQUBO Uses QBsolv to determine low energy samples for the given QUBO.
+    %   response = sampleQubo(Q)
+    %   respones = sampleQubo(Q, n_repeats)
+    %
+    % Args:
+    %   Q: The QUBO as a 2-dimensional matlab array containing the linear and quadratic biases of
+    %       the qubo.
+    %   n_repeats: Determines the number of times to repeat the main loop in qbsolv after
+    %       determining a better sample. Default 50.
+    %
+    % Returns:
+    %   response: A struct with two fields, 'samples' and 'energies'. Each 'row' in samples is a
+    %       different low energy sample returned by QBSolv. Each row in 'energies' is the
+    %       corresponding energy.
+    %
     
         if isempty(Q)
             response.samples = [];
@@ -46,7 +60,21 @@ methods (Static)
     end
     
     function response = sampleIsing(h, J, n_repeats)
-    % TODO
+    % SAMPLEISING Uses QBsolv to determine low energy samples for the given Ising problem.
+    %   response = sampleIsing(h, J)
+    %   respones = sampleIsing(h, J, n_repeats)
+    %
+    % Args:
+    %   h: The linear biases of the Ising problem as a matlab 1-dimensional array.
+    %   J: The quadratic biases of the Ising problem as a matlab 2-dimensional array.
+    %   n_repeats: Determines the number of times to repeat the main loop in qbsolv after
+    %       determining a better sample. Default 50.
+    %
+    % Returns:
+    %   response: A struct with two fields, 'samples' and 'energies'. Each 'row' in samples is a
+    %       different low energy sample returned by QBSolv. Each row in 'energies' is the
+    %       corresponding energy.
+    %
     
         if isempty(h)
             response.samples = [];
