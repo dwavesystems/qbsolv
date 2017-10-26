@@ -1,10 +1,4 @@
 classdef QBSolv
-%UNTITLED2 Summary of this class goes here
-%   Detailed explanation goes here
-
-properties
-end
-
 methods (Static)
     function response = sampleQubo(Q, n_repeats)
     % SAMPLEQUBO Uses QBsolv to determine low energy samples for the given QUBO.
