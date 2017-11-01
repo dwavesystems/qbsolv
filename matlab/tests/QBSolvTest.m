@@ -27,6 +27,18 @@ methods (Test)
         checkIsingResponse(testCase, response, h, J);
     end
     
+    function testNRepeatsArg(testCase)
+        h = zeros(1, 5);
+        J = sparse(triu(ones(5), 1));
+        response = QBSolv().sampleIsing(h, J, 6);
+        checkIsingResponse(testCase, response, h, J);
+
+     
+        Q = ones(3);
+        response = QBSolv().sampleQubo(Q, 100);
+        testCase.checkQuboResponse(response, Q);  % check it, because why not
+    end
+    
     function testTrivialQubo(testCase)
         Q = sparse([]);
         response = QBSolv().sampleQubo(Q);
