@@ -19,8 +19,10 @@ build/
 scratch.py
 
 python/build
-python/dwave_qbsolv/qbsolv.c
+python/dwave_qbsolv/qbsolv_binding.c
 python/dwave_qbsolv.egg-info/*
 
 *.whl
 *.so
+
+dist/
