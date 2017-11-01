@@ -86,15 +86,21 @@ void randomize_pop_solution_by_index(int8_t *solution, int nbits, int *indices )
         solution[indices[i]] = (rand() < pop_ran) ? 1 : 0;
     }
 }
-// shuffle the index vector before sort
+// shuffle the index vector using Durstenfeld's version of the Fisher-Yates
+// shuffle algorithm.  Take care to avoid bias
 void shuffle_index(int *indices, int length)
 {
     for (int i = length - 1; i > 0; i--) {
-        int j   = rand() % (i + 1);
-        // swap values
-        int tmp = indices[i];
-        indices[i] = indices[j];
-        indices[j] = tmp;
+        int max_usable_rand = (RAND_MAX / (i + 1)) * (i + 1) - 1;  // integer div
+        int j = 0;
+        do { j = rand(); } while (j > max_usable_rand);
+        j %= (i + 1);
+        if (j != i) {
+            // swap values
+            int tmp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = tmp;
+        }
     }
 }
 

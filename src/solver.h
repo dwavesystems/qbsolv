@@ -19,14 +19,16 @@ extern "C" {
 #endif
 
 // This function Simply evaluates the objective function for a given solution.
-double Simple_evaluate(int8_t *solution, uint qubo_size, double **qubo);
+double Simple_evaluate(const int8_t * const solution, const uint qubo_size,
+    const double ** const qubo);
 
 // This function evaluates the objective function for a given solution.
-double evaluate(int8_t *solution, uint qubo_size, double **qubo, double *flip_cost);
+double evaluate(int8_t * const solution, const uint qubo_size,
+    const double ** const qubo, double * const flip_cost);
 
 // Flips a given bit in the solution, and calculates the new energy.
-double evaluate_1bit(double old_energy, uint bit, int8_t *solution, uint qubo_size,
-    double **qubo, double *flip_cost);
+double evaluate_1bit(const double old_energy, const uint bit, int8_t * const solution,
+    const uint qubo_size, const double ** const qubo, double * const flip_cost);
 
 // Tries to improve the current solution Q by flipping single bits.
 double local_search_1bit(double energy, int8_t *solution, uint qubo_size,
