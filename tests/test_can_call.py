@@ -49,39 +49,50 @@ class TestSmallProblems(unittest.TestCase):
     def test_linear(self):
         """Run a set of independent variables."""
         size = 10
-        qubo = {(ii, ii): -1 for ii in range(size)}
+        qubo = {}
+        solution = {}
+        for ii in range(size):
+            qubo[(ii, ii)] = -1
+            solution[ii] = 1
+
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -size)
+        self.has_solution(results, solution, -size)
 
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo, target=-size)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -size)
+        self.has_solution(results, solution, -size)
 
     def test_easy_loop(self):
         """Run a loop of variables without frustration."""
         size = 10
-        qubo = {(ii, ii): -1 for ii in range(size)}
+        qubo = {}
+        solution = {}
         for ii in range(size):
+            qubo[(ii, ii)] = -1
             qubo[ii, (ii + 1) % size] = -1
+            solution[ii] = 1
 
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -2 * size)
+        self.has_solution(results, solution, -2 * size)
 
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo, target=-2 * size)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -2 * size)
+        self.has_solution(results, solution, -2 * size)
 
     def test_single_frustrated_loop(self):
         """Run a loop of variables with a frustrated link."""
         size = 10
-        qubo = {(ii, ii): -1 for ii in range(size)}
+        qubo = {}
+        solution = {}
         for ii in range(size):
+            qubo[(ii, ii)] = -1
             qubo[ii, (ii + 1) % size] = -1
+            solution[ii] = 1
         qubo[size - 1, 0] = 1
 
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -2 * size + 2)
+        self.has_solution(results, solution, -2 * size + 2)
 
         results = dwave_qbsolv.QBSolv().sample_qubo(qubo, target=-2 * size + 2)
-        self.has_solution(results, {ii: 1 for ii in range(size)}, -2 * size + 2)
+        self.has_solution(results, solution, -2 * size + 2)
 
 
 class TestSmallBeasleyProblems(unittest.TestCase):

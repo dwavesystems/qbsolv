@@ -5,10 +5,9 @@ from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 
-
 extra_compile_args = {
     'msvc': [],
-    'unix': ['-Ofast', '-Wall', '-Wextra', '-flto'],
+    'unix': ['-std=gnu99', '-Ofast', '-Wall', '-Wextra', '-flto'],
     # 'unix': ['-std=c++1y','-w','-O0', '-g', '-fipa-pure-const'],
 }
 
@@ -49,7 +48,7 @@ setup(
     name='dwave_qbsolv',
     version='0.1.2',
     packages=packages,
-    install_requires=['dimod>=0.3.0', 'cython'],
+    install_requires=['dimod>=0.3.1', 'cython'],
     ext_modules=cythonize(extensions),
     cmdclass={'build_ext': build_ext_compiler_check}
 )
