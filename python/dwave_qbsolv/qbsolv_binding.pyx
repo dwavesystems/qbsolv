@@ -2,10 +2,10 @@ import sys
 import random
 import logging
 
-from libc.stdint cimport int8_t, int64_t, int32_t
 from libc.stdio cimport stdout
 from libc.stdlib cimport malloc, free, srand
 
+from dwave_qbsolv.cqbsolv cimport int8_t, int64_t, int32_t
 from dwave_qbsolv.cqbsolv cimport default_parameters, dw_init, dw_close, dw_sub_sample
 from dwave_qbsolv.cqbsolv cimport Verbose_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, Target_, findMax_
 from dwave_qbsolv.cqbsolv cimport solve, malloc2D

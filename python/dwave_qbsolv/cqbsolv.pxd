@@ -1,5 +1,13 @@
-from libc.stdint cimport int8_t, int32_t
 from libc.stdio cimport FILE
+
+cdef extern from "stdheaders_shim.h":
+    # When a ctypedef is externed cython uses the type information for
+    # building the interface, but the actual typedef used in the generated
+    # code comes from the .h file. This is a work around for stdint being
+    # missing from older Microsoft c compilers.
+    ctypedef char int8_t
+    ctypedef long long int64_t
+    ctypedef int int32_t
 
 cdef extern from "qbsolv.h":
     # pointer type for subsolver.

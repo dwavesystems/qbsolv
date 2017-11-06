@@ -18,15 +18,11 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "stdheaders_shim.h"
 #include <string.h>
 #include <math.h>
 #include <sys/types.h>
-//#include <unistd.h>
 #include <time.h>
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
 #define  VERSION    "open source 2.5"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -36,8 +32,8 @@
 #define flt_equals(a, b) (fabs((a) - (b)) < EPSILON)
 
 #define GETMEM(P, T, N) (P = (T*)malloc((sizeof(T) * N)))
-#define BADMALLOC {printf("\n  ------> Exit(%d) called by %s(%s.%d)\n\n", 9, __func__, __FILE__, __LINE__); exit(9); }
-#define DL printf("-----> AT %s(%s.%d)\n",  __func__, __FILE__, __LINE__);
+#define BADMALLOC {printf("\n  ------> Exit(%d) called by %s(%s.%d)\n\n", 9, __FUNCTION__, __FILE__, __LINE__); exit(9); }
+#define DL printf("-----> AT %s(%s.%d)\n",  __FUNCTION__, __FILE__, __LINE__);
 #define CPSECONDS ((double)(clock() - start_) / CLOCKS_PER_SEC)
 #define DLT printf("%lf seconds ", CPSECONDS);
 #define uint unsigned int
@@ -47,4 +43,6 @@
 #define LONGFORMAT "ld"
 #elif defined (__APPLE__)
 #define LONGFORMAT "lld"
+#else
+#error Unable to determine 64bit output format
 #endif

@@ -5,6 +5,7 @@ from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 
+
 extra_compile_args = {
     'msvc': [],
     'unix': ['-std=gnu99', '-Ofast', '-Wall', '-Wextra', '-flto'],
@@ -35,10 +36,9 @@ class build_ext_compiler_check(build_ext):
 extensions = [Extension('dwave_qbsolv.qbsolv_binding',
                         ['dwave_qbsolv/qbsolv_binding.pyx',
                          './globals.c',
-                         '../src/solver.c',
-                         '../src/debugs.c',
-                         '../src/dwsolv.c',
-                         '../src/util.c'],
+                         '../src/solver.cc',
+                         '../src/dwsolv.cc',
+                         '../src/util.cc'],
                         include_dirs=['.', '../src', '../include'],
                         )]
 

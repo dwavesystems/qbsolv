@@ -10,10 +10,10 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU)
 #    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
-add_executable(solver_reduce solver_reduce.cpp ../src/util.c ../src/solver.c ../src/dwsolv.c)
+add_executable(solver_reduce solver_reduce.cpp ../src/util.cc ../src/solver.cc ../src/dwsolv.cc)
 target_link_libraries(solver_reduce gtest pthread)
 add_test(solver_reduce solver_reduce)
 
-add_executable(util_malloc util_malloc.cpp ../src/util.c)
+add_executable(util_malloc util_malloc.cpp ../src/util.cc)
 target_link_libraries(util_malloc gtest pthread)
 add_test(util_malloc util_malloc)

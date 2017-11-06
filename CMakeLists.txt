@@ -15,11 +15,17 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU)
     set(CMAKE_C_FLAGS_RELEASE "-O3")
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=gnu++11")
+    set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
 # location of header files
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include)
 
 # static library
-add_library(libqbsolv STATIC src/solver.c src/util.c src/dwsolv.c)
+add_library(libqbsolv STATIC src/solver.cc src/util.cc src/dwsolv.cc)
 set_target_properties(libqbsolv PROPERTIES PREFIX "")
 
 if(QBSOLV_BUILD_CMD)

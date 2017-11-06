@@ -1,5 +1,9 @@
-#include <stdint.h>
 #include "../cmd/readqubo.h"
+#include "stdheaders_shim.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 FILE   *outFile_;
 FILE   *solution_input_;
@@ -10,3 +14,7 @@ double Target_, Time_;
 
 struct nodeStr_ *nodes_;
 struct nodeStr_ *couplers_;
+
+#ifdef __cplusplus
+}
+#endif
