@@ -8,7 +8,7 @@ from Cython.Build import cythonize
 
 extra_compile_args = {
     'msvc': [],
-    'unix': ['-std=gnu99', '-Ofast', '-Wall', '-Wextra', '-flto'],
+    'unix': ['-std=gnu++11', '-Ofast', '-Wall', '-Wextra', '-flto'],
     # 'unix': ['-std=c++1y','-w','-O0', '-g', '-fipa-pure-const'],
 }
 
@@ -21,6 +21,7 @@ extra_link_args = {
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
+        print(dir(self))
 
         compile_args = extra_compile_args[compiler]
         for ext in self.extensions:
@@ -35,11 +36,11 @@ class build_ext_compiler_check(build_ext):
 
 extensions = [Extension('dwave_qbsolv.qbsolv_binding',
                         ['dwave_qbsolv/qbsolv_binding.pyx',
-                         './globals.c',
+                         './globals.cc',
                          '../src/solver.cc',
                          '../src/dwsolv.cc',
                          '../src/util.cc'],
-                        include_dirs=['.', '../src', '../include'],
+                        include_dirs=['.', '../src', '../include']
                         )]
 
 packages = ['dwave_qbsolv']

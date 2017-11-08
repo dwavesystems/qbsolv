@@ -19,17 +19,14 @@ matrix:
       env: C_COMPILER=clang CXX_COMPILER=clang++
     - language: c
       os: osx
-      script: ./ci/travis/cpp-coverage.sh
+      script: ./ci/travis/osx-cpp-coverage.sh
       deploy:
       env: C_COMPILER=gcc CXX_COMPILER=g++
     - language: c
       os: osx
-      script: ./ci/travis/cpp-coverage.sh
+      script: ./ci/travis/osx-cpp-coverage.sh
       deploy:
       env: C_COMPILER=clang CXX_COMPILER=clang++
-    # - language: python
-    #   os: osx
-    #   script: ./ci/travis/build-mac-wheels.sh
     - language: python
       sudo: required
       services:
@@ -41,6 +38,24 @@ matrix:
         - docker
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
            PRE_CMD=linux32
+    - os: osx
+      language: generic
+      before_install:
+        - brew update
+        - virtualenv env -p python2
+        - source env/bin/activate
+      script: ./ci/travis/osx-build-wheel.sh
+    - os: osx
+      language: generic
+      before_install:
+        - brew update
+        - brew install python3
+        - virtualenv env -p python3
+        - source env/bin/activate
+      script: ./ci/travis/osx-build-wheel.sh
+    # - os: osx
+    #   language: generic
+    #   env: TOXENV=pynightly
 
 addons:
   apt:
