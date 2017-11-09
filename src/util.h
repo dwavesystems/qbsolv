@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "stdheaders_shim.h"
 #include "macros.h"
 
 #ifdef __cplusplus

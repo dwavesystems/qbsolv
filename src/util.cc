@@ -18,6 +18,10 @@
 #include "qbsolv.h"
 #include <math.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // create and pointer fill a 2d array of "size" for
 // X[rows][cols] addressing. Using only a single malloc
 void **malloc2D(uint rows, uint cols, uint size)
@@ -712,7 +716,7 @@ size_t getline_win(char **lineptr, size_t *n, FILE *stream) {
         return -1;
     }
     if (bufptr == NULL) {
-        bufptr = malloc(128);
+        bufptr = (char*)malloc(128);
         if (bufptr == NULL) {
             return -1;
         }
@@ -722,7 +726,7 @@ size_t getline_win(char **lineptr, size_t *n, FILE *stream) {
     while(c != EOF) {
         if ((p - bufptr) > (size - 1)) {
             size = size + 128;
-            bufptr = realloc(bufptr, size);
+            bufptr = (char*)realloc(bufptr, size);
             if (bufptr == NULL) {
                 return -1;
             }
@@ -739,5 +743,9 @@ size_t getline_win(char **lineptr, size_t *n, FILE *stream) {
     *n = size;
 
     return p - bufptr - 1;
+}
+#endif
+
+#ifdef __cplusplus
 }
 #endif

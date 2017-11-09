@@ -12,12 +12,17 @@
  limitations under the License.
 */
 
+#include "macros.h"
 #include "util.h"
 #include "extern.h"
 #include "dwsolv.h"
 #include "qbsolv.h"
 
 #include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // This function Simply evaluates the objective function for a given solution.
 //  call this to double check that a solution = energy
@@ -335,12 +340,12 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     }
                     howFar = ((double)(iter_max - (*bit_flips)) / (double)thisIter);
                     if (Verbose_ > 3) {
-                        printf("Tabu new best %lf ,K=%d,iteration = %"LONGFORMAT", %lf, %d\n",
+                        printf("Tabu new best %lf ,K=%d,iteration = %" LONGFORMAT ", %lf, %d\n",
                             best_energy * sign, last_bit,(int64_t) (*bit_flips), howFar, brk );
                     }
                     if ( howFar < 0.80  && numIncrease > 0 ) {
                         if (Verbose_ > 3) {
-                            printf("Increase Itermax %"LONGFORMAT", %"LONGFORMAT"\n", iter_max,
+                            printf("Increase Itermax %" LONGFORMAT ", %" LONGFORMAT "\n", iter_max,
                                      (iter_max + increaseIter));
                         }
                         iter_max  += increaseIter;
@@ -724,7 +729,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         print_output(qubo_size, solution, numPartCalls, best_energy * sign,CPSECONDS, param);
     }
     if (Verbose_ > 1) {
-        DLT; printf(" V Starting outer loop =%lf iterations %"LONGFORMAT"\n", best_energy * sign, bit_flips);
+        DLT; printf(" V Starting outer loop =%lf iterations %" LONGFORMAT "\n", best_energy * sign, bit_flips);
     }
 
     // starting main search loop Partition ( run parts on tabu or Dwave ) --> Tabu rinse and repeat
@@ -843,7 +848,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         val_index_sort(index, flip_cost, qubo_size); // Create index array of sorted values
 
         if ( Verbose_ > 1 ) {
-            DLT; printf("Latest answer  %4.5f iterations =%"LONGFORMAT"\n", energy * sign,(int64_t) bit_flips);
+            DLT; printf("Latest answer  %4.5f iterations =%" LONGFORMAT "\n", energy * sign,(int64_t) bit_flips);
         }
 
         result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN, qubo_size,
@@ -883,7 +888,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
         }
 
         if ( Verbose_ > 1) {
-            DLT; printf("V Best outer loop =%lf iterations %"LONGFORMAT"\n", best_energy * sign, bit_flips);
+            DLT; printf("V Best outer loop =%lf iterations %" LONGFORMAT "\n", best_energy * sign, bit_flips);
         }
 
         // check on, if to continue the outer loop
@@ -924,3 +929,8 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
 
     return;
 }
+
+
+#ifdef __cplusplus
+}
+#endif

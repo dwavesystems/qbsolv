@@ -12,7 +12,7 @@
 */
 #pragma once
 
-#include <stdint.h>
+#include "stdheaders_shim.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -14,8 +14,7 @@
  limitations under the License.
 */
 #pragma once
-#include <stdint.h>
-#include <stdbool.h>
+#include "stdheaders_shim.h"
 
 #ifdef __cplusplus
 extern "C" {

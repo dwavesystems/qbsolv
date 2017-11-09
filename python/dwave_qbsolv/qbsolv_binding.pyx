@@ -1,13 +1,14 @@
+# distutils: language=c++
 import sys
 import random
 import logging
 
-from libc.stdint cimport int8_t, int64_t, int32_t
 from libc.stdio cimport stdout
 from libc.stdlib cimport malloc, free, srand
 
+from dwave_qbsolv.cqbsolv cimport int8_t, int64_t, int32_t
 from dwave_qbsolv.cqbsolv cimport default_parameters, dw_init, dw_close, dw_sub_sample
-from dwave_qbsolv.cqbsolv cimport Verbose_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, findMax_
+from dwave_qbsolv.cqbsolv cimport Verbose_, algo_, outFile_, Time_, Tlist_, numsolOut_, WriteMatrix_, TargetSet_, Target_, findMax_
 from dwave_qbsolv.cqbsolv cimport solve, malloc2D
 
 ENERGY_IMPACT = 0
@@ -24,7 +25,7 @@ log = logging.getLogger(__name__)
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
                algorithm=None, timeout=2592000,
-               solver=None):
+               solver=None, target=None, find_max=False):
     """TODO: update
 
     Runs qbsolv.
@@ -48,7 +49,8 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         a list of dics, energies is the energy for each sample and counts
         is the number of times each sample was found by qbsolv.
 
-    NB: relies on variables in Q being index valued and nonnegative, but not checked at this point
+    Note:
+        relies on variables in Q being index valued and nonnegative, but not checked at this point
     """
 
     # first up, we want the default parameters for the solve function.
@@ -124,7 +126,12 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     TargetSet_ = False
 
     global findMax_
-    findMax_ = False
+    findMax_ = bool(find_max)
+
+    if target is not None:
+        TargetSet_ = True
+        global Target_
+        Target_ = target
 
     # we also take the opporunity to set the random seed used by qbsolv. Qbsolv has a default random seed
     # so we mimic that behaviour here.
@@ -156,13 +163,14 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     # This also affects other locations (ctrl+f QFLIP)
     cdef int u, v
     cdef double bias
+    cdef double sign = 1 if find_max else -1
     # put the values from Q into Q_array
     for (u, v), bias in iteritems(Q):
         # upper triangular
         if v < u:
-            Q_array[v][u] = -bias
+            Q_array[v][u] = sign * bias
         else:
-            Q_array[u][v] = -bias
+            Q_array[u][v] = sign * bias
 
     # Ok, solve using qbsolv! This puts the answer into output_sample
     solve(Q_array, n_variables, solution_list, energy_list, solution_counts, Qindex, n_solutions, &params)
