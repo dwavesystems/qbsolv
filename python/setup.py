@@ -8,7 +8,7 @@ from Cython.Build import cythonize
 
 extra_compile_args = {
     'msvc': [],
-    'unix': ['-std=gnu++11', '-Ofast', '-Wall', '-Wextra', '-flto'],
+    'unix': ['-std=c++11', '-Ofast', '-Wall', '-Wextra', '-flto'],
     # 'unix': ['-std=c++1y','-w','-O0', '-g', '-fipa-pure-const'],
 }
 
@@ -21,7 +21,6 @@ extra_link_args = {
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
-        print(dir(self))
 
         compile_args = extra_compile_args[compiler]
         for ext in self.extensions:
@@ -50,6 +49,6 @@ setup(
     version='0.1.2',
     packages=packages,
     install_requires=['dimod>=0.3.1', 'cython'],
-    ext_modules=cythonize(extensions),
+    ext_modules=cythonize(extensions, language='c++'),
     cmdclass={'build_ext': build_ext_compiler_check}
 )

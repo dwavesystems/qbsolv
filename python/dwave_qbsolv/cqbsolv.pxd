@@ -1,3 +1,4 @@
+# distutils: language=c++
 from libc.stdio cimport FILE
 
 cdef extern from "stdheaders_shim.h":
