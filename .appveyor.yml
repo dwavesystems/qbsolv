@@ -81,11 +81,11 @@ build_script:
   - cd python
   - "%CMD_IN_ENV% python setup.py bdist_wheel"
   - cd ..
-  - pip install dwave_qbsolv --no-index -f python\\dist\\"
+  - pip install dwave_qbsolv --no-index -f python\\dist\\
 
 test_script:
   # Run the project tests
-  - python -m unittest discover"
+  - python -m unittest discover
 
 after_test:
   # If tests are successful, create binary packages for the project.
