@@ -8,7 +8,7 @@ from Cython.Build import cythonize
 
 extra_compile_args = {
     'msvc': [],
-    'unix': ['-Ofast', '-Wall', '-Wextra', '-flto'],
+    'unix': ['-std=c++11', '-Ofast', '-Wall', '-Wextra', '-flto'],
     # 'unix': ['-std=c++1y','-w','-O0', '-g', '-fipa-pure-const'],
 }
 
@@ -35,12 +35,11 @@ class build_ext_compiler_check(build_ext):
 
 extensions = [Extension('dwave_qbsolv.qbsolv_binding',
                         ['dwave_qbsolv/qbsolv_binding.pyx',
-                         './globals.c',
-                         '../src/solver.c',
-                         '../src/debugs.c',
-                         '../src/dwsolv.c',
-                         '../src/util.c'],
-                        include_dirs=['.', '../src', '../include'],
+                         './globals.cc',
+                         '../src/solver.cc',
+                         '../src/dwsolv.cc',
+                         '../src/util.cc'],
+                        include_dirs=['.', '../src', '../include']
                         )]
 
 packages = ['dwave_qbsolv']
@@ -49,7 +48,7 @@ setup(
     name='dwave_qbsolv',
     version='0.1.2',
     packages=packages,
-    install_requires=['dimod>=0.3.0', 'cython'],
-    ext_modules=cythonize(extensions),
+    install_requires=['dimod>=0.3.1', 'cython'],
+    ext_modules=cythonize(extensions, language='c++'),
     cmdclass={'build_ext': build_ext_compiler_check}
 )

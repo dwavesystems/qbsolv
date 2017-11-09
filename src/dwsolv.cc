@@ -35,6 +35,10 @@ static DW_epqmi *epqmi_;
 #include <unistd.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 char       *workspace, *connection, *wspath, *solver, ws_tmp_path[256], tmp_path[256];
 
     // this is conditionally compiled as it needs externals supplied by Dwave tools group
@@ -127,7 +131,7 @@ int dw_init()
     fclose(fs);
     // use putenv instead of setenv
     int len_put = strlen(ws_tmp_path) +1 + strlen("DW_INTERNAL__WSPATH") +1;
-    char *put_str=malloc(len_put);
+    char *put_str= (char*)malloc(len_put);
     sprintf(put_str,"%s=%s","DW_INTERNAL__WSPATH",ws_tmp_path);
 
     //if ( (sysResult = setenv("DW_INTERNAL__WSPATH", ws_tmp_path, 1)) != 0 ) {
@@ -251,3 +255,7 @@ void dw_close()
 {
     return;
 }
+
+#ifdef __cplusplus
+}
+#endif

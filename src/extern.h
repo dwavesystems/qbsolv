@@ -18,6 +18,10 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct nodeStr_;
 
 extern FILE   *outFile_;
@@ -29,3 +33,7 @@ extern double Target_, Time_;
 
 extern struct nodeStr_ *nodes_;
 extern struct nodeStr_ *couplers_;
+
+#ifdef __cplusplus
+}
+#endif

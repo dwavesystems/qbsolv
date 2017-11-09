@@ -16,6 +16,7 @@
 #pragma once
 
 #include <stdio.h>
+#include "stdheaders_shim.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,39 +1,76 @@
-language: c
 sudo: false
+language: python
+os: linux
+
+env:
+  global:
+    - TWINE_USERNAME=dwtools
+    - secure: "pvWM1Newi4AQPDh3KOrhlOSNoxHW2HBMG1Sd20s7voeGY097ESdXcJzh3EH3la8c6SlP6jyKWlm1NvoEAGt2gF1F0ME3flX6QAne0I14FdjFnmzVmvhC5/9jN3y97uN4yKvtdnFKqM3sI5BwMQW30fmxc+0xI3SlUTXdSUjEdR/cIPflynP8poTwNHLe+RpaFalCqJygBHBzgvatIK6kZMpiu4IhJWecQPeIR8Mx/srclYhGn+/IJP7EFTUz5ijRX1Oz4npWVs2FiVLmR46rKThpeAEqj6ZE1K4Qc6mj0+Wkd9w0qusq1zdZeUfJtIRl1S3PSdm6432kuE+eAlTs5bahw1Ha1VDuR+rOfhkEIkm/ucl5/Sh/3e604sVvggEadMuVl5NTCAClnkA5uU+GQKpvSoUGblgCMxhUCsLWSNMYV03qaPTK10OBOcD0lYkUIqCVQ5WDw9yBEsAIjO1WXC4NyP3PbVlkgTiWKaWattvmE+cqZ22Z7/nolxPySlf4ZIbTp94YOjiAB83g/Bf+7k7wJpo3Ag1eA4B20k7nDuoNFf7VdUeZCJx5PbkSs5Q40swkI3AZudJ6au36XsPtl9vpidPuJ8F6cL9A1QyIRCB59he7AJck2lcjwU81QWMphBQT1mBKaR9FBqcd1Dje+/2oQ7dYw8L4iKjrKFvFzTE="
 
 matrix:
   include:
-    - os: linux
+    - language: c
+      script: ./ci/travis/cpp-coverage.sh
+      deploy:
       env: C_COMPILER=gcc CXX_COMPILER=g++
-    - os: linux
+    - language: c
+      script: ./ci/travis/cpp-coverage.sh
+      deploy:
       env: C_COMPILER=clang CXX_COMPILER=clang++
+    - language: c
+      os: osx
+      script: ./ci/travis/osx-cpp-coverage.sh
+      deploy:
+      env: C_COMPILER=gcc CXX_COMPILER=g++
+    - language: c
+      os: osx
+      script: ./ci/travis/osx-cpp-coverage.sh
+      deploy:
+      env: C_COMPILER=clang CXX_COMPILER=clang++
+    - language: python
+      sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+    - language: python
+      sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
+           PRE_CMD=linux32
+    - os: osx
+      language: generic
+      before_install:
+        - brew update
+        - virtualenv env -p python2
+        - source env/bin/activate
+      script: ./ci/travis/osx-build-wheel.sh
+    - os: osx
+      language: generic
+      before_install:
+        - brew update
+        - brew install python3
+        - virtualenv env -p python3
+        - source env/bin/activate
+      script: ./ci/travis/osx-build-wheel.sh
+    # - os: osx
+    #   language: generic
+    #   env: TOXENV=pynightly
 
 addons:
   apt:
     packages:
       - libgtest-dev
 
-before_install:
-  - pip install --user cpp-coveralls
-  - export CC=$C_COMPILER
-  - export CXX=$CXX_COMPILER
-
-install:
-  - mkdir ~/gtest
-  - cd ~/gtest
-  - export LIBRARY_PATH=$(pwd)
-  - cmake -D CMAKE_INSTALL_PREFIX:PATH=./ /usr/src/gtest/
-  - make CC=$CC CXX=$CXX
-  - cd -
-
 script:
-  - mkdir build
-  - cd build
-  - cmake .. -DQBSOLV_BUILD_TESTS=ON
-  - make CC=$CC CXX=$CXX
-  - make test
-  - find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
-  - cd ..
+  - docker pull $DOCKER_IMAGE
+  - docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/ci/travis/build-wheels.sh
+  - ls wheelhouse/
 
-after_success:
-  - coveralls --exclude tests -E '.*gtest.*' --gcov-options '\-lp'
+deploy:
+  provider: script
+  script: ci/travis/upload-wheels.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
