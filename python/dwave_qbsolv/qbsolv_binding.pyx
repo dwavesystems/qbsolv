@@ -38,19 +38,19 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
             sample. Default 50.
         seed (int, optional): Random seed. Default None.
         algorithm (int, optional): Which algorithm to use. Default
-            None. Algorithms numbers can be imported from module
+            None. Algorithm numbers can be imported from module
             under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
         solver (function, optional): A function that finds low energy
             solutions from a small QUBO. Must be able to handle arbitrary
             QUBOs of size <= subproblem_size. TODO: more definition
 
     Returns:
-        (list, list): (samples, counts) where samples is
-        a list of dics, energies is the energy for each sample and counts
-        is the number of times each sample was found by qbsolv.
+        (list, list): (samples, counts) where samples is a list of dicts,
+        energies is the energy for each sample, and counts is the number of
+        times each sample was found by qbsolv.
 
     Note:
-        relies on variables in Q being index valued and nonnegative, but not checked at this point
+        relies on variables in Q being index-valued and nonnegative, but not checked at this point
     """
 
     # first up, we want the default parameters for the solve function.
@@ -60,23 +60,23 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     cdef int32_t repeats = num_repeats
     params.repeats = num_repeats
 
-    # Look for keywords identifying methods implemnted in the qbsolv c library
+    # Look for keywords identifying methods implemented in the qbsolv C library
     if solver == 'tabu' or solver is None:
-        log.debug('Using builtin tabu sub problem solver.')
+        log.debug('Using built-in tabu sub-problem solver.')
     elif solver == 'dw':
-        log.debug('Using builtin dw interface sub problem solver.')
+        log.debug('Using built-in dw interface sub-problem solver.')
         params.sub_sampler = &dw_sub_sample
         params.sub_size = dw_init();
 
     # Try to identify a dimod solver
     elif hasattr(solver, 'sample_ising') and hasattr(solver, 'sample_qubo'):
-        log.debug('Using dimod as sub problem solver.')
+        log.debug('Using dimod as sub-problem solver.')
         params.sub_sampler = &solver_callback
         params.sub_sampler_data = <void*>solver.sample_qubo
 
     # Otherwise any callable should work
     elif callable(solver):
-        log.debug('Using callback as sub problem solver.')
+        log.debug('Using callback as sub-problem solver.')
         params.sub_sampler = &solver_callback
         params.sub_sampler_data = <void*>solver
 
@@ -106,7 +106,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     if not isinstance(timeout, int) or timeout <= 0:
         raise ValueError("'timeout' must be a positive integer")
     global Time_
-    Time_ = timeout # the maximum runtime of the algorithm in seconds before timeout (2592000 = a months worth of seconds)
+    Time_ = timeout # the maximum runtime of the algorithm in seconds before timeout (2592000 = a month's worth of seconds)
 
     # other global variables are fixed for our purposes here
 
@@ -133,7 +133,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         global Target_
         Target_ = target
 
-    # we also take the opporunity to set the random seed used by qbsolv. Qbsolv has a default random seed
+    # we also take the opportunity to set the random seed used by qbsolv. Qbsolv has a default random seed
     # so we mimic that behaviour here.
     if seed is None:
         seed = random.randint(0, 1L<<30)
@@ -175,22 +175,22 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     # Ok, solve using qbsolv! This puts the answer into output_sample
     solve(Q_array, n_variables, solution_list, energy_list, solution_counts, Qindex, n_solutions, &params)
 
-    # we have three things we are interested in, the samples, the energies and the number of times each
-    # sample appeared
+    # we are interested in three things: the samples, the energies, and the
+    # number of times each sample appeared
     samples = []
     counts = []
 
     # it is actually faster to use a while loop here and keep everything as a C object
     cdef int i = 0
     while i < n_solutions:
-        soln_idx = Qindex[i]  # Qindex tracks where the order of the solutions
+        soln_idx = Qindex[i]  # Qindex tracks the order of the solutions
 
         # if no solutions were found then we can stop
         if solution_counts[soln_idx] == 0:
             break
 
         # NB: in principle we have the energy list and could return them directly,
-        # right now it appears that QBSolv has a bug, so we will fix this on future
+        # but right now it appears that QBSolv has a bug; we will fix this in a future
         # release
 
         samples.append({v: int(solution_list[soln_idx][v]) for v in range(n_variables)})

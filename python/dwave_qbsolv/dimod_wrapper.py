@@ -21,7 +21,7 @@ class QBSolv(dimod.TemplateSampler):
     @dimod.decorators.qubo(1)
     @dimod.decorators.qubo_index_labels(1)
     def sample_qubo(self, Q, n_repeats=50, seed=None, algorithm=None, **kwargs):
-        """Samples low energy states defined by a QUBO using qbsolv.
+        """Samples low-energy states defined by a QUBO using qbsolv.
 
         Args:
             Q (dict): A dictionary defining the QUBO. Should be of the form
@@ -30,9 +30,9 @@ class QBSolv(dimod.TemplateSampler):
                 repeat the main loop in qbsolv after determining a better
                 sample. Default 50.
             seed (int, optional): Random seed. Default None.
-            algorithm (int, optional): Which algorithm to use. Defaut
-                None. Algorithms numbers can be imported from module
-                under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
+            algorithm (int, optional): Which algorithm to use. Default None.
+                Algorithm numbers can be imported from module under the names
+                ENERGY_IMPACT and SOLUTION_DIVERSITY.
 
         Returns:
             :obj:`BinaryResponse`
