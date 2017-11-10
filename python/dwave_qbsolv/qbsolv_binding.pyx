@@ -24,8 +24,9 @@ log = logging.getLogger(__name__)
 
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
-               algorithm=None, timeout=2592000,
+               algorithm=None, timeout=2592000, solver_limit=None,
                solver=None, target=None, find_max=False):
+<<<<<<< 64e5e99374f26ed18f416fc98deab2b4b495b75b
     """TODO: update
 
     Runs qbsolv.
@@ -43,6 +44,11 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         solver (function, optional): A function that finds low energy
             solutions from a small QUBO. Must be able to handle arbitrary
             QUBOs of size <= subproblem_size. TODO: more definition
+=======
+    """Entry point to `solve` method in the qbsolv library.
+
+    Arguments are described in the dimod wrapper.
+>>>>>>> Update python wrapper docs+args+test
 
     Returns:
         (list, list): (samples, counts) where samples is a list of dicts,
@@ -59,6 +65,8 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     log.debug('params.repeats = %d', num_repeats)
     cdef int32_t repeats = num_repeats
     params.repeats = num_repeats
+    if solver_limit is not None:
+        params.sub_size = <int32_t>(solver_limit)
 
     # Look for keywords identifying methods implemented in the qbsolv C library
     if solver == 'tabu' or solver is None:
@@ -72,7 +80,15 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     elif hasattr(solver, 'sample_ising') and hasattr(solver, 'sample_qubo'):
         log.debug('Using dimod as sub-problem solver.')
         params.sub_sampler = &solver_callback
-        params.sub_sampler_data = <void*>solver.sample_qubo
+
+        def dimod_callback(Q, best_state):
+            result = solver.sample_qubo(Q)
+            sample = next(result.samples())
+            for key, value in sample.items():
+                best_state[key] = value
+            return best_state
+
+        params.sub_sampler_data = <void*>dimod_callback
 
     # Otherwise any callable should work
     elif callable(solver):
