@@ -24,25 +24,11 @@ log = logging.getLogger(__name__)
 
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
-               algorithm=None, timeout=2592000,
+               algorithm=None, timeout=2592000, solver_limit=None,
                solver=None, target=None, find_max=False):
-    """TODO: update
+    """Entry point to `solve` method in the qbsolv library.
 
-    Runs qbsolv.
-
-    Args:
-        Q (dict): A dictionary defining the QUBO. Should be of the form
-            {(u, v): bias} where u, v are variables and bias is numeric.
-        num_repeats (int, optional): Determines the number of times to
-            repeat the main loop in qbsolv after determining a better
-            sample. Default 50.
-        seed (int, optional): Random seed. Default None.
-        algorithm (int, optional): Which algorithm to use. Default
-            None. Algorithm numbers can be imported from module
-            under the names ENERGY_IMPACT and SOLUTION_DIVERSITY.
-        solver (function, optional): A function that finds low energy
-            solutions from a small QUBO. Must be able to handle arbitrary
-            QUBOs of size <= subproblem_size. TODO: more definition
+    Arguments are described in the dimod wrapper.
 
     Returns:
         (list, list): (samples, counts) where samples is a list of dicts,
@@ -59,6 +45,8 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     log.debug('params.repeats = %d', num_repeats)
     cdef int32_t repeats = num_repeats
     params.repeats = num_repeats
+    if solver_limit is not None:
+        params.sub_size = <int32_t>(solver_limit)
 
     # Look for keywords identifying methods implemented in the qbsolv C library
     if solver == 'tabu' or solver is None:
@@ -72,7 +60,15 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     elif hasattr(solver, 'sample_ising') and hasattr(solver, 'sample_qubo'):
         log.debug('Using dimod as sub-problem solver.')
         params.sub_sampler = &solver_callback
-        params.sub_sampler_data = <void*>solver.sample_qubo
+
+        def dimod_callback(Q, best_state):
+            result = solver.sample_qubo(Q)
+            sample = next(result.samples())
+            for key, value in sample.items():
+                best_state[key] = value
+            return best_state
+
+        params.sub_sampler_data = <void*>dimod_callback
 
     # Otherwise any callable should work
     elif callable(solver):
