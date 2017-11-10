@@ -14,15 +14,21 @@
  limitations under the License.
 */
 
-#include "include.h"
+#include "util.h"
+#include "readqubo.h"
+#include "qbsolv.h"
+#include "dwsolv.h"
 #include <getopt.h>
+
+void print_help(void);
+void print_qubo_format(void);
 
 // define what will be used by "extern" in other functions
 //
 FILE            *outFile_;
 FILE            *solution_input_;
 int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
-int             Verbose_, SubMatrix_, UseDwave_, TargetSet_, WriteMatrix_, Tlist_;
+int             Verbose_, TargetSet_, WriteMatrix_, Tlist_;
 char            *outFileNm_, pgmName_[16], algo_[4];
 double          **val;
 double          Target_, Time_;
@@ -46,6 +52,11 @@ int  main( int argc,  char *argv[])
  *  process the commandline and the environment, ...
  *  Initialize global variables
  */
+
+    parameters_t param = default_parameters();
+
+    bool use_dwave = false;
+
     extern char *optarg;
     extern int  optind, optopt, opterr;
 
@@ -54,10 +65,7 @@ int  main( int argc,  char *argv[])
 
     strcpy(pgmName_, "qbsolv");
     findMax_     = false;
-    UseDwave_    = false;
     Verbose_     = 0;
-    int nRepeats = defaultRepeats;
-    SubMatrix_   = 46; // submatrix default
     strcpy(algo_, "o"); //algorithm default
 
     WriteMatrix_ = false;
@@ -91,7 +99,7 @@ int  main( int argc,  char *argv[])
     int  opt, option_index = 0;
     char *chx; // used as exit ptr in strto(x) functions
     if ( dw_established () ) {  // user has set up a DW envir
-        UseDwave_ = true;
+        use_dwave = true;
     }
 
     while ((opt = getopt_long(argc, argv, "Hhi:o:v:VS:T:l:n:wmo:t:qr:a:", longopts, &option_index)) != -1) {
@@ -129,7 +137,7 @@ int  main( int argc,  char *argv[])
             findMax_ = true; // go for the maximum value otherwise the minimum is found by default
             break;
         case 'n':
-            nRepeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeats without improvement
+            param.repeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeats without improvement
             break;
         case 'v':
             Verbose_ = strtol(optarg, &chx, 10); // this sets the value of the Verbose
@@ -139,18 +147,18 @@ int  main( int argc,  char *argv[])
             exit(9);
             break;
         case 'S':
-            SubMatrix_ = strtol(optarg, &chx, 10); // this sets the size of the Partitioning Matrix
-            if ( SubMatrix_ < 10 ) {
-                                     // other settings, this could be setting it from true above to false here.
-                if ( SubMatrix_ != 0) {
-                    fprintf(stderr, "\n Error --  SubMatrix must be 0 or greater than 10.  -S %d\n ", SubMatrix_);
+            param.sub_size = strtol(optarg, &chx, 10); // this sets the size of the Partitioning Matrix
+            if (param.sub_size < 10) {
+                // other settings, this could be setting it from true above to false here.
+                if (param.sub_size != 0) {
+                    fprintf(stderr, "\n Error --  SubMatrix must be 0 or greater than 10.  -S %d\n ", param.sub_size);
                     ++errorCount;
                 }
             }
 
-            UseDwave_ = false;   // explicit setting of Submatrix says to use tabu solver, regardless of other 
-            if ( SubMatrix_ == 0 ) {
-                UseDwave_ = true; // except where -S 0
+            use_dwave = false;   // explicit setting of Submatrix says to use tabu solver, regardless of other
+            if ( param.sub_size == 0 ) {
+                use_dwave = true; // except where -S 0
             }
             break;
         case 'T':
@@ -206,11 +214,12 @@ int  main( int argc,  char *argv[])
     val = (double**)malloc2D(maxNodes_, maxNodes_, sizeof(double) ); // create a 2d double array
     fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
 
-    if ( UseDwave_ ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
-        dw_init();  
+    if ( use_dwave ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
+        param.sub_size = dw_init();
+        param.sub_sampler = &dw_sub_sample;
     }
     numsolOut_=0;
-    print_opts(maxNodes_);
+    print_opts(maxNodes_, &param);
 
     // get some memory for storing and shorting Q bit vectors
     int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
@@ -219,7 +228,7 @@ int  main( int argc,  char *argv[])
     } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
         QLEN=75; // this need a lot of diversity
     }
-    
+
     int8_t  **solution_list;
     double *energy_list;
     int    *solution_counts, *Qindex;
@@ -228,13 +237,13 @@ int  main( int argc,  char *argv[])
     if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
-    
-    solve(val, maxNodes_, nRepeats, solution_list, energy_list, solution_counts, Qindex, QLEN);
-    
+
+    solve(val, maxNodes_, solution_list, energy_list, solution_counts, Qindex, QLEN, &param);
+
     free(solution_list); free(energy_list); free(solution_counts); free(Qindex);
     free(val);
 
-    if ( UseDwave_ ) {
+    if (use_dwave) {
         dw_close();
     }
     if (Verbose_ > 3) {
@@ -296,7 +305,7 @@ void  print_help(void)
            "\t\tthe value will default to (47) and will use the tabu solver\n"
            "\t\tfor subproblem solutions.  If a value is specified, qbsolv uses\n"
            "\t\tthat value to create subproblem and solve with the tabu solver. \n"
-           "\t-s  solutionIn   \n" 
+           "\t-s  solutionIn   \n"
            "\t\tIf present, this optional argument is a filename that is\n"
            "\t\tin the format of the first 2 records of the output solution file,\n"
            "\t\tthe solution read from this file will be the initial solution used\n"

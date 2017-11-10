@@ -4,3 +4,26 @@ qbsolv
 *.exe
 *.gch
 *.stackdump
+*.m~
+
+# Test coverage files
+*.gcno*
+*.gcda*
+
+*.sublime-project
+*.sublime-workspace
+
+venv/
+build/
+
+scratch.py
+
+python/build
+python/dwave_qbsolv/qbsolv_binding.c
+python/dwave_qbsolv/qbsolv_binding.cpp
+python/dwave_qbsolv.egg-info/*
+
+*.whl
+*.so
+
+dist/

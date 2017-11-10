@@ -13,8 +13,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-#include "include.h"
+
+#include <stdint.h>
+
+#include "readqubo.h"
 #include "extern.h"
+#include "macros.h"
 
 // read from inFile and parse the qubo file
 
@@ -108,4 +112,35 @@ int read_qubo(const char *inFileName, FILE *inFile)
     }
 
     return errors;
+}
+
+//  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
+//
+void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
+    int nNodes, struct nodeStr_ *couplers, int nCouplers)
+{
+    // Zero out the qubo
+    for (int i = 0; i < maxNodes; i++) {
+        for (int j = 0; j < maxNodes; j++) {
+            qubo[i][j] = 0.0;
+        }
+    }
+
+    // Copy the structs into the matrix, flip the sign if we are looking for the
+    // minimum value during the optimization.
+    if (findMax_) {
+        for (int i = 0; i < nNodes; i++) {
+            qubo[nodes[i].n1][nodes[i].n1] = nodes[i].value;
+        }
+        for (int i = 0; i < nCouplers; i++) {
+            qubo[couplers[i].n1][couplers[i].n2] = couplers[i].value;
+        }
+    } else {
+        for (int i = 0; i < nNodes; i++) {
+            qubo[nodes[i].n1][nodes[i].n1] = -nodes[i].value;
+        }
+        for (int i = 0; i < nCouplers; i++) {
+            qubo[couplers[i].n1][couplers[i].n2] = -couplers[i].value;
+        }
+    }
 }

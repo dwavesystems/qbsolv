@@ -13,26 +13,25 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// -------  GLOBAL Variables  ------------------------------------------
 #pragma once
 
 #include <stdio.h>
+#include "stdheaders_shim.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct nodeStr_;
+struct nodeStr_ {
+    int32_t n1, n2;
+    double value;
+};
 
-extern FILE   *outFile_;
-extern FILE   *solution_input_;
-extern int    maxNodes_, nCouplers_, nNodes_, findMax_, start_, numsolOut_;
-extern int    Verbose_, TargetSet_, WriteMatrix_, Tlist_;
-extern char   *outFileNm_, pgmName_[16], algo_[4];
-extern double Target_, Time_;
+//  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
+void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
+    int nNodes, struct nodeStr_ *couplers, int nCouplers);
 
-extern struct nodeStr_ *nodes_;
-extern struct nodeStr_ *couplers_;
+int read_qubo(const char *inFileName, FILE *inFile);
 
 #ifdef __cplusplus
 }

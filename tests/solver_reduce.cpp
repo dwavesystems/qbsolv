@@ -1,15 +1,18 @@
 #include "gtest/gtest.h"
-#include "../src/include.h"
-#include "../src/extern.h"
+#include "qbsolv.h"
+#include "solver.h"
+#include "util.h"
+#include "extern.h"
 
-FILE   *outFile_;
-int    maxNodes_,nCouplers_,nNodes_,findMax_;
-int    Verbose_,SubMatrix_,UseDwave_,TargetSet_,WriteMatrix_,Tlist_;
-char   *outFileNm_,pgmName_[16];
-double **val;
-double Target_,Time_;
-struct nodeStr_  *nodes_;
-struct nodeStr_  *couplers_;
+// FILE            *outFile_;
+// FILE            *solution_input_;
+// int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
+// int             Verbose_, TargetSet_, WriteMatrix_, Tlist_;
+// char            *outFileNm_, pgmName_[16], algo_[4];
+// double          **val;
+// double          Target_, Time_;
+// struct nodeStr_ *nodes_;
+// struct nodeStr_ *couplers_;
 
 TEST(clamp_function, small_system){
     // -------------------------------------------------------------------------
@@ -43,7 +46,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 1b, same but with change in initialization of selected variable
@@ -55,7 +58,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 2a
@@ -67,7 +70,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(4, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 2b, same but with change in initialization of selected variable
@@ -79,7 +82,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(4, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 3a
@@ -91,7 +94,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(3, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 3b, same but with change in initialization of selected variable
@@ -101,7 +104,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(3, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 4a
@@ -113,7 +116,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(5, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 4b, same but with change in initialization of selected variable
@@ -123,7 +126,7 @@ TEST(clamp_function, small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(5, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 }
 
@@ -165,7 +168,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 1b, same but with change in initialization of selected variable
@@ -177,7 +180,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 2a
@@ -189,7 +192,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(4, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 2b, same but with change in initialization of selected variable
@@ -201,7 +204,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(4, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 3a
@@ -213,7 +216,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(3, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 3b, same but with change in initialization of selected variable
@@ -223,7 +226,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(3, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 
     // -- part 4a
@@ -235,7 +238,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(5, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][0]);
     EXPECT_EQ(0, selectionState[0]);
 
     // -- part 4b, same but with change in initialization of selected variable
@@ -245,7 +248,7 @@ TEST(clamp_function, offset_small_system){
 
     reduce(selectionMapping, quboMat, 1, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(5, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][0]);
     EXPECT_EQ(1, selectionState[0]);
 }
 
@@ -300,9 +303,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(-3, selectionMat[0][0]);
-    EXPECT_EQ(4, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(-3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -321,9 +324,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(-2, selectionMat[0][0]);
-    EXPECT_EQ(6, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(-2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(6, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -342,9 +345,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(1, selectionMat[0][0]);
-    EXPECT_EQ(2, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(1, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -365,9 +368,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(2, selectionMat[0][0]);
-    EXPECT_EQ(4, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -386,9 +389,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(-4, selectionMat[0][0]);
-    EXPECT_EQ(4, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(-4, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -407,9 +410,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(-3, selectionMat[0][0]);
-    EXPECT_EQ(6, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(-3, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(6, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -428,9 +431,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(0, selectionMat[0][0]);
-    EXPECT_EQ(2, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(0, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(2, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -450,9 +453,9 @@ TEST(clamp_function, five_system){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(1, selectionMat[0][0]);
-    EXPECT_EQ(4, selectionMat[1][1]);
-    EXPECT_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(1, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(4, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(5, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
@@ -510,15 +513,10 @@ TEST(clamp_function, non_contiguous_subsection){
 
     reduce(selectionMapping, quboMat, 2, maxNodes, selectionMat, globalState, selectionState);
 
-    EXPECT_EQ(7, selectionMat[0][0]);
-    EXPECT_EQ(11, selectionMat[1][1]);
-    EXPECT_EQ(-2, selectionMat[0][1] + selectionMat[1][0]);
+    ASSERT_DOUBLE_EQ(7, selectionMat[0][0]);
+    ASSERT_DOUBLE_EQ(11, selectionMat[1][1]);
+    ASSERT_DOUBLE_EQ(-2, selectionMat[0][1] + selectionMat[1][0]);
 
     EXPECT_EQ(1, selectionState[0]);
     EXPECT_EQ(1, selectionState[1]);
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

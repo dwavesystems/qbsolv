@@ -20,7 +20,7 @@
 #  the libraries will be assumed to exist if $DWAVE_HOME
 #   is defined, if it is defined, and libraries don't exist
 #   this will likely fail
-#   
+#
 #
 os=$( uname | tr '[:upper:]' '[:lower:]' )
 case $os in
@@ -33,20 +33,20 @@ esac
 if [ "${1}" == "" ]
 then
     # compile and link assuming qOp system not available
-    env="LOCAL"  
+    env="LOCAL"
 else
     # compile and link assuming qOp system is available
     env="QOP"
 fi
 
-if [ -e ${DWAVE_HOME}/libepqmi.a ] 
+if [ -e ${DWAVE_HOME}/libepqmi.a ]
 then
     env="QOP"
 fi
 
 # always a clean build. Why not, compilers are fast enough for such a small program.
 
-c_flags="-Wall -Ofast -Wextra -std=gnu99 "
+c_flags="-Wall -O3 -Wextra -std=gnu99 -I ../src -I ../cmd -I ../include "
 #"-fopenmp-use-tls"
 
 if [ "${env}" == "LOCAL" ]
@@ -68,7 +68,7 @@ else
     esac
     echo "qOp build"
 fi
-if [ "$os" == "ming" ] 
+if [ "$os" == "ming" ]
 then
     c_flags="${c_flags} -D WIN"
     echo "build for windoze"
@@ -77,6 +77,5 @@ fi
 
 l_flags="-lm ${epqmi_lib} ${dw_lib} ${link_lib} "
 
-echo "${CC} ${c_flags} -o qbsolv *.c  ${l_flags} "
-`${CC} ${c_flags} -o qbsolv *.c  ${l_flags} `
-
+echo "${CC} ${c_flags} -o qbsolv *.c ../cmd/*.c ${l_flags} "
+`${CC} ${c_flags} -o qbsolv *.c ../cmd/*.c ${l_flags} `
