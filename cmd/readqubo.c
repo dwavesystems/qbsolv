@@ -35,6 +35,11 @@ int read_qubo(const char *inFileName, FILE *inFile)
     size_t linecap = 0;
     char   *line = NULL;
     char   token[50], tokenp[50];
+#define MAX_TOPOLOGY_LEN 49  // more than big enough for "0", "unconstrained", or "chimeraXXX"
+    char   topology[MAX_TOPOLOGY_LEN+1];
+
+    memset(topology, '\0', MAX_TOPOLOGY_LEN+1);
+
 #if _WIN32
     while ((lineLen = getline_win(&line, &linecap, inFile)) > 0 ) {
 #else
@@ -46,9 +51,14 @@ int read_qubo(const char *inFileName, FILE *inFile)
         }
         if ( !pFound ) {
             if ( strncmp(line, "p", 1) == 0 || strncmp(line, "P", 1) == 0) { //found program line
-                sscanf(line, " %s %s %d %d %d %d", tokenp, token, &i, &maxNodes_, &nNodes_, &nCouplers_);
+                sscanf(line, " %s %s %s %d %d %d", tokenp, token, topology, &maxNodes_, &nNodes_, &nCouplers_);
                 if ( strncmp(token, "qubo", 4) != 0 ) {
                     fprintf(stderr, " P line in %s is not a qubo, it lists as %s\n", inFileName, token);
+                    exit(9);
+                } else if ( 0 != strncmp(topology, "0", 1) && 0 != strncmp(topology, "unconstrained", 13) ) {
+                    fprintf(stderr, " P line in %s specifies unknown topology \"%s\".\n"
+                       " Only \"0\" and \"unconstrained\" (which are equivalent) are supported currently\n",
+                       inFileName, topology);
                     exit(9);
                 } else { // it is a p qubo line :-)
                     // The p line is a header in the qubo file format
