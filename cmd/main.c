@@ -404,9 +404,6 @@ void  print_qubo_format( void)
         "\t\t0  2   3.4\n"
         "\t\t1  2   4.5\n"
         "\t\t0  3   -2\n"
-        "\t\t0  2   3.4\n"
-        "\t\t1  2   4.5\n"
-        "\t\t0  3   -2\n"
         "\t\t1  3   4.5678\n"
         "\t\t2  3   -3.22\n\n";
 
