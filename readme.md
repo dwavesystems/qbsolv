@@ -181,9 +181,6 @@ elements of a QUBO benchmark file, not to represent a real problem.
         0  2   3.4
         1  2   4.5
         0  3   -2
-        0  2   3.4
-        1  2   4.5
-        0  3   -2
         1  3   4.5678
         2  3   -3.22
 ```
