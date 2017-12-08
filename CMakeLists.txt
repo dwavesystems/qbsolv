@@ -6,7 +6,7 @@ project(qbsolv)
 # set(VERSION_PATCH 0)
 
 option(QBSOLV_BUILD_CMD "Build compiled command line interface." ON)
-option(QBSOLV_BUILD_TESTS "Build c library unit tests." ON)
+option(QBSOLV_BUILD_TESTS "Build c library unit tests." OFF)
 
 # Set compiler flags for gcc
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
