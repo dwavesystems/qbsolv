@@ -2,7 +2,7 @@
 set -e -x
 
 for PYBIN in /opt/python/*/bin; do
-    if [[ ${PYBIN} =~ 26 ]]; then
+    if [[ ${PYBIN} =~ "2.6" ]]; then
         # dimod doesn't support 2.6, skip for now
         continue
     fi
@@ -20,7 +20,7 @@ done
 
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
-    if [[ ${PYBIN} =~ 26 ]]; then
+    if [[ ${PYBIN} =~ "2.6" ]]; then
         # dimod doesn't support 2.6, skip for now
         continue
     fi
