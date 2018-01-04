@@ -23,7 +23,7 @@ popd
 # Build the tests
 mkdir build;
 cd build;
-cmake .. -DQBSOLV_BUILD_TESTS=ON;
+cmake .. -DQBSOLV_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug;
 make CC=$CC CXX=$CXX;
 
 # Run the tests
