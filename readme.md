@@ -22,11 +22,12 @@ To build the C library use cmake to generate a build command for your system. On
 
 ```
 mkdir build; cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake ..
 make
 ```
 
 To build the command line interface turn the cmake option `QBSOLV_BUILD_CMD` on. The command line option for cmake to do this would be `-DQBSOLV_BUILD_CMD=ON`.
+To build the tests turn the cmake option `QBSOLV_BUILD_TESTS` on. The command line option for cmake to do this would be `-DQBSOLV_BUILD_TESTS=ON`.
 
 Command Line Usage
 ------------------
