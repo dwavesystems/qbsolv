@@ -13,7 +13,7 @@ cmake .. -DQBSOLV_BUILD_TESTS=ON;
 make CC=$CC CXX=$CXX;
 
 # Run the tests
-make test;
+./tests/all_tests;
 
 # Gather the test coverage files
 find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
