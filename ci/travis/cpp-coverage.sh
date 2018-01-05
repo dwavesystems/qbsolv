@@ -6,22 +6,14 @@ pip install --user cpp-coveralls;
 export CC=$C_COMPILER;
 export CXX=$CXX_COMPILER;
 
-# Build and install gtest
-mkdir ~/gtest
-cd ~/gtest
-export LIBRARY_PATH=$(pwd)
-cmake -D CMAKE_INSTALL_PREFIX:PATH=./ /usr/src/gtest/
-make CC=$CC CXX=$CXX
-cd -
-
 # Build the tests
 mkdir build;
 cd build;
-cmake .. -DQBSOLV_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug;
+cmake .. -DQBSOLV_BUILD_TESTS=ON;
 make CC=$CC CXX=$CXX;
 
 # Run the tests
-make test;
+./tests/all_tests;
 
 # Gather the test coverage files
 find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
