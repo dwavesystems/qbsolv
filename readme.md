@@ -22,7 +22,7 @@ To build the C library use cmake to generate a build command for your system. On
 
 ```
 mkdir build; cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ```
 
