@@ -914,7 +914,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
 
     // all done print results if needed and free allocated arrays
     if (WriteMatrix_)
-        print_solution_and_qubo(solution, qubo_size, qubo);
+        print_solution_and_qubo(Qbest, qubo_size, qubo);
 
     if ( Verbose_ == 0 ) {
         Qbest=&solution_list[Qindex[0]][0];
