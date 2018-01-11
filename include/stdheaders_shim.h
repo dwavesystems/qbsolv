@@ -18,20 +18,20 @@
 //
 
 #if defined(_MSC_VER) && !defined(_MSC_STDINT_H_) && _MSC_VER < 1700
-    #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2 * !!(condition)]))
 
-    typedef __int8 int8_t;
-    typedef unsigned __int8 uint8_t;
-    typedef __int32 int32_t;
-    typedef unsigned __int32 uint32_t;
-    typedef __int64 int64_t;
-    typedef unsigned __int64 uint64_t;
+typedef __int8 int8_t;
+typedef unsigned __int8 uint8_t;
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
 
-    static void __test_block(){
-        BUILD_BUG_ON(sizeof(int8_t) != 1);
-        BUILD_BUG_ON(sizeof(int32_t) != 4);
-        BUILD_BUG_ON(sizeof(int64_t) != 8);
-    }
+static void __test_block() {
+    BUILD_BUG_ON(sizeof(int8_t) != 1);
+    BUILD_BUG_ON(sizeof(int32_t) != 4);
+    BUILD_BUG_ON(sizeof(int64_t) != 8);
+}
 #else
 #include <stdint.h>
 #endif
@@ -39,9 +39,9 @@
 // Don't need to include/find bool in c++ context.
 #ifndef __cplusplus
 #if defined(_MSC_VER) && !defined(_MSC_STDBOOL_H_)
-    typedef int bool;
-    #define false 0
-    #define true 1
+typedef int bool;
+#define false 0
+#define true 1
 #else
 // For c99 compilers _Bool is actually a built in type (macroed to bool).
 #include <stdbool.h>

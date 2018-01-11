@@ -44,10 +44,11 @@ parameters_t default_parameters(void);
 void dw_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution, void*);
 
 // Callback for `solve` to use tabu on subproblems
-void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t*sub_solution, void*);
+void tabu_sub_sample(double** sub_qubo, int subMatrix, int8_t* sub_solution, void*);
 
 // Entry into the overall solver from the main program
-void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *energy_list, int *solution_counts, int *Qindex, int QLEN, parameters_t* param);
+void solve(double** qubo, const int qubo_size, int8_t** solution_list, double* energy_list, int* solution_counts,
+           int* Qindex, int QLEN, parameters_t* param);
 
 #ifdef __cplusplus
 }

@@ -14,24 +14,24 @@
  limitations under the License.
 */
 
-#include "util.h"
-#include "readqubo.h"
-#include "qbsolv.h"
-#include "dwsolv.h"
 #include <getopt.h>
+#include "dwsolv.h"
+#include "qbsolv.h"
+#include "readqubo.h"
+#include "util.h"
 
 void print_help(void);
 void print_qubo_format(void);
 
 // define what will be used by "extern" in other functions
 //
-FILE            *outFile_;
-FILE            *solution_input_;
-int             maxNodes_, nCouplers_, nNodes_, findMax_,numsolOut_;
-int             Verbose_, TargetSet_, WriteMatrix_, Tlist_;
-char            *outFileNm_, pgmName_[16], algo_[4];
-double          **val;
-double          Target_, Time_;
+FILE *outFile_;
+FILE *solution_input_;
+int maxNodes_, nCouplers_, nNodes_, findMax_, numsolOut_;
+int Verbose_, TargetSet_, WriteMatrix_, Tlist_;
+char *outFileNm_, pgmName_[16], algo_[4];
+double **val;
+double Target_, Time_;
 struct nodeStr_ *nodes_;
 struct nodeStr_ *couplers_;
 //  main routine,
@@ -45,217 +45,229 @@ struct nodeStr_ *couplers_;
 
 const int defaultRepeats = 50;
 
-int  main( int argc,  char *argv[])
-{
-/*
- *  Initialize global variables, set up data structures,
- *  process the commandline and the environment, ...
- *  Initialize global variables
- */
+int main(int argc, char *argv[]) {
+    /*
+     *  Initialize global variables, set up data structures,
+     *  process the commandline and the environment, ...
+     *  Initialize global variables
+     */
 
     parameters_t param = default_parameters();
 
     bool use_dwave = false;
 
     extern char *optarg;
-    extern int  optind, optopt, opterr;
+    extern int optind, optopt, opterr;
 
     char *inFileName = NULL;
-    FILE *inFile    = NULL;
+    FILE *inFile = NULL;
 
     strcpy(pgmName_, "qbsolv");
-    findMax_     = false;
-    Verbose_     = 0;
-    strcpy(algo_, "o"); //algorithm default
+    findMax_ = false;
+    Verbose_ = 0;
+    strcpy(algo_, "o");  // algorithm default
 
     WriteMatrix_ = false;
-    outFile_     = stdout;
-    TargetSet_   = false;
-    Time_        = 2592000; // the maximum runtime of the algorithm in seconds before timeout (2592000 = a month's worth of seconds)
-    Tlist_       = -1; // tabu list length  -1 signals go with defaults
-    int64_t seed       = 17932241798878;
-    int  errorCount = 0;
+    outFile_ = stdout;
+    TargetSet_ = false;
+    Time_ = 2592000;  // the maximum runtime of the algorithm in seconds before timeout (2592000 = a month's worth of
+                      // seconds)
+    Tlist_ = -1;      // tabu list length  -1 signals go with defaults
+    int64_t seed = 17932241798878;
+    int errorCount = 0;
 
-    static struct option longopts[] = {
-        { "help",           no_argument,       NULL, 'h'},
-        { "infile",         required_argument, NULL, 'i'},
-        { "outfile",        required_argument, NULL, 'o'},
-        { "verbosityLevel", required_argument, NULL, 'v'},
-        { "version",        no_argument,       NULL, 'V'},
-        { "subproblemSize", required_argument, NULL, 'S'},
-        { "target",         required_argument, NULL, 'T'},
-        { "repeats",        required_argument, NULL, 'n'},
-        { "solutionIn",     required_argument, NULL, 's'},
-        { "max",            no_argument,       NULL, 'm'},
-        { "output",         required_argument, NULL, 'o'},
-        { "timeout",        required_argument, NULL, 't'},
-        { "quboFormat",     no_argument,       NULL, 'q'},
-        { "tlist",          required_argument, NULL, 'l'},
-        { "seed",           required_argument, NULL, 'r'},
-        { "Algo",           required_argument, NULL, 'a'},
-        { NULL,             no_argument,       NULL, 0}
-    };
+    static struct option longopts[] = {{"help", no_argument, NULL, 'h'},
+                                       {"infile", required_argument, NULL, 'i'},
+                                       {"outfile", required_argument, NULL, 'o'},
+                                       {"verbosityLevel", required_argument, NULL, 'v'},
+                                       {"version", no_argument, NULL, 'V'},
+                                       {"subproblemSize", required_argument, NULL, 'S'},
+                                       {"target", required_argument, NULL, 'T'},
+                                       {"repeats", required_argument, NULL, 'n'},
+                                       {"solutionIn", required_argument, NULL, 's'},
+                                       {"max", no_argument, NULL, 'm'},
+                                       {"output", required_argument, NULL, 'o'},
+                                       {"timeout", required_argument, NULL, 't'},
+                                       {"quboFormat", no_argument, NULL, 'q'},
+                                       {"tlist", required_argument, NULL, 'l'},
+                                       {"seed", required_argument, NULL, 'r'},
+                                       {"Algo", required_argument, NULL, 'a'},
+                                       {NULL, no_argument, NULL, 0}};
 
-    int  opt, option_index = 0;
-    char *chx; // used as exit ptr in strto(x) functions
-    if ( dw_established () ) {  // user has set up a DW envir
+    int opt, option_index = 0;
+    char *chx;               // used as exit ptr in strto(x) functions
+    if (dw_established()) {  // user has set up a DW envir
         use_dwave = true;
     }
 
     while ((opt = getopt_long(argc, argv, "Hhi:o:v:VS:T:l:n:wmo:t:qr:a:", longopts, &option_index)) != -1) {
         switch (opt) {
-        case 'a':
-            strcpy(algo_, optarg); //algorithm copied off of command line -a option
-            switch (algo_[0]) {
-                case 'o' :
-                    // Original Dwave algorithm
-                    break;
-                case 'd' :
-                    // choose "Solution diversity"
-                    break;
-                default: /* unknown */
-                    printf(" Unknown Algorithm choice: options are o:d cmdline had %s \n",algo_);
-                    exit(9);
-                break;
-            }
-            break;
-        case 'H':
-        case 'h':
-            print_help();
-            exit(0);
-        case 'i':
-            inFileName = optarg;
-            if ((inFile = fopen(inFileName, "r")) == NULL) {
-                fprintf(stderr, "\n\t Error - can't find/open file " "\"%s\"\n\n", optarg);
-                exit(9);
-            }
-            break;
-        case 'l':
-            Tlist_ = strtol(optarg, &chx, 10); // this sets the length of the tabu list
-            break;
-        case 'm':
-            findMax_ = true; // go for the maximum value otherwise the minimum is found by default
-            break;
-        case 'n':
-            param.repeats = strtol(optarg, &chx, 10); // this sets the number of outer loop repeats without improvement
-            break;
-        case 'v':
-            Verbose_ = strtol(optarg, &chx, 10); // this sets the value of the Verbose
-            break;
-        case 'V':
-            fprintf(outFile_, " Version " VERSION " \n Compiled: " __DATE__ ","__TIME__ "\n");
-            exit(9);
-            break;
-        case 'S':
-            param.sub_size = strtol(optarg, &chx, 10); // this sets the size of the Partitioning Matrix
-            if (param.sub_size < 10) {
-                // other settings, this could be setting it from true above to false here.
-                if (param.sub_size != 0) {
-                    fprintf(stderr, "\n Error --  SubMatrix must be 0 or greater than 10.  -S %d\n ", param.sub_size);
-                    ++errorCount;
+            case 'a':
+                strcpy(algo_, optarg);  // algorithm copied off of command line -a option
+                switch (algo_[0]) {
+                    case 'o':
+                        // Original Dwave algorithm
+                        break;
+                    case 'd':
+                        // choose "Solution diversity"
+                        break;
+                    default: /* unknown */
+                        printf(" Unknown Algorithm choice: options are o:d cmdline had %s \n", algo_);
+                        exit(9);
+                        break;
                 }
-            }
-
-            use_dwave = false;   // explicit setting of Submatrix says to use tabu solver, regardless of other
-            if ( param.sub_size == 0 ) {
-                use_dwave = true; // except where -S 0
-            }
-            break;
-        case 'T':
-            Target_    = strtod(optarg, (char**)NULL); // this sets desired optimal energy
-            TargetSet_ = true;
-            break;
-        case 't':
-            Time_ = strtod(optarg, (char**)NULL); // this sets the maximum runtime of the algorithm in seconds
-            break;
-        case 'o':
-            if ((outFile_ = fopen(optarg, "w")) == NULL) {
-                fprintf(stderr, "\n\t Error - can't find/write file " "\"%s\"\n\n", optarg);
+                break;
+            case 'H':
+            case 'h':
+                print_help();
+                exit(0);
+            case 'i':
+                inFileName = optarg;
+                if ((inFile = fopen(inFileName, "r")) == NULL) {
+                    fprintf(stderr,
+                            "\n\t Error - can't find/open file "
+                            "\"%s\"\n\n",
+                            optarg);
+                    exit(9);
+                }
+                break;
+            case 'l':
+                Tlist_ = strtol(optarg, &chx, 10);  // this sets the length of the tabu list
+                break;
+            case 'm':
+                findMax_ = true;  // go for the maximum value otherwise the minimum is found by default
+                break;
+            case 'n':
+                param.repeats =
+                        strtol(optarg, &chx, 10);  // this sets the number of outer loop repeats without improvement
+                break;
+            case 'v':
+                Verbose_ = strtol(optarg, &chx, 10);  // this sets the value of the Verbose
+                break;
+            case 'V':
+                fprintf(outFile_, " Version " VERSION " \n Compiled: " __DATE__
+                                  ","__TIME__
+                                  "\n");
                 exit(9);
-            }
-            outFileNm_ = optarg;
-            break;
-        case 'q':
-            print_qubo_format();
-            exit(0);
-            break;
-        case 'r':
-            seed = strtol(optarg, &chx, 10); // sets the seed value
-            break;
-        case 'w':
-            WriteMatrix_ = true;
-            break;
-        default: /* '?' or unknown */
-            print_help();
-            exit(0);
-            break;
+                break;
+            case 'S':
+                param.sub_size = strtol(optarg, &chx, 10);  // this sets the size of the Partitioning Matrix
+                if (param.sub_size < 10) {
+                    // other settings, this could be setting it from true above to false here.
+                    if (param.sub_size != 0) {
+                        fprintf(stderr, "\n Error --  SubMatrix must be 0 or greater than 10.  -S %d\n ",
+                                param.sub_size);
+                        ++errorCount;
+                    }
+                }
+
+                use_dwave = false;  // explicit setting of Submatrix says to use tabu solver, regardless of other
+                if (param.sub_size == 0) {
+                    use_dwave = true;  // except where -S 0
+                }
+                break;
+            case 'T':
+                Target_ = strtod(optarg, (char **)NULL);  // this sets desired optimal energy
+                TargetSet_ = true;
+                break;
+            case 't':
+                Time_ = strtod(optarg, (char **)NULL);  // this sets the maximum runtime of the algorithm in seconds
+                break;
+            case 'o':
+                if ((outFile_ = fopen(optarg, "w")) == NULL) {
+                    fprintf(stderr,
+                            "\n\t Error - can't find/write file "
+                            "\"%s\"\n\n",
+                            optarg);
+                    exit(9);
+                }
+                outFileNm_ = optarg;
+                break;
+            case 'q':
+                print_qubo_format();
+                exit(0);
+                break;
+            case 'r':
+                seed = strtol(optarg, &chx, 10);  // sets the seed value
+                break;
+            case 'w':
+                WriteMatrix_ = true;
+                break;
+            default: /* '?' or unknown */
+                print_help();
+                exit(0);
+                break;
         }
     }
     // options from command line complete
     //
-    srand( seed );
+    srand(seed);
 
     if (inFile == NULL) {
-        fprintf(stderr, "\n\t%s error -- no input file (-i option) specified"
-                "\n\n", pgmName_);
+        fprintf(stderr,
+                "\n\t%s error -- no input file (-i option) specified"
+                "\n\n",
+                pgmName_);
         exit(9);
     }
 
-    errorCount = read_qubo(inFileName, inFile); // read in the QUBO from file
+    errorCount = read_qubo(inFileName, inFile);  // read in the QUBO from file
 
-    if ((errorCount > 0) ) {
-        fprintf(stderr, "\n\t%d Input error(s) on file \"%s\"\n\n"
+    if ((errorCount > 0)) {
+        fprintf(stderr,
+                "\n\t%d Input error(s) on file \"%s\"\n\n"
                 "\t%s has been stopped.\n\tThere is a description "
                 "of the .qubo file format: use %s -q to print it\n\n",
                 errorCount, inFileName, pgmName_, pgmName_);
         exit(1);
     }
 
-    val = (double**)malloc2D(maxNodes_, maxNodes_, sizeof(double) ); // create a 2d double array
-    fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_); // move to a 2d array
+    val = (double **)malloc2D(maxNodes_, maxNodes_, sizeof(double));    // create a 2d double array
+    fill_qubo(val, maxNodes_, nodes_, nNodes_, couplers_, nCouplers_);  // move to a 2d array
 
-    if ( use_dwave ) { // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
+    if (use_dwave) {  // either -S not set and DW_INTERNAL__CONNECTION env variable not NULL, or -S set to 0,
         param.sub_size = dw_init();
         param.sub_sampler = &dw_sub_sample;
     }
-    numsolOut_=0;
+    numsolOut_ = 0;
     print_opts(maxNodes_, &param);
 
     // get some memory for storing and shorting Q bit vectors
-    int QLEN=20 ;  // the max number of solutions to store in soltuion_lists
-    if ( strncmp(&algo_[0],"o",strlen("o") )==0) {
-        QLEN=20; // don't need a big que for this optimization
-    } else if ( strncmp(&algo_[0],"d",strlen("d") )==0) {
-        QLEN=75; // this need a lot of diversity
+    int QLEN = 20;  // the max number of solutions to store in soltuion_lists
+    if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
+        QLEN = 20;  // don't need a big que for this optimization
+    } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
+        QLEN = 75;  // this need a lot of diversity
     }
 
-    int8_t  **solution_list;
+    int8_t **solution_list;
     double *energy_list;
-    int    *solution_counts, *Qindex;
+    int *solution_counts, *Qindex;
 
-    solution_list = (int8_t**)malloc2D(QLEN + 1, maxNodes_, sizeof(int8_t));
+    solution_list = (int8_t **)malloc2D(QLEN + 1, maxNodes_, sizeof(int8_t));
     if (GETMEM(energy_list, double, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(solution_counts, int, QLEN + 1) == NULL) BADMALLOC
     if (GETMEM(Qindex, int, QLEN + 1) == NULL) BADMALLOC
 
     solve(val, maxNodes_, solution_list, energy_list, solution_counts, Qindex, QLEN, &param);
 
-    free(solution_list); free(energy_list); free(solution_counts); free(Qindex);
+    free(solution_list);
+    free(energy_list);
+    free(solution_counts);
+    free(Qindex);
     free(val);
 
     if (use_dwave) {
         dw_close();
     }
     if (Verbose_ > 3) {
-        fprintf(outFile_, "\n\t\"qbsolv  -i %s\" (%d nodes, %d couplers) - end-of-job\n\n",
-                inFileName, nNodes_, nCouplers_);
+        fprintf(outFile_, "\n\t\"qbsolv  -i %s\" (%d nodes, %d couplers) - end-of-job\n\n", inFileName, nNodes_,
+                nCouplers_);
     }
     exit(0);
-
 }
 
-void  print_help(void)
-{
+void print_help(void) {
     printf("\n\t%s -i infile [-o outfile] [-m] [-T] [-n] [-S SubMatrix] [-w] \n"
            "\t\t[-h] [-a algorithm] [-v verbosityLevel] [-V] [-q] [-t seconds]\n"
            "\nDESCRIPTION\n"
@@ -338,74 +350,73 @@ void  print_help(void)
     return;
 }
 
-void  print_qubo_format( void)
-{
+void print_qubo_format(void) {
     const char *quboFormat =
-        "\n   A .qubo file contains data which describes an unconstrained\n"
-        "quadratic binary optimization problem.  It is an ASCII file comprise"
-        "d\nof four types of lines:\n\n"
-        "1) Comments - defined by a \"c\" in column 1.  They may appear\n"
-        "\tanywhere in the file, and are otherwise ignored.\n\n"
-        "2) One program line, which starts with p in the first column.\n"
-        "\tThe program line must be the first non-comment line in the file.\n"
-        "\tThe program line has six required fields (separated by space(s)),\n"
-        "\tas in this example:\n\n"
-        "  p   qubo  topology   maxNodes   nNodes   nCouplers\n\n"
-        "    where:\n"
-        "  p          the problem line sentinel\n"
-        "  qubo       identifies the file type\n"
-        "  topology   a string which identifies the topology of the problem\n"
-        "\t     and the specific problem type.  For an unconstrained problem,\n"
-        "\t     target will be \"0\" or \"unconstrained.\"   Possible, for future\n"
-        "\t     implementations, valid strings might include \"chimera128\"\n"
-        "\t     or \"chimera512\" (among others).\n"
-        "  maxNodes   number of nodes in the topology.\n"
-        "  nNodes     number of nodes in the problem (nNodes <= maxNodes).\n"
-        "\t     Each node has a unique number and must take a value in the\n"
-        "\t     the range {0 - (maxNodes-1)}.  A duplicate node number is an\n"
-        "\t     error.  The node numbers need not be in order, and they need\n"
-        "\t     not be contiguous.\n"
-        "  nCouplers  number of couplers in the problem.  Each coupler is a\n"
-        "\t     unique connection between two different nodes.  The maximum\n"
-        "\t     number of couplers is (nNodes)^2.  A duplicate coupler is\n"
-        "\t     an error.\n\n"
-        "3) nNodes clauses.  Each clause is made up of three numbers.  The\n"
-        "\tnumbers are separated by one or more blanks.  The first two\n"
-        "\tnumbers must be integers and are the number for this node\n"
-        "\t(repeated).  The node number must be in {0 , (maxNodes-1)}.\n"
-        "\tThe third value is the weight associated with the node, may be\n"
-        "\tan integer or float, and can take on any positive or negative\n"
-        "\tvalue, or zero.\n\n"
-        "4) nCouplers clauses.  Each clause is made up of three numbers.  The\n"
-        "\tnumbers are separated by one or more blanks.  The first two\n"
-        "\tnumbers must be different integers and are the node numbers\n"
-        "\tfor this coupler.  The two values (i and j) must have (i < j).\n"
-        "\tEach number must be one of the nNodes valid node numbers (and\n"
-        "\tthus in {0, (maxNodes-1)}).  The third value is the strength\n"
-        "\tassociated with the coupler, may be an integer or float, and can\n"
-        "\ttake on any positive or negative value, but not zero.  Every node\n"
-        "\tmust connect with at least one other node (thus must have at least\n"
-        "\tone coupler connected to it).\n\n"
-        "Here is a simple QUBO file example for an unconstrained QUBO with 4\n"
-        "nodes and 6 couplers.  This example is provided to illustrate the\n"
-        "elements of a QUBO benchmark file, not to represent a real problem.\n"
-        "\n\t\tc\n"
-        "\t\tc  This is a sample .qubo file\n"
-        "\t\tc  with 4 nodes and 6 couplers\n"
-        "\t\tc\n"
-        "\t\tp  qubo  0  4  4  6 \n"
-        "\t\tc ------------------\n"
-        "\t\t0  0   3.4\n"
-        "\t\t1  1   4.5\n"
-        "\t\t2  2   2.1\n"
-        "\t\t3  3   -2.4\n"
-        "\t\tc ------------------\n"
-        "\t\t0  1   2.2\n"
-        "\t\t0  2   3.4\n"
-        "\t\t1  2   4.5\n"
-        "\t\t0  3   -2\n"
-        "\t\t1  3   4.5678\n"
-        "\t\t2  3   -3.22\n\n";
+            "\n   A .qubo file contains data which describes an unconstrained\n"
+            "quadratic binary optimization problem.  It is an ASCII file comprise"
+            "d\nof four types of lines:\n\n"
+            "1) Comments - defined by a \"c\" in column 1.  They may appear\n"
+            "\tanywhere in the file, and are otherwise ignored.\n\n"
+            "2) One program line, which starts with p in the first column.\n"
+            "\tThe program line must be the first non-comment line in the file.\n"
+            "\tThe program line has six required fields (separated by space(s)),\n"
+            "\tas in this example:\n\n"
+            "  p   qubo  topology   maxNodes   nNodes   nCouplers\n\n"
+            "    where:\n"
+            "  p          the problem line sentinel\n"
+            "  qubo       identifies the file type\n"
+            "  topology   a string which identifies the topology of the problem\n"
+            "\t     and the specific problem type.  For an unconstrained problem,\n"
+            "\t     target will be \"0\" or \"unconstrained.\"   Possible, for future\n"
+            "\t     implementations, valid strings might include \"chimera128\"\n"
+            "\t     or \"chimera512\" (among others).\n"
+            "  maxNodes   number of nodes in the topology.\n"
+            "  nNodes     number of nodes in the problem (nNodes <= maxNodes).\n"
+            "\t     Each node has a unique number and must take a value in the\n"
+            "\t     the range {0 - (maxNodes-1)}.  A duplicate node number is an\n"
+            "\t     error.  The node numbers need not be in order, and they need\n"
+            "\t     not be contiguous.\n"
+            "  nCouplers  number of couplers in the problem.  Each coupler is a\n"
+            "\t     unique connection between two different nodes.  The maximum\n"
+            "\t     number of couplers is (nNodes)^2.  A duplicate coupler is\n"
+            "\t     an error.\n\n"
+            "3) nNodes clauses.  Each clause is made up of three numbers.  The\n"
+            "\tnumbers are separated by one or more blanks.  The first two\n"
+            "\tnumbers must be integers and are the number for this node\n"
+            "\t(repeated).  The node number must be in {0 , (maxNodes-1)}.\n"
+            "\tThe third value is the weight associated with the node, may be\n"
+            "\tan integer or float, and can take on any positive or negative\n"
+            "\tvalue, or zero.\n\n"
+            "4) nCouplers clauses.  Each clause is made up of three numbers.  The\n"
+            "\tnumbers are separated by one or more blanks.  The first two\n"
+            "\tnumbers must be different integers and are the node numbers\n"
+            "\tfor this coupler.  The two values (i and j) must have (i < j).\n"
+            "\tEach number must be one of the nNodes valid node numbers (and\n"
+            "\tthus in {0, (maxNodes-1)}).  The third value is the strength\n"
+            "\tassociated with the coupler, may be an integer or float, and can\n"
+            "\ttake on any positive or negative value, but not zero.  Every node\n"
+            "\tmust connect with at least one other node (thus must have at least\n"
+            "\tone coupler connected to it).\n\n"
+            "Here is a simple QUBO file example for an unconstrained QUBO with 4\n"
+            "nodes and 6 couplers.  This example is provided to illustrate the\n"
+            "elements of a QUBO benchmark file, not to represent a real problem.\n"
+            "\n\t\tc\n"
+            "\t\tc  This is a sample .qubo file\n"
+            "\t\tc  with 4 nodes and 6 couplers\n"
+            "\t\tc\n"
+            "\t\tp  qubo  0  4  4  6 \n"
+            "\t\tc ------------------\n"
+            "\t\t0  0   3.4\n"
+            "\t\t1  1   4.5\n"
+            "\t\t2  2   2.1\n"
+            "\t\t3  3   -2.4\n"
+            "\t\tc ------------------\n"
+            "\t\t0  1   2.2\n"
+            "\t\t0  2   3.4\n"
+            "\t\t1  2   4.5\n"
+            "\t\t0  3   -2\n"
+            "\t\t1  3   4.5678\n"
+            "\t\t2  3   -3.22\n\n";
 
     printf("%s", quboFormat);
     return;

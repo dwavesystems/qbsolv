@@ -1,8 +1,8 @@
+#include "solver.h"
+#include "extern.h"
 #include "gtest/gtest.h"
 #include "qbsolv.h"
-#include "solver.h"
 #include "util.h"
-#include "extern.h"
 
 // FILE            *outFile_;
 // FILE            *solution_input_;
@@ -14,14 +14,14 @@
 // struct nodeStr_ *nodes_;
 // struct nodeStr_ *couplers_;
 
-TEST(clamp_function, small_system){
+TEST(clamp_function, small_system) {
     // -------------------------------------------------------------------------
     // TEST 1:  Extracting one conditioned variable from a two variable system
 
     // -- Bootstrap
     // Declare the full QUBO
     int maxNodes = 2;
-    double ** quboMat = (double**)malloc2D(2, 2, sizeof(double));
+    double** quboMat = (double**)malloc2D(2, 2, sizeof(double));
 
     // Encode simple 2 variable system
     // E(a, b) = 2a + 2ab + 3b
@@ -35,7 +35,7 @@ TEST(clamp_function, small_system){
 
     // output variables
     int8_t selectionState[1];
-    double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
+    double** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
     // E(a, b=0) = 2a + 2a(0) + 3(0)
@@ -130,7 +130,7 @@ TEST(clamp_function, small_system){
     EXPECT_EQ(1, selectionState[0]);
 }
 
-TEST(clamp_function, offset_small_system){
+TEST(clamp_function, offset_small_system) {
     // -------------------------------------------------------------------------
     // TEST 2:  Same tests as test 1 but with some unused variables inserted
     // in the beginning of the matrix, should be ignored.
@@ -141,7 +141,7 @@ TEST(clamp_function, offset_small_system){
     // -- Bootstrap
     // Declare the full QUBO
     int maxNodes = 4;
-    double ** quboMat = (double**)malloc2D(4, 4, sizeof(double));
+    double** quboMat = (double**)malloc2D(4, 4, sizeof(double));
 
     // Encode simple 2 variable system
     // E(a, b) = 2a + 2ab + 3b
@@ -157,7 +157,7 @@ TEST(clamp_function, offset_small_system){
 
     // output variables
     int8_t selectionState[1];
-    double ** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
+    double** selectionMat = (double**)malloc2D(1, 1, sizeof(double));
 
     // -- part 1a
     // E(a, b=0) = 2a + 2a(0) + 3(0)
@@ -252,15 +252,14 @@ TEST(clamp_function, offset_small_system){
     EXPECT_EQ(1, selectionState[0]);
 }
 
-
-TEST(clamp_function, five_system){
+TEST(clamp_function, five_system) {
     // -------------------------------------------------------------------------
     // TEST 3:  Test a slightly larger problem
 
     // -- Bootstrap
     // Declare the full QUBO
     int maxNodes = 5;
-    double ** quboMat = (double**)malloc2D(5, 5, sizeof(double));
+    double** quboMat = (double**)malloc2D(5, 5, sizeof(double));
 
     // Encode simple 2 variable system
     // E(b) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 +
@@ -280,18 +279,19 @@ TEST(clamp_function, five_system){
     quboMat[2][4] = 1;
     quboMat[3][4] = 2;
 
-
     // selection variables
     int selectionMapping[2];
     int8_t globalState[5];
 
     // output variables
     int8_t selectionState[2];
-    double ** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
+    double** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
 
     // -- part 1
-    // E([0, 0, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (0) + 2(0) - 3b_2 + 4b_3 + 2(0) + (0) * (0) - (0) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5 * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
+    // E([0, 0, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (0) + 2(0) - 3b_2 + 4b_3 + 2(0) + (0) * (0) - (0) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
     //                    = -3b_2 + 4b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -311,8 +311,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 2
-    // E([0, 0, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (0) + 2(0) - 3b_2 + 4b_3 + 2(1) + (0) * (0) - (0) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5 * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
+    // E([0, 0, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (0) + 2(0) - 3b_2 + 4b_3 + 2(1) + (0) * (0) - (0) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
     //                    = -2 b_2 + 6 b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -332,8 +334,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 3
-    // E([0, 1, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (0) + 2(1) - 3b_2 + 4b_3 + 2(0) + (0) * (1) - (0) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5 * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
+    // E([0, 1, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (0) + 2(1) - 3b_2 + 4b_3 + 2(0) + (0) * (1) - (0) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
     //                    = 1 b_2 + 2b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -353,8 +357,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 4
-    // E([0, 1, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (0) + 2(1) - 3b_2 + 4b_3 + 2(1) + (0) * (1) - (0) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5 * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
+    // E([0, 1, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (0) + 2(1) - 3b_2 + 4b_3 + 2(1) + (0) * (1) - (0) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
     //                    = - 3b_2 + 4b_3 + 4 * b_2 - 2 * b_3 + 5 * b_2 * b_3 + b_2 + 2 * b_3
     //                    = 2 * b_2 + 4b_3 + 5 * b_2 * b_3
 
@@ -376,8 +382,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 5
-    // E([1, 0, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (1) + 2(0) - 3b_2 + 4b_3 + 2(0) + (1) * (0) - (1) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5 * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
+    // E([1, 0, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2(0) - 3b_2 + 4b_3 + 2(0) + (1) * (0) - (1) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
     //                    = - 4b_2 + 4b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -397,8 +405,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 6
-    // E([1, 0, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (1) + 2(0) - 3b_2 + 4b_3 + 2(1) + (1) * (0) - (1) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5 * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
+    // E([1, 0, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2(0) - 3b_2 + 4b_3 + 2(1) + (1) * (0) - (1) * b_2 + 4 * (0) * b_2 - 2 * (0) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
     //                    = - 3b_2 + 6b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -418,8 +428,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 7
-    // E([1, 1, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (1) + 2(1) - 3b_2 + 4b_3 + 2(0) + (1) * (1) - (1) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5 * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
+    // E([1, 1, ?, ?, 0]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2(1) - 3b_2 + 4b_3 + 2(0) + (1) * (1) - (1) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (0) + 2 * b_3 * (0)
     //                    = -0b_2 + 2b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
     selectionMapping[1] = 3;
@@ -439,8 +451,10 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 
     // -- part 8
-    // E([1, 1, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (1) + 2(1) - 3b_2 + 4b_3 + 2(1) + (1) * (1) - (1) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5 * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
+    // E([1, 1, ?, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2(1) - 3b_2 + 4b_3 + 2(1) + (1) * (1) - (1) * b_2 + 4 * (1) * b_2 - 2 * (1) * b_3 + 5
+    //                    * b_2 * b_3 + b_2 * (1) + 2 * b_3 * (1)
     //                    = -3 b_2 + 4b_3 - b_2 + 4 * b_2 - 2 * b_3 + 5 * b_2 * b_3 + b_2 + 2 * b_3
     //                    = +1 b_2 + 4 b_3 + 5 * b_2 * b_3
     selectionMapping[0] = 2;
@@ -461,14 +475,14 @@ TEST(clamp_function, five_system){
     EXPECT_EQ(1, selectionState[1]);
 }
 
-TEST(clamp_function, non_contiguous_subsection){
+TEST(clamp_function, non_contiguous_subsection) {
     // -------------------------------------------------------------------------
     // TEST 3:  Test a slightly larger problem
 
     // -- Bootstrap
     // Declare the full QUBO
     int maxNodes = 5;
-    double ** quboMat = (double**)malloc2D(5, 5, sizeof(double));
+    double** quboMat = (double**)malloc2D(5, 5, sizeof(double));
 
     // Encode simple 2 variable system
     // E(b) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 +
@@ -488,18 +502,19 @@ TEST(clamp_function, non_contiguous_subsection){
     quboMat[2][4] = 1;
     quboMat[3][4] = 2;
 
-
     // selection variables
     int selectionMapping[2];
     int8_t globalState[5];
 
     // output variables
     int8_t selectionState[2];
-    double ** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
+    double** selectionMat = (double**)malloc2D(2, 2, sizeof(double));
 
     // -- part 8
-    // E([1, ?, 1, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5 * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
-    //                    = (1) + 2b_1 - 3(1) + 4b_3 + 2(1) + (1) * b_1 - (1) * (1) + 4 * b_1 * (1) - 2 * b_1 * b_3 + 5 * (1) * b_3 + (1) * (1) + 2 * b_3 * (1)
+    // E([1, ?, 1, ?, 1]) = b_0 + 2b_1 - 3b_2 + 4b_3 + 2b_4 + b_0 * b_1 - b_0 * b_2 + 4 * b_1 * b_2 - 2 * b_1 * b_3 + 5
+    // * b_2 * b_3 + b_2 * b_4 + 2 * b_3 * b_4
+    //                    = (1) + 2b_1 - 3(1) + 4b_3 + 2(1) + (1) * b_1 - (1) * (1) + 4 * b_1 * (1) - 2 * b_1 * b_3 + 5
+    //                    * (1) * b_3 + (1) * (1) + 2 * b_3 * (1)
     //                    = 2b_1 + 4b_3 + b_1 + 4 * b_1 - 2 * b_1 * b_3 + 5 b_3 + 2 * b_3
     //                    = 7b_1 + 11b_3 - 2 * b_1 * b_3
 
