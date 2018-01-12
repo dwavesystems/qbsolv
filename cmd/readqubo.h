@@ -28,8 +28,8 @@ struct nodeStr_ {
 };
 
 //  zero out and fill 2d arrary val from nodes and couplers (negate if looking for minimum)
-void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes,
-    int nNodes, struct nodeStr_ *couplers, int nCouplers);
+void fill_qubo(double **qubo, int maxNodes, struct nodeStr_ *nodes, int nNodes, struct nodeStr_ *couplers,
+               int nCouplers);
 
 int read_qubo(const char *inFileName, FILE *inFile);
 

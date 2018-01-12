@@ -76,7 +76,8 @@ def ad2_qubo(qubo_out, adj_in):
         for st in range(len(state_adj)):
             state = index_to_state[st]
             neighbors = state_adj[state]
-            qubo.write("c " + state + "   " + str(len(neighbors)) + " neighbors  " + str(len(neighbors) * 4) + " external couplers\n")
+            qubo.write("c " + state + "   " + str(len(neighbors)) + " neighbors  " +
+                       str(len(neighbors) * 4) + " external couplers\n")
             qubo.write("  " + str(st * 4) + " " + str(st * 4 + 1) + " 2 " + "\n")
             qubo.write("  " + str(st * 4) + " " + str(st * 4 + 2) + " 2 " + "\n")
             qubo.write("  " + str(st * 4) + " " + str(st * 4 + 3) + " 2 " + "\n")

@@ -3,10 +3,7 @@
 
 #define DW_EPQMI_MAGIC 0x7a6b0c4d
 
-typedef struct DW_epqmi
-{
-  unsigned int magic;
-} DW_epqmi;
+typedef struct DW_epqmi { unsigned int magic; } DW_epqmi;
 
 /*
  * If the epqmi_file argument is a NULL pointer, use the current DW
@@ -37,4 +34,4 @@ int DW_epqmi_sol_obj(DW_epqmi *epqmi, int solnum, float *objective);
 
 int DW_epqmi_free(DW_epqmi *epqmi);
 
-#endif // EPQMI_H_INCLUDED
+#endif  // EPQMI_H_INCLUDED
