@@ -12,7 +12,7 @@ Installation or Building
 
 #### Python
 
-A wheel might be available for your system on pypi: `pip install qbsolv`
+A wheel might be available for your system on pypi: `pip install dwave-qbsolv`
 
 Alternately, you can build the library with setuptools
 `cd python; python setup.py build`
