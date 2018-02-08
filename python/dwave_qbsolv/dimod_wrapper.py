@@ -60,7 +60,7 @@ class QBSolv(dimod.TemplateSampler):
             target (float, optional): If given the qbsolv process haults when
                 a state with this energy value or better is discoverd. (default None)
             find_max (bool, optional): Switches the process from minimization to
-                maximuzation. (default False, minimization)
+                maximization. (default False, minimization)
 
         Returns:
             :obj:`BinaryResponse`
