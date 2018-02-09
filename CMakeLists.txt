@@ -8,7 +8,11 @@ project(qbsolv)
 option(QBSOLV_BUILD_CMD "Build compiled command line interface." ON)
 option(QBSOLV_BUILD_TESTS "Build c library unit tests." OFF)
 
-# Set compiler flags for gcc
+# Set compiler flags for gcc and clang
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 if(CMAKE_C_COMPILER_ID MATCHES GNU OR CMAKE_C_COMPILER_ID MATCHES Clang)
     set(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS} -Wall -Wextra -std=gnu99")
     set(CMAKE_C_FLAGS_DEBUG   "-O0 -g3")
