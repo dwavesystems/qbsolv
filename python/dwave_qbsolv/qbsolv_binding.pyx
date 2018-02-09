@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
                algorithm=None, timeout=2592000, solver_limit=None,
-               solver=None, target=None, find_max=False):
+               solver=None, target=None, find_max=False, sample_kwargs={}):
     """Entry point to `solve` method in the qbsolv library.
 
     Arguments are described in the dimod wrapper.
@@ -62,7 +62,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         params.sub_sampler = &solver_callback
 
         def dimod_callback(Q, best_state):
-            result = solver.sample_qubo(Q)
+            result = solver.sample_qubo(Q, **sample_kwargs)
             sample = next(result.samples())
             for key, value in sample.items():
                 best_state[key] = value
