@@ -143,6 +143,11 @@ int dw_init() {
         exit(9);
     }
     strcpy(tmp_path, "/tmp");
+    if(put_str != NULL) {
+      free(put_str);
+      put_str = NULL;
+    }
+    
 
     wspath = getenv("DW_INTERNAL__WSPATH");  // read again, as it was set
 
