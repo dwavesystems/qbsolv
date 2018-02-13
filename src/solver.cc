@@ -704,7 +704,6 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             best_energy = MAX(best_energy, energy);
             result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN,
                                       qubo_size, &num_nq_solutions);
-            Qbest = &solution_list[Qindex[0]][0];
             best_energy = energy_list[Qindex[0]];
             if (result.code == NEW_HIGH_ENERGY_UNIQUE_SOL) {  // better solution
                 best_energy = energy;
