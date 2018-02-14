@@ -3,7 +3,17 @@
 from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
-from Cython.Build import cythonize
+import os
+
+cwd = os.path.abspath(os.path.dirname(__file__))
+if not os.path.exists(os.path.join(cwd, 'PKG-INFO')):
+    try:
+        from Cython.Build import cythonize
+        USE_CYTHON = True
+    except ImportError:
+        USE_CYTHON = False
+else:
+    USE_CYTHON = False
 
 
 extra_compile_args = {
@@ -33,22 +43,27 @@ class build_ext_compiler_check(build_ext):
         build_ext.build_extensions(self)
 
 
+ext = '.pyx' if USE_CYTHON else '.cpp'
+
 extensions = [Extension('dwave_qbsolv.qbsolv_binding',
-                        ['dwave_qbsolv/qbsolv_binding.pyx',
-                         './globals.cc',
-                         '../src/solver.cc',
-                         '../src/dwsolv.cc',
-                         '../src/util.cc'],
-                        include_dirs=['.', '../src', '../include']
+                        ['python/dwave_qbsolv/qbsolv_binding' + ext,
+                         './python/globals.cc',
+                         './src/solver.cc',
+                         './src/dwsolv.cc',
+                         './src/util.cc'],
+                        include_dirs=['./python', './src', './include']
                         )]
 
-packages = ['dwave_qbsolv']
+if USE_CYTHON:
+    extensions = cythonize(extensions, language='c++')
+
+packages = ['python/dwave_qbsolv']
 
 setup(
     name='dwave_qbsolv',
-    version='0.2.3',
+    version='0.2.4.dev1',
     packages=packages,
     install_requires=['dimod>=0.3.1,<0.5.0', 'cython'],
-    ext_modules=cythonize(extensions, language='c++'),
+    ext_modules=extensions,
     cmdclass={'build_ext': build_ext_compiler_check}
 )
