@@ -105,4 +105,4 @@ deploy_script:
   - "echo username: %username% >> %USERPROFILE%\\.pypirc"
   - "echo password: %password% >> %USERPROFILE%\\.pypirc"
   - "%CMD_IN_ENV% pip install twine"
-  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "%CMD_IN_ENV% twine upload python\dist\*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "%CMD_IN_ENV% twine upload --skip-existing python\dist\*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
