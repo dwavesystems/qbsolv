@@ -14,10 +14,19 @@ Installation or Building
 
 #### Python
 
-A wheel might be available for your system on pypi: `pip install dwave-qbsolv`
+A wheel might be available for your system on pypi. Source distributions are provided as well.
+
+```bash
+pip install dwave-qbsolv
+```
 
 Alternately, you can build the library with setuptools
-`cd python; python setup.py build`
+
+```bash
+pip install -r python/requirement.txt
+pip install cython==0.27
+python setup.py install
+```
 
 #### C
 To build the C library use cmake to generate a build command for your system. On Linux the commands would be something
