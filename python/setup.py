@@ -48,7 +48,7 @@ setup(
     name='dwave_qbsolv',
     version='0.2.3',
     packages=packages,
-    install_requires=['dimod>=0.3.1<=0.4.0', 'cython'],
+    install_requires=['dimod>=0.3.1,<0.5.0', 'cython'],
     ext_modules=cythonize(extensions, language='c++'),
     cmdclass={'build_ext': build_ext_compiler_check}
 )
