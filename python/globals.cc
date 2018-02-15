@@ -1,4 +1,4 @@
-#include "../cmd/readqubo.h"
+#include "readqubo.h"
 #include "stdheaders_shim.h"
 
 #ifdef __cplusplus

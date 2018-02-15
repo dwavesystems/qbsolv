@@ -7,7 +7,8 @@ for PYBIN in /opt/python/*/bin; do
         continue
     fi
     "${PYBIN}/pip" install -r /io/python/requirements.txt
-    "${PYBIN}/pip" wheel -e /io/python -w wheelhouse/
+    "${PYBIN}/pip" install cython==0.27
+    "${PYBIN}/pip" wheel -e /io/ -w wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels
