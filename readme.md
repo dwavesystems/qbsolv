@@ -23,7 +23,7 @@ pip install dwave-qbsolv
 Alternately, you can build the library with setuptools
 
 ```bash
-pip install -r python/requirement.txt
+pip install -r python/requirements.txt
 pip install cython==0.27
 python setup.py install
 ```
