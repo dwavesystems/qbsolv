@@ -51,7 +51,7 @@ extensions = [Extension('dwave_qbsolv.qbsolv_binding',
                          './src/solver.cc',
                          './src/dwsolv.cc',
                          './src/util.cc'],
-                        include_dirs=['./python', './src', './include']
+                        include_dirs=['./python', './src', './include', './cmd']
                         )]
 
 if USE_CYTHON:
@@ -61,7 +61,7 @@ packages = ['dwave_qbsolv']
 
 setup(
     name='dwave_qbsolv',
-    version='0.2.4.dev1',
+    version='0.2.4.dev2',
     packages=packages,
     package_dir={'dwave_qbsolv': 'python/dwave_qbsolv'},
     install_requires=['dimod>=0.3.1,<0.5.0', 'cython'],
