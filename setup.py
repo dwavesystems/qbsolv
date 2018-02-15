@@ -57,12 +57,13 @@ extensions = [Extension('dwave_qbsolv.qbsolv_binding',
 if USE_CYTHON:
     extensions = cythonize(extensions, language='c++')
 
-packages = ['python/dwave_qbsolv']
+packages = ['dwave_qbsolv']
 
 setup(
     name='dwave_qbsolv',
     version='0.2.4.dev1',
     packages=packages,
+    package_dir={'dwave_qbsolv': 'python/dwave_qbsolv'},
     install_requires=['dimod>=0.3.1,<0.5.0', 'cython'],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext_compiler_check}
