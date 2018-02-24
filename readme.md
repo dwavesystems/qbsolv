@@ -2,6 +2,7 @@ qbsolv
 ======
 
 [![Build Status](https://travis-ci.org/dwavesystems/qbsolv.svg?branch=master)](https://travis-ci.org/dwavesystems/qbsolv)
+[![Build status](https://ci.appveyor.com/api/projects/status/y2f7rqxvepn4ak4b/branch/master?svg=true)](https://ci.appveyor.com/project/dwave-adtt/qbsolv/branch/master)
 
 A decomposing solver, finds a minimum value of a large quadratic unconstrained binary optimization (QUBO) problem by
 splitting it into pieces solved either via a D-Wave system or a classical tabu solver.
@@ -13,10 +14,19 @@ Installation or Building
 
 #### Python
 
-A wheel might be available for your system on pypi: `pip install dwave-qbsolv`
+A wheel might be available for your system on pypi. Source distributions are provided as well.
+
+```bash
+pip install dwave-qbsolv
+```
 
 Alternately, you can build the library with setuptools
-`cd python; python setup.py build`
+
+```bash
+pip install -r python/requirements.txt
+pip install cython==0.27
+python setup.py install
+```
 
 #### C
 To build the C library use cmake to generate a build command for your system. On Linux the commands would be something

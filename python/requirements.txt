@@ -1,2 +1,1 @@
-dimod>=0.3.1
-Cython
+dimod==0.3.1

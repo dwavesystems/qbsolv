@@ -52,7 +52,18 @@ matrix:
         - brew install python3
         - virtualenv env -p python3
         - source env/bin/activate
-      script: ./ci/travis/osx-build-wheel.sh
+      script:
+        - ./ci/travis/osx-build-wheel.sh
+        - python setup.py sdist
+      after_success:
+        - pip install twine
+      deploy:
+        provider: script
+        script:
+          - twine upload --username $TWINE_USERNAME --password $TWINE_PASSWORD --skip-existing wheelhouse/* dist/*
+        skip_cleanup: true
+        on:
+          tags: true
     # - os: osx
     #   language: generic
     #   env: TOXENV=pynightly
