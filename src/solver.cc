@@ -701,13 +701,8 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             // DL;printf(" len_index %d %d \n",len_index,pass);
             randomize_solution(solution, qubo_size);
             energy = local_search(solution, qubo_size, qubo, flip_cost, &bit_flips);
-            best_energy = MAX(best_energy, energy);
             result = manage_solutions(solution, solution_list, energy, energy_list, solution_counts, Qindex, QLEN,
                                       qubo_size, &num_nq_solutions);
-            best_energy = energy_list[Qindex[0]];
-            if (result.code == NEW_HIGH_ENERGY_UNIQUE_SOL) {  // better solution
-                best_energy = energy;
-            }
             len_index = mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0, Qindex);
             if (pass++ > 40) break;
             // printf(" len_index = %d  NU %d  energy %lf\n",len_index,NU,energy);
