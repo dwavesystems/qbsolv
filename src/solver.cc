@@ -41,13 +41,10 @@ double Simple_evaluate(const int8_t *const solution, const uint qubo_size, const
 
     for (uint ii = 0; ii < qubo_size; ii++) {
         double row_sum = 0.0;
-        double col_sum = 0.0;
 
         // qubo an upper triangular matrix, so start right of the diagonal
         // for the rows, and stop at the diagonal for the columns
         for (uint jj = ii + 1; jj < qubo_size; jj++) row_sum += qubo[ii][jj] * (double)solution[jj];
-
-        for (uint jj = 0; jj < ii; jj++) col_sum += qubo[jj][ii] * (double)solution[jj];
 
         if (solution[ii] == 1) result += row_sum + qubo[ii][ii];
     }
