@@ -297,6 +297,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
     for (uint i = 0; i < qubo_size; i++) TabuK[i] = 0;           // zero out the Tabu vector
 
     int kk, kkstr = 0, kkend = qubo_size, kkinc;
+    uint bit_cycle_1=qubo_size,bit_cycle_2=qubo_size,bit_cycle=0;
     while (*bit_flips < iter_max) {
         // best solution in neighbour, initialized most negative number
         double neighbour_best = BIGNEGFP;
@@ -317,7 +318,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
             {
                 (*bit_flips)++;
                 double new_energy = Vlastchange + flip_cost[bit];  //  value if Q[k] bit is flipped
-                if (new_energy > best_energy) {
+                if (new_energy > best_energy && bit != bit_cycle_1 ) {
                     brk = true;
                     last_bit = bit;
                     new_energy = evaluate_1bit(Vlastchange, bit, solution, qubo_size, (const double **)qubo,
@@ -330,16 +331,25 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 
                     for (uint i = 0; i < qubo_size; i++) best[i] = solution[i];  // copy the best solution so far
 
+                    howFar = ((double)(iter_max - (*bit_flips)) / (double)thisIter);
+                    if (Verbose_ > 3) {
+                        printf("Tabu new best %lf ,K=%d,last=%d, last_2=%d, cycle=%d,iteration = %" LONGFORMAT ""
+                               ", %lf, %d\n", Vlastchange * sign,
+                               last_bit,bit_cycle_1,bit_cycle_2,bit_cycle, (int64_t)(*bit_flips), howFar, brk);
+                    }
                     if (target_set) {
                         if (Vlastchange >= (sign * target)) {
                             break;
                         }
                     }
-                    howFar = ((double)(iter_max - (*bit_flips)) / (double)thisIter);
-                    if (Verbose_ > 3) {
-                        printf("Tabu new best %lf ,K=%d,iteration = %" LONGFORMAT ", %lf, %d\n", best_energy * sign,
-                               last_bit, (int64_t)(*bit_flips), howFar, brk);
-                    }
+                    //  trying to capture a non progressive cycle, after update, really not an advance
+                    //  but have flipped a bit in a different place,, sometime a cycle of 3 bit positions
+                    if ( bit_cycle_2 == bit_cycle_1 ) bit_cycle++;
+                    if ( bit_cycle_2 == last_bit ) bit_cycle++;
+                    if ( bit_cycle > 4 ) break;
+
+                    bit_cycle_2=bit_cycle_1;
+                    bit_cycle_1=last_bit;
                     if (howFar < 0.80 && numIncrease > 0) {
                         if (Verbose_ > 3) {
                             printf("Increase Itermax %" LONGFORMAT ", %" LONGFORMAT "\n", iter_max,
@@ -364,6 +374,8 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                 break;
             }
         }
+        if ( bit_cycle > 6 ) break;
+
         if (!brk) {  // this is the fall-thru case and we haven't tripped interior If V> VS test so flip Q[K]
             Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, (const double **)qubo, flip_cost);
         }
@@ -654,7 +666,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
     const int Progress_check = 12;                // number of non-progresive passes thru main loop before reset
     const float SubMatrix_span = 0.214f;          // percent of the total size will be covered by the subMatrix pass
     const int64_t InitialTabuPass_factor = 6500;  // initial pass factor for tabu iterations
-    const int64_t TabuPass_factor = 1600;         // iterative pass factor for tabu iterations
+    const int64_t TabuPass_factor = 1700;         // iterative pass factor for tabu iterations
 
     const int subMatrix = param->sub_size;
     int MaxNodes_sub = MAX(subMatrix + 1, SubMatrix_span * qubo_size);
