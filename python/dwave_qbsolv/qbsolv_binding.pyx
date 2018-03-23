@@ -31,7 +31,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     Arguments are described in the dimod wrapper.
 
     Returns:
-        (list, list): (samples, counts) where samples is a list of dicts,
+        (list, list, list): (samples, energies, counts) where samples is a list of dicts,
         energies is the energy for each sample, and counts is the number of
         times each sample was found by qbsolv.
 
@@ -174,6 +174,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     # we are interested in three things: the samples, the energies, and the
     # number of times each sample appeared
     samples = []
+    energies = []
     counts = []
 
     # it is actually faster to use a while loop here and keep everything as a C object
@@ -185,11 +186,10 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
         if solution_counts[soln_idx] == 0:
             break
 
-        # NB: in principle we have the energy list and could return them directly,
-        # but right now it appears that QBSolv has a bug; we will fix this in a future
-        # release
-
         samples.append({v: int(solution_list[soln_idx][v]) for v in range(n_variables)})
+        # NB: for now we need to flip the sign of Q if we are doing minimization
+        # This also affects other locations (ctrl+f QFLIP)
+        energies.append(float(energy_list[soln_idx] * sign))
         counts.append(int(solution_counts[soln_idx]))
 
         i += 1
@@ -205,7 +205,7 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     if solver == 'dw':
         dw_close();
 
-    return samples, counts
+    return samples, energies, counts
 
 
 cdef void solver_callback(double** Q_array, int n_variables, int8_t* best_solution, void *py_solver):

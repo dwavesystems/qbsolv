@@ -36,7 +36,7 @@ class TestSmallProblems(unittest.TestCase):
 
     def has_solution(self, results, expected_state, expected_energy):
         solution_found = False
-        for state, energy in results.items():
+        for state, energy in results.data(['sample', 'energy']):
             solution_found |= state == expected_state and abs(energy - expected_energy) < ENERGY_ERROR
         self.assertTrue(solution_found)
 
@@ -121,7 +121,7 @@ class TestSmallBeasleyProblems(unittest.TestCase):
             # But this is a non-deterministic test.
             for _ in range(3):
                 results = qbsolv.sample_qubo(qubo, find_max=True)
-                self.assertTrue(any(abs(energy - expected_energy) < ENERGY_ERROR for energy in results.energies()))
+                self.assertTrue(any(abs(datum.energy - expected_energy) < ENERGY_ERROR for datum in results.data()))
                 break
             else:
                 self.fail()
@@ -158,9 +158,8 @@ class TestDimodCallback(unittest.TestCase):
             # Give each problem three shots. One should be enough.
             # But this is a non-deterministic test.
             for _ in range(3):
-                results = qbsolv.sample_qubo(qubo, find_max=True,
-                                             solver=_callback)
-                self.assertTrue(any(abs(energy - expected_energy) < ENERGY_ERROR for energy in results.energies()))
+                results = qbsolv.sample_qubo(qubo, find_max=True, solver=_callback)
+                self.assertTrue(any(abs(datum.energy - expected_energy) < ENERGY_ERROR for datum in results.data()))
                 break
             else:
                 self.fail()
@@ -182,9 +181,8 @@ class TestDimodCallback(unittest.TestCase):
             # Give each problem three shots. One should be enough.
             # But this is a non-deterministic test.
             for _ in range(3):
-                results = qbsolv.sample_qubo(qubo, find_max=True,
-                                             solver=dimod.RandomSampler())
-                self.assertTrue(any(abs(energy - expected_energy) < ENERGY_ERROR for energy in results.energies()))
+                results = qbsolv.sample_qubo(qubo, find_max=True, solver=dimod.RandomSampler())
+                self.assertTrue(any(abs(datum.energy - expected_energy) < ENERGY_ERROR for datum in results.data()))
                 break
             else:
                 self.fail()

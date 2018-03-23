@@ -5,7 +5,7 @@ from dwave_qbsolv.qbsolv_binding import run_qbsolv, ENERGY_IMPACT, SOLUTION_DIVE
 __all__ = ['QBSolv', 'ENERGY_IMPACT', 'SOLUTION_DIVERSITY']
 
 
-class QBSolv(dimod.TemplateSampler):
+class QBSolv(dimod.core.sampler.Sampler):
     """Wraps the qbsolv C package for python.
 
     Examples:
@@ -17,9 +17,13 @@ class QBSolv(dimod.TemplateSampler):
         >>> list(response.energies())
         '[1.0]'
     """
+    properties = None
+    parameters = None
 
-    @dimod.decorators.qubo(1)
-    @dimod.decorators.qubo_index_labels(1)
+    def __init__(self):
+        self.properties = {}
+        self.parameters = {}
+
     def sample_qubo(self, Q, num_repeats=50, seed=None, algorithm=None,
                     verbosity=-1, timeout=2592000, solver_limit=None, solver=None,
                     target=None, find_max=False, **sample_kwargs):
@@ -63,7 +67,7 @@ class QBSolv(dimod.TemplateSampler):
                 maximization. (default False, minimization)
 
         Returns:
-            :obj:`BinaryResponse`
+            :obj:`Response`
 
         Examples:
             >>> Q = {(0, 0): 1, (1, 1): 1, (0, 1): 1}
@@ -78,12 +82,11 @@ class QBSolv(dimod.TemplateSampler):
             raise ValueError("num_repeats must be a positive integer")
 
         # pose the QUBO to qbsolv
-        samples, counts = run_qbsolv(Q=Q, num_repeats=num_repeats, seed=seed, algorithm=algorithm,
-                                     verbosity=verbosity, timeout=timeout, solver_limit=solver_limit,
-                                     solver=solver, target=target, find_max=find_max, sample_kwargs=sample_kwargs)
+        samples, energies, counts = run_qbsolv(Q=Q, num_repeats=num_repeats, seed=seed, algorithm=algorithm,
+                                               verbosity=verbosity, timeout=timeout, solver_limit=solver_limit,
+                                               solver=solver, target=target, find_max=find_max, sample_kwargs=sample_kwargs)
 
         # load the response
-        response = dimod.BinaryResponse()
-        response.add_samples_from(samples, sample_data=({'count': n} for n in counts), Q=Q)
+        response = dimod.Response.from_dicts(samples, {'energy': energies, 'num_occurrences': counts}, dimod.BINARY)
 
         return response

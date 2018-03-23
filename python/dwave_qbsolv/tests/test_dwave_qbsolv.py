@@ -28,8 +28,8 @@ class TestWrapper(unittest.TestCase):
         for v in sample:
             self.assertEqual(sample[v], 1)
 
-        for sample, energy in response.items():
-            self.assertEqual(dimod.qubo_energy(Q, sample), energy)
+        for sample, energy in response.data(['sample', 'energy']):
+            self.assertEqual(dimod.qubo_energy(sample, Q), energy)
 
     def test_dimod_basic_qubo_alpha(self):
         n_variables = 50
@@ -67,5 +67,5 @@ class TestWrapper(unittest.TestCase):
 
         response = qbs.QBSolv().sample_ising(h, J)
 
-        for sample, energy in response.items():
-            self.assertLessEqual(abs(dimod.ising_energy(h, J, sample) - energy), 10**-5)
+        for sample, energy in response.data(['sample', 'energy']):
+            self.assertLessEqual(abs(dimod.ising_energy(sample, h, J) - energy), 10**-5)
