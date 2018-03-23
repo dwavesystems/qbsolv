@@ -24,8 +24,16 @@ def load_qubo(filename):
     with open(filename, 'r') as handle:
         for line in handle.readlines():
             line = line.strip()
-            if len(line) == 0 or line[0] == 'c' or line[0] == 'p':
+            # ignore comment lines
+            if len(line) == 0 or line[0] == 'c':
                 continue
+            # grab size of qubo and instantiate with zeros on diagonal
+            # needs to happen to account for nodes with no biases
+            if line[0] == 'p':
+                _, _, _, n_variables, _, _ = line.split()
+                qubo = {(a, a): 0 for a in range(int(n_variables))}
+                continue
+            # TODO: we should check that 'p' line has been found first
             a, b, bias = line.split()
             qubo[int(a), int(b)] = qubo.get((int(a), int(b)), 0) + float(bias)
     return qubo
