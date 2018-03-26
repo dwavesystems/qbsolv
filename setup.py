@@ -64,7 +64,7 @@ setup(
     version='0.2.4',
     packages=packages,
     package_dir={'dwave_qbsolv': 'python/dwave_qbsolv'},
-    install_requires=['dimod>=0.6.3,<0.7.0'],
+    install_requires=['dimod>=0.6.4,<0.7.0'],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext_compiler_check}
 )
