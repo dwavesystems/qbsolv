@@ -22,7 +22,9 @@ class QBSolv(dimod.core.sampler.Sampler):
 
     def __init__(self):
         self.properties = {}
-        self.parameters = {}
+        self.parameters = {'num_repeats': [],  'seed': [],  'algorithm': [],
+                           'verbosity': [],  'timeout': [],  'solver_limit': [],  'solver': [],
+                           'target': [],  'find_max': [],  'sample_kwargs': []}
 
     def sample_qubo(self, Q, num_repeats=50, seed=None, algorithm=None,
                     verbosity=-1, timeout=2592000, solver_limit=None, solver=None,
