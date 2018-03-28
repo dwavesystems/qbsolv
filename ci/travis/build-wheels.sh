@@ -2,8 +2,12 @@
 set -e -x
 
 for PYBIN in /opt/python/*/bin; do
-    if [[ ${PYBIN} =~ "2.6" ]]; then
-        # dimod doesn't support 2.6, skip for now
+    echo ${PYBIN}
+done
+
+for PYBIN in /opt/python/*/bin; do
+    if [[ ${PYBIN} =~ "33" ]]; then
+        # dimod doesn't support 3.3, skip for now
         continue
     fi
     "${PYBIN}/pip" install -r /io/python/requirements.txt
@@ -21,8 +25,8 @@ done
 
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
-    if [[ ${PYBIN} =~ "2.6" ]]; then
-        # dimod doesn't support 2.6, skip for now
+    if [[ ${PYBIN} =~ "33" ]]; then
+        # dimod doesn't support 3.3, skip for now
         continue
     fi
     "${PYBIN}/pip" install dwave_qbsolv --no-index -f /io/wheelhouse/

@@ -5,7 +5,8 @@
 Compatible with Python 2 and 3
 
 ```
-pip install -r requirements.txt
+pip install -r python/requirements.txt
+pip install cython==0.27
 python setup.py install
 ```
 
