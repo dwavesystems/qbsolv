@@ -26,9 +26,10 @@ class QBSolv(dimod.core.sampler.Sampler):
                            'verbosity': [],  'timeout': [],  'solver_limit': [],  'solver': [],
                            'target': [],  'find_max': [],  'sample_kwargs': []}
 
-    def sample_qubo(self, Q, num_repeats=50, seed=None, algorithm=None,
-                    verbosity=-1, timeout=2592000, solver_limit=None, solver=None,
-                    target=None, find_max=False, **sample_kwargs):
+    @dimod.decorators.bqm_index_labels
+    def sample(self, bqm, num_repeats=50, seed=None, algorithm=None,
+               verbosity=-1, timeout=2592000, solver_limit=None, solver=None,
+               target=None, find_max=False, **sample_kwargs):
         """Sample low-energy states defined by a QUBO using qbsolv.
 
         Note:
@@ -84,11 +85,13 @@ class QBSolv(dimod.core.sampler.Sampler):
             raise ValueError("num_repeats must be a positive integer")
 
         # pose the QUBO to qbsolv
+        Q, offset = bqm.to_qubo()
         samples, energies, counts = run_qbsolv(Q=Q, num_repeats=num_repeats, seed=seed, algorithm=algorithm,
                                                verbosity=verbosity, timeout=timeout, solver_limit=solver_limit,
                                                solver=solver, target=target, find_max=find_max, sample_kwargs=sample_kwargs)
 
         # load the response
         response = dimod.Response.from_dicts(samples, {'energy': energies, 'num_occurrences': counts}, dimod.BINARY)
+        response.change_vartype(bqm.vartype, {'energy': [offset] * len(energies)})
 
         return response
