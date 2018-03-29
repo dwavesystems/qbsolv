@@ -68,4 +68,4 @@ class TestWrapper(unittest.TestCase):
         response = qbs.QBSolv().sample_ising(h, J)
 
         for sample, energy in response.data(['sample', 'energy']):
-            self.assertLessEqual(abs(dimod.ising_energy(sample, h, J) - energy), 10**-5)
+            self.assertAlmostEqual(dimod.ising_energy(sample, h, J), energy)
