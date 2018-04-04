@@ -53,10 +53,42 @@ void randomize_solution(int8_t *solution, int nbits) {
         solution[i] = rand() % 2;
     }
 }
+
+// this circular rotates of the bit vector 1,2,3 or 4 positions
+void rotate_solution(int8_t *solution, int nbits) {
+    int rotate=1+rand()%4;
+    for (int i = 0; i < nbits-rotate; i++) {
+        solution[i] = solution[i+rotate];
+    }
+    int j=0;
+    for (int i = nbits-rotate; i < nbits; i++ ) {
+        solution[i] = solution[j++] ;
+    }
+}
+// this randomly flips the bit vector to 1 or 0, favoring turning 0s to 1s
+void flip_solution(int8_t *solution, int nbits) {
+    for (int i = 0; i < nbits; i++) {
+        if ( solution [i] == 1 && rand() %2 == 1 ) {
+            solution [ i] = 0;
+        }else {
+            solution [ i] = 1;
+        }
+    }
+}
 // this randomly sets the bit vector to 1 or 0, with index
 void randomize_solution_by_index(int8_t *solution, int nbits, int *indices) {
     for (int i = 0; i < nbits; i++) {
         solution[indices[i]] = rand() % 2;
+    }
+}
+// this flips the bit vector to 1 or 0, with index, favoring turning 0s to 1s
+void flip_solution_by_index(int8_t *solution, int nbits, int *indices) {
+    for (int i = 0; i < nbits; i++) {
+        if ( solution [indices[i]] == 1 && rand() %2 == 1 ) {
+            solution [ indices [i]] = 0;
+        }else {
+            solution [ indices [i]] = 1;
+        }
     }
 }
 // this randomly sets the bit vector to 1 or 0, with similar population counts
