@@ -46,8 +46,17 @@ void **malloc2D(uint rows, uint cols, uint size);
 // this randomly sets the bit vector to 1 or 0
 void randomize_solution(int8_t *solution, int nbits);
 
+// this randomly flips the bit vector to 1 or 0
+void flip_solution(int8_t *solution, int nbits);
+
+// this rotates bit vector to 1 or 0
+void rotate_solution(int8_t *solution, int nbits);
+
 // this randomly sets the bit vector to 1 or 0, with index
 void randomize_solution_by_index(int8_t *solution, int nbits, int *indices);
+
+// this flips the bit vector to 1 or 0, with index
+void flip_solution_by_index(int8_t *solution, int nbits, int *indices);
 
 // this randomly sets the bit vector to 1 or 0, with similar population counts
 void randomize_pop_solution(int8_t *solution, int nbits);
@@ -57,6 +66,9 @@ void randomize_pop_solution_by_index(int8_t *solution, int nbits, int *indices);
 
 // shuffle the index vector before sort
 void shuffle_index(int *indices, int length);
+
+// shuffle the solution vector 
+void shuffle_solution(int8_t *solution, int length);
 
 //  print out the bit vector as row and column, surrounding the Qubo in triangular form  used in the -w option
 void print_solution_and_qubo(int8_t *solution, int maxNodes, double **qubo);

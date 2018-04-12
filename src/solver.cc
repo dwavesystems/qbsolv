@@ -321,6 +321,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                 if (new_energy > best_energy && bit != bit_cycle_1 ) {
                     brk = true;
                     last_bit = bit;
+                    float Delta_E = (float)  (new_energy - best_energy) ;
                     new_energy = evaluate_1bit(Vlastchange, bit, solution, qubo_size, (const double **)qubo,
                                                flip_cost);  // flip the bit and fix tables
                     Vlastchange = local_search_1bit(new_energy, solution, qubo_size, qubo, flip_cost,
@@ -344,6 +345,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     }
                     //  trying to capture a non progressive cycle, after update, really not an advance
                     //  but have flipped a bit in a different place,, sometime a cycle of 3 bit positions
+                    if ( Delta_E <= 0.00000001 ) bit_cycle++;
                     if ( bit_cycle_2 == bit_cycle_1 ) bit_cycle++;
                     if ( bit_cycle_2 == last_bit ) bit_cycle++;
                     if ( bit_cycle > 4 ) break;
@@ -827,11 +829,13 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             // submatrix search did not produce enough new values, so randomize those bits
             if (change <= 2) {
                 if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
-                    randomize_solution_by_index(solution, l, index);
+                    flip_solution_by_index(solution, l, index);
+                    //randomize_solution_by_index(solution, l, index);
                 } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
                     len_index =
                             mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0, Qindex);
-                    randomize_solution_by_index(solution, len_index, Pcompress);
+                    flip_solution_by_index(solution, len_index, Pcompress);
+                    //randomize_solution_by_index(solution, len_index, Pcompress);
                 }
                 if (Verbose_ > 3) {
                     printf(" Submatrix search did not produce enough new values, so randomize %d bits\n", l);
