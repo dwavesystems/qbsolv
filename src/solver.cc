@@ -297,7 +297,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
     for (uint i = 0; i < qubo_size; i++) TabuK[i] = 0;           // zero out the Tabu vector
 
     int kk, kkstr = 0, kkend = qubo_size, kkinc;
-    uint bit_cycle_1=qubo_size,bit_cycle_2=qubo_size,bit_cycle=0;
+    uint bit_cycle_1 = qubo_size, bit_cycle_2 = qubo_size, bit_cycle = 0;
     while (*bit_flips < iter_max) {
         // best solution in neighbour, initialized most negative number
         double neighbour_best = BIGNEGFP;
@@ -318,10 +318,10 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
             {
                 (*bit_flips)++;
                 double new_energy = Vlastchange + flip_cost[bit];  //  value if Q[k] bit is flipped
-                if (new_energy > best_energy && bit != bit_cycle_1 ) {
+                if (new_energy > best_energy && bit != bit_cycle_1) {
                     brk = true;
                     last_bit = bit;
-                    float Delta_E = (float)  (new_energy - best_energy) ;
+                    float Delta_E = (float)(new_energy - best_energy);
                     new_energy = evaluate_1bit(Vlastchange, bit, solution, qubo_size, (const double **)qubo,
                                                flip_cost);  // flip the bit and fix tables
                     Vlastchange = local_search_1bit(new_energy, solution, qubo_size, qubo, flip_cost,
@@ -334,9 +334,11 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
 
                     howFar = ((double)(iter_max - (*bit_flips)) / (double)thisIter);
                     if (Verbose_ > 3) {
-                        printf("Tabu new best %lf ,K=%d,last=%d, last_2=%d, cycle=%d,iteration = %" LONGFORMAT ""
-                               ", %lf, %d\n", Vlastchange * sign,
-                               last_bit,bit_cycle_1,bit_cycle_2,bit_cycle, (int64_t)(*bit_flips), howFar, brk);
+                        printf("Tabu new best %lf ,K=%d,last=%d, last_2=%d, cycle=%d,iteration = %" LONGFORMAT
+                               ""
+                               ", %lf, %d\n",
+                               Vlastchange * sign, last_bit, bit_cycle_1, bit_cycle_2, bit_cycle, (int64_t)(*bit_flips),
+                               howFar, brk);
                     }
                     if (target_set) {
                         if (Vlastchange >= (sign * target)) {
@@ -345,13 +347,13 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                     }
                     //  trying to capture a non progressive cycle, after update, really not an advance
                     //  but have flipped a bit in a different place,, sometime a cycle of 3 bit positions
-                    if ( Delta_E <= 0.00000001 ) bit_cycle++;
-                    if ( bit_cycle_2 == bit_cycle_1 ) bit_cycle++;
-                    if ( bit_cycle_2 == last_bit ) bit_cycle++;
-                    if ( bit_cycle > 4 ) break;
+                    if (Delta_E <= 0.00000001) bit_cycle++;
+                    if (bit_cycle_2 == bit_cycle_1) bit_cycle++;
+                    if (bit_cycle_2 == last_bit) bit_cycle++;
+                    if (bit_cycle > 4) break;
 
-                    bit_cycle_2=bit_cycle_1;
-                    bit_cycle_1=last_bit;
+                    bit_cycle_2 = bit_cycle_1;
+                    bit_cycle_1 = last_bit;
                     if (howFar < 0.80 && numIncrease > 0) {
                         if (Verbose_ > 3) {
                             printf("Increase Itermax %" LONGFORMAT ", %" LONGFORMAT "\n", iter_max,
@@ -376,7 +378,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
                 break;
             }
         }
-        if ( bit_cycle > 6 ) break;
+        if (bit_cycle > 6) break;
 
         if (!brk) {  // this is the fall-thru case and we haven't tripped interior If V> VS test so flip Q[K]
             Vlastchange = evaluate_1bit(Vlastchange, last_bit, solution, qubo_size, (const double **)qubo, flip_cost);
@@ -762,92 +764,95 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
 
     // outer loop begin
     while (ContinueWhile) {
-       if (qubo_size > 20 && subMatrix < qubo_size) { // these are of the size that will use updates from submatrix processing
-        if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
-            // use the first "remove" index values to remove rows and columns from new matrix
-            // initial TabuK to nothing tabu sub_solution[i] = Q[i];
-            // create compression bit vector
-            val_index_sort(index, flip_cost, qubo_size);  // Create index array of sorted values
-            l_max = MIN(qubo_size - subMatrix, MaxNodes_sub);
-            if (Verbose_ > 1) printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n", l_max, subMatrix);
-        } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
-            // pick "backbone" as an index of non-matching bits in solutions
-            //
-            len_index = mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0, Qindex);
-            // need to cover all of len_index so we will pad out the Qindex to a multiple of subMatrix
-            l_max = len_index;
-        }
-
-        // begin submatrix passes
-        if (NoProgress % Progress_check == (Progress_check - 1)) {  // every Progress_check (th) loop without progess
-            // reset completely
-            // solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex);
-            randomize_solution(solution, qubo_size);
-            if (Verbose_ > 1) {
-                DLT;
-                printf(" \n\n Reset Q and start over Repeat = %d/%d, as no progress is exhausted %d %d\n\n\n",
-                       param->repeats, RepeatPass, NoProgress, NoProgress % Progress_check);
+        if (qubo_size > 20 &&
+            subMatrix < qubo_size) {  // these are of the size that will use updates from submatrix processing
+            if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
+                // use the first "remove" index values to remove rows and columns from new matrix
+                // initial TabuK to nothing tabu sub_solution[i] = Q[i];
+                // create compression bit vector
+                val_index_sort(index, flip_cost, qubo_size);  // Create index array of sorted values
+                l_max = MIN(qubo_size - subMatrix, MaxNodes_sub);
+                if (Verbose_ > 1)
+                    printf("Reduced submatrix solution l = 0; %d, subMatrix size = %d\n", l_max, subMatrix);
+            } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
+                // pick "backbone" as an index of non-matching bits in solutions
+                //
+                len_index = mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0, Qindex);
+                // need to cover all of len_index so we will pad out the Qindex to a multiple of subMatrix
+                l_max = len_index;
             }
-        } else {
-            int change = 0;
-            {  // scope of parallel region
-                int t_change = 0;
-                int *Icompress;
-                if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
-                for (l = 0; l < l_max; l += subMatrix) {
+
+            // begin submatrix passes
+            if (NoProgress % Progress_check ==
+                (Progress_check - 1)) {  // every Progress_check (th) loop without progess
+                // reset completely
+                // solution_population( solution, solution_list, num_nq_solutions, qubo_size, Qindex);
+                randomize_solution(solution, qubo_size);
+                if (Verbose_ > 1) {
+                    DLT;
+                    printf(" \n\n Reset Q and start over Repeat = %d/%d, as no progress is exhausted %d %d\n\n\n",
+                           param->repeats, RepeatPass, NoProgress, NoProgress % Progress_check);
+                }
+            } else {
+                int change = 0;
+                {  // scope of parallel region
+                    int t_change = 0;
+                    int *Icompress;
+                    if (GETMEM(Icompress, int, qubo_size) == NULL) BADMALLOC
+                    for (l = 0; l < l_max; l += subMatrix) {
+                        if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
+                            if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
+
+                            for (int i = l, j = 0; i < l + subMatrix; i++) {
+                                Icompress[j++] = index[i];  // create compression index
+                            }
+                            index_sort(Icompress, subMatrix, true);  // sort it for effective reduction
+
+                            // coarsen and reduce the problem
+                        } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
+                            if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
+                            int i_strt = l;
+                            if (l + subMatrix > len_index)
+                                i_strt = len_index - subMatrix - 1;  // cover all of len_index by backup on last pass
+                            for (int i = i_strt, j = 0; i < i_strt + subMatrix; i++) {
+                                Icompress[j++] = Pcompress[i];  // create compression index
+                            }
+                        }
+                        t_change = reduce_solve_projection(Icompress, qubo, qubo_size, subMatrix, solution, param);
+                        // do the following in a critical region
+
+                        change = change + t_change;
+                        numPartCalls++;
+                        DwaveQubo++;
+                        // end critical region
+                    }
+                    free(Icompress);
+                }
+
+                // submatrix search did not produce enough new values, so randomize those bits
+                if (change <= 2) {
                     if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
-                        if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
-
-                        for (int i = l, j = 0; i < l + subMatrix; i++) {
-                            Icompress[j++] = index[i];  // create compression index
-                        }
-                        index_sort(Icompress, subMatrix, true);  // sort it for effective reduction
-
-                        // coarsen and reduce the problem
+                        flip_solution_by_index(solution, l, index);
+                        // randomize_solution_by_index(solution, l, index);
                     } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
-                        if (Verbose_ > 3) printf("Submatrix starting at backbone %d\n", l);
-                        int i_strt = l;
-                        if (l + subMatrix > len_index)
-                            i_strt = len_index - subMatrix - 1;  // cover all of len_index by backup on last pass
-                        for (int i = i_strt, j = 0; i < i_strt + subMatrix; i++) {
-                            Icompress[j++] = Pcompress[i];  // create compression index
+                        len_index = mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0,
+                                                            Qindex);
+                        flip_solution_by_index(solution, len_index, Pcompress);
+                        // randomize_solution_by_index(solution, len_index, Pcompress);
+                    }
+                    if (Verbose_ > 3) {
+                        printf(" Submatrix search did not produce enough new values, so randomize %d bits\n", l);
+                    } else {
+                        if (Verbose_ > 3) {
+                            printf("Number of solution Bits changed %d \n ", change);
                         }
                     }
-                    t_change = reduce_solve_projection(Icompress, qubo, qubo_size, subMatrix, solution, param);
-                    // do the following in a critical region
-
-                    change = change + t_change;
-                    numPartCalls++;
-                    DwaveQubo++;
-                    // end critical region
                 }
-                free(Icompress);
+
+                // completed submatrix passes
+                if (Verbose_ > 1) printf("\n");
             }
-
-            // submatrix search did not produce enough new values, so randomize those bits
-            if (change <= 2) {
-                if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
-                    flip_solution_by_index(solution, l, index);
-                    //randomize_solution_by_index(solution, l, index);
-                } else if (strncmp(&algo_[0], "d", strlen("d")) == 0) {
-                    len_index =
-                            mul_index_solution_diff(solution_list, num_nq_solutions, qubo_size, Pcompress, 0, Qindex);
-                    flip_solution_by_index(solution, len_index, Pcompress);
-                    //randomize_solution_by_index(solution, len_index, Pcompress);
-                }
-                if (Verbose_ > 3) {
-                    printf(" Submatrix search did not produce enough new values, so randomize %d bits\n", l);
-                } else {
-                    if (Verbose_ > 3) {
-                        printf("Number of solution Bits changed %d \n ", change);
-                    }
-                }
-            }
-
-            // completed submatrix passes
-            if (Verbose_ > 1) printf("\n");
         }
-       }
         if (Verbose_ > 1) {
             DLT;
             printf(" ***Full Tabu  -- after partition pass \n");
