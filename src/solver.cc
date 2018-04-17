@@ -267,7 +267,7 @@ double tabu_search(int8_t *solution, int8_t *best, uint qubo_size, double **qubo
             nTabu = MIN(Tlist_, (int)qubo_size + 1);  // tabu use set tenure
         } else {
             if (qubo_size < 20)
-                nTabu = 5;
+                nTabu = 10;
             else if (qubo_size < 100)
                 nTabu = 10;
             else if (qubo_size < 250)
@@ -490,7 +490,7 @@ double solv_submatrix(int8_t *solution, int8_t *best, uint qubo_size, double **q
     int nTabu;
     int64_t iter_max = (*bit_flips) + (int64_t)MAX((int64_t)3000, (int64_t)20000 * (int64_t)qubo_size);
     if (qubo_size < 20)
-        nTabu = 5;
+        nTabu = 10;
     else if (qubo_size < 100)
         nTabu = 10;
     else if (qubo_size < 250)
@@ -757,14 +757,12 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             ContinueWhile = false;
         }
     }
-    if (qubo_size < 20 || subMatrix > qubo_size) {
-        ContinueWhile = false;  // trivial problem or Submatrix won't contribute
-    }
 
     DwaveQubo = 0;
 
     // outer loop begin
     while (ContinueWhile) {
+       if (qubo_size > 20 && subMatrix < qubo_size) { // these are of the size that will use updates from submatrix processing
         if (strncmp(&algo_[0], "o", strlen("o")) == 0) {
             // use the first "remove" index values to remove rows and columns from new matrix
             // initial TabuK to nothing tabu sub_solution[i] = Q[i];
@@ -849,6 +847,7 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
             // completed submatrix passes
             if (Verbose_ > 1) printf("\n");
         }
+       }
         if (Verbose_ > 1) {
             DLT;
             printf(" ***Full Tabu  -- after partition pass \n");
