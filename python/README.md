@@ -19,8 +19,8 @@ python setup.py install
 >>> response = QBSolv().sample_ising(h, J)
 >>> list(response.samples())
 '[{0: 1, 1: 1, 2: 1}]'
->>> list(response.energies())
-'[1.0]'
+>>> list(response.data_vectors['energy'])
+'[-3.0]'
 ```
 
 ```python
@@ -29,6 +29,6 @@ python setup.py install
 >>> response = QBSolv().sample_qubo(Q)
 >>> list(response.samples())
 '[{0: 0, 1: 0}]'
->>> list(response.energies())
+>>> list(response.data_vectors['energy'])
 '[0.0]'
 ```
