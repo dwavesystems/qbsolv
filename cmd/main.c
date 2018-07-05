@@ -16,6 +16,8 @@
 
 #ifdef _WIN32
 	#include "wingetopt.h"
+#else
+	#include <getopt.h>
 #endif // _WIN32
 
 
