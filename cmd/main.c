@@ -15,7 +15,7 @@
 */
 
 #ifdef _WIN32
-	#include "getopt.h"
+	#include "wingetopt.h"
 #endif // _WIN32
 
 

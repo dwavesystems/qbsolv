@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\cmd",
     "\\src"
   ],
-  "SelectedNode": "\\.clang-format",
+  "SelectedNode": "\\cmd\\main.c",
   "PreviewInSolutionExplorer": false
 }
