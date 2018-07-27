@@ -49,7 +49,7 @@ matrix:
       language: generic
       before_install:
         - brew update
-        - brew install pyenv
+        - brew upgrade pyenv
         - pyenv install 2.7.15 -s
         - pyenv install 3.4.8 -s
         - pyenv install 3.5.5 -s
