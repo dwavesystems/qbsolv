@@ -56,8 +56,9 @@ matrix:
         - pyenv install 3.6.6 -s
         - pyenv install 3.7.0 -s
       script:
+        - eval "$(pyenv init -)"
         - pyenv local 2.7.15 3.4.8 3.5.5 3.6.6 3.7.0
-        - python2.7 -m pip install -r /io/python/requirements.txt
+        - python2.7 -m pip install -r ./python/requirements.txt
         - python2.7 -m unittest tests
         # - python3.4 -m pip install -r ./python/requirements.txt
         # - python3.4 -m unittest tests
