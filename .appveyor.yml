@@ -93,7 +93,6 @@ install:
   # pip will build them from source using the MSVC compiler matching the
   # target Python version and architecture
   - "%CMD_IN_ENV% pip install -r python/requirements.txt"
-  - "%CMD_IN_ENV% pip install cython==0.28.4"
   - "%CMD_IN_ENV% pip install wheel setuptools --upgrade --force"
 
 build_script:
