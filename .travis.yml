@@ -57,15 +57,15 @@ matrix:
         - pyenv install 3.7.0 -s
       script:
         - pyenv local 2.7.15 3.4.8 3.5.5 3.6.6 3.7.0
-        - python2.7 -m pip install -r requirements.txt
+        - python2.7 -m pip install -r /io/python/requirements.txt
         - python2.7 -m unittest tests
-        # - python3.4 -m pip install -r requirements.txt
+        # - python3.4 -m pip install -r ./python/requirements.txt
         # - python3.4 -m unittest tests
-        - python3.5 -m pip install -r requirements.txt
+        - python3.5 -m pip install -r ./python/requirements.txt
         - python3.5 -m unittest tests
-        - python3.6 -m pip install -r requirements.txt
+        - python3.6 -m pip install -r ./python/requirements.txt
         - python3.6 -m unittest tests
-        - python3.7 -m pip install -r requirements.txt
+        - python3.7 -m pip install -r ./python/requirements.txt
         - python3.7 -m unittest tests
       after_success:
         - pyenv local 2.7.15 3.4.8 3.5.5 3.6.6 3.7.0
