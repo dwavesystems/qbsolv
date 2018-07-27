@@ -1,1 +1,2 @@
-dimod==0.6.13
+dimod==0.6.13; python_version>"3.5"
+dimod==0.6.10; python_version<="3.4"
