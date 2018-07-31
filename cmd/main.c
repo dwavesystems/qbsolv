@@ -14,11 +14,18 @@
  limitations under the License.
 */
 
-#include <getopt.h>
+#ifdef _WIN32
+	#include "wingetopt.h"
+#else
+	#include <getopt.h>
+#endif // _WIN32
+
+
 #include "dwsolv.h"
 #include "qbsolv.h"
 #include "readqubo.h"
 #include "util.h"
+
 
 void print_help(void);
 void print_qubo_format(void);
