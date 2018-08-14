@@ -90,8 +90,13 @@ class QBSolv(dimod.core.sampler.Sampler):
                                                verbosity=verbosity, timeout=timeout, solver_limit=solver_limit,
                                                solver=solver, target=target, find_max=find_max, sample_kwargs=sample_kwargs)
 
-        # load the response
-        response = dimod.Response.from_dicts(samples, {'energy': energies, 'num_occurrences': counts}, dimod.BINARY)
-        response.change_vartype(bqm.vartype, {'energy': [offset] * len(energies)})
+        if hasattr(dimod.Response, 'from_dicts'):
+            # dimod<=0.6.x
+            response = dimod.Response.from_dicts(samples, {'energy': energies, 'num_occurrences': counts}, dimod.BINARY)
+            response.change_vartype(bqm.vartype, {'energy': [offset] * len(energies)})
+        else:
+            # dimod>=0.7.x
+            response = dimod.Response.from_samples(samples, {'energy': energies, 'num_occurrences': counts}, {}, dimod.BINARY)
+            response.change_vartype(bqm.vartype, energy_offset=offset)
 
         return response

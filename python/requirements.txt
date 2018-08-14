@@ -1,3 +1,2 @@
-dimod==0.6.13; python_version>="3.5"
-dimod==0.6.10; python_version<="3.4"
+dimod==0.7.2
 cython==0.28.4
