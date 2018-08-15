@@ -19,5 +19,5 @@ make CC=$CC CXX=$CXX;
 find . \( -name '*.gcno' -or -name '*.gcda' \) -exec mv {} .. \;
 cd -;
 
-# Submit the traces to coveralls
-coveralls --exclude tests -E '.*gtest.*' --gcov-options '\-lp';
+# # Submit the traces to coveralls
+# coveralls --exclude tests -E '.*gtest.*' --gcov-options '\-lp';

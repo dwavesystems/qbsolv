@@ -1,2 +1,5 @@
 dimod==0.7.2
 cython==0.28.4
+
+coverage
+codecov
