@@ -1,0 +1,390 @@
+version: 2
+jobs:
+  test-3.6: &full-test-template
+    docker:
+      - image: circleci/python:3.6-jessie
+
+    working_directory: ~/repo
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: create virtualenv
+          command: |
+            python -m virtualenv env
+
+      - run: &install-dependencies-template
+          name: install dependencies
+          command: |
+            . env/bin/activate
+            python --version
+            pip install -r python/requirements.txt
+
+      - save_cache:
+          paths:
+            - ./env
+          key: v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+
+      - run: &install-package-template
+          name: install package
+          command: |
+            . env/bin/activate
+            python setup.py build_ext --inplace
+            pip install .
+        
+      - run: &run-tests-template
+          name: run unittests
+          command: |
+            . env/bin/activate
+            python --version
+            coverage run -m unittest discover
+
+      - store_artifacts:
+          path: ./htmlcov
+
+      - run:
+          name: codecov
+          command: |
+            . env/bin/activate
+            codecov
+
+      - run: &sdist-build-template
+          name: build sdist
+          command: |
+            . env/bin/activate
+            python setup.py sdist
+
+      - store_artifacts:
+          path: ./dist
+
+      - run: &sdist-install-template
+          name: test installing from sdist without cython
+          command: |
+            python -m virtualenv env_sdist
+            . env_sdist/bin/activate
+            pip install dist/dwave-qbsolv-*.tar.gz
+
+      - run: &sdist-cython-install-template
+          name: install sdist with cython
+          command: |
+            python -m virtualenv env_cython_sdist
+            . env_cython_sdist/bin/activate
+            pip install cython
+            pip install dist/dwave-qbsolv-*.tar.gz
+
+  test-3.7:
+    <<: *full-test-template
+    docker:
+      - image: circleci/python:3.7-stretch
+
+  test-3.5:
+    <<: *full-test-template
+    docker:
+      - image: circleci/python:3.5-jessie
+
+  test-3.4:
+    <<: *full-test-template
+    docker:
+      - image: circleci/python:3.4-jessie
+
+  test-2.7:
+    <<: *full-test-template
+    docker:
+      - image: circleci/python:2.7-jessie
+
+  test-osx-3.7: &osx-tests-template
+    macos:
+      xcode: "9.4.1"
+    environment:
+      PYTHON: 3.7.0
+      # HOMEBREW_NO_AUTO_UPDATE: 1  # for 3.7 we need to update homebrew
+
+    working_directory: ~/repo
+
+    steps: 
+      - checkout
+
+      - run: 
+          name: install pyenv
+          command: |
+            brew install pyenv
+
+      - restore_cache:
+          keys:
+            - pyenv-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: install python
+          command: |
+            pyenv install $PYTHON -s
+
+      - save_cache:
+          paths:
+            - ~/.pyenv
+          key: pyenv-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: create virtualenv
+          command: |
+            eval "$(pyenv init -)"
+            pyenv local $PYTHON
+            python -m pip install virtualenv
+            python -m virtualenv env
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+
+      - run: &install-dependencies-template
+          name: install dependencies
+          command: |
+            . env/bin/activate
+            python --version
+            pip install -r python/requirements.txt
+
+      - save_cache:
+          paths:
+            - ./env
+          key: v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+
+      - run: *install-package-template
+        
+      - run: *run-tests-template
+
+      - run: *sdist-build-template
+
+      - store_artifacts:
+          path: ./dist
+
+      - run: *sdist-install-template
+
+      - run: *sdist-cython-install-template
+
+  test-osx-3.6:
+    <<: *osx-tests-template
+    environment:
+      PYTHON: 3.6.5
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  test-osx-3.5:
+    <<: *osx-tests-template
+    environment:
+      PYTHON: 3.5.5
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  test-osx-3.4:
+    <<: *osx-tests-template
+    environment:
+      PYTHON: 3.4.8
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  test-osx-2.7:
+    <<: *osx-tests-template
+    environment:
+      PYTHON: 2.7.15
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+##################################################################################################
+# Deploy
+##################################################################################################
+
+  build-manylinux-64: &manylinux-template
+    docker:
+      - image: quay.io/pypa/manylinux1_x86_64
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: build wheels
+          command: |
+            for PYBIN in /opt/python/*/bin; do
+              "${PYBIN}/pip" install -r python/requirements.txt
+              "${PYBIN}/pip" wheel . -w ./wheelhouse
+              "${PYBIN}/python" setup.py sdist -d ./dist
+            done
+
+      - run:
+          name: bundle shared libraries into wheels
+          command: |
+            for whl in ./wheelhouse/dwave*qbsolv*.whl; do
+              auditwheel repair "$whl" -w ./dist
+            done
+
+      - store_artifacts:
+          path: ./dist
+
+      - run: &init-pypirc-template
+          name: init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+
+      - run:
+          name: create a virtualenv
+          command: |
+            pythons=(/opt/python/*/bin)
+            python="${pythons[0]}"
+            "$python/pip" install virtualenv
+            "$python/python" -m virtualenv env
+
+      - run: &upload-template
+          name: install twine and deploy
+          command: |
+            . env/bin/activate
+            python -m pip install twine
+            twine upload --skip-existing ./dist/*
+
+  build-manylinux-32:
+    <<: *manylinux-template
+    docker:
+      - image: quay.io/pypa/manylinux1_i686
+
+  build-osx-3.7: &osx-build-template
+    macos:
+      xcode: "9.4.1"
+    environment:
+      PYTHON: 3.7.0
+      # HOMEBREW_NO_AUTO_UPDATE: 1  # for 3.7 we need to update homebrew
+
+    working_directory: ~/repo
+
+    steps: 
+      - checkout
+
+      - run: 
+          name: install pyenv
+          command: |
+            brew install pyenv
+
+      - restore_cache:
+          keys:
+            - pyenv-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: install python
+          command: |
+            pyenv install $PYTHON -s
+
+      - save_cache:
+          paths:
+            - ~/.pyenv
+          key: pyenv-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: create virtualenv
+          command: |
+            eval "$(pyenv init -)"
+            pyenv local $PYTHON
+            python -m pip install virtualenv
+            python -m virtualenv env
+
+      - run: *install-dependencies-template
+
+      - run: *install-package-template
+        
+      - run:
+          name: create bdist_wheel
+          command: |
+            . env/bin/activate
+            python setup.py bdist_wheel
+
+      - store_artifacts:
+          path: ./dist
+
+      - run: *init-pypirc-template
+
+      - run: *upload-template
+
+  build-osx-3.6:
+    <<: *osx-build-template
+    environment:
+      PYTHON: 3.6.5
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  build-osx-3.5:
+    <<: *osx-build-template
+    environment:
+      PYTHON: 3.5.5
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  build-osx-3.4:
+    <<: *osx-build-template
+    environment:
+      PYTHON: 3.4.8
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+  build-osx-2.7:
+    <<: *osx-build-template
+    environment:
+      PYTHON: 2.7.15
+      HOMEBREW_NO_AUTO_UPDATE: 1
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-3.7
+      - test-3.6
+      - test-3.5
+      - test-3.4
+      - test-2.7
+      - test-osx-3.7
+      - test-osx-3.6
+      - test-osx-3.5
+      - test-osx-3.4
+      - test-osx-2.7
+
+  deploy:
+    jobs:
+      - build-manylinux-64:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-manylinux-32:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-3.7:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-3.6:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-3.5:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-3.4:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-2.7:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
