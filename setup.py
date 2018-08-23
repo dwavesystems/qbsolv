@@ -81,7 +81,7 @@ setup(
     install_requires=['dimod>=0.6.10,<0.8.0'],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext_compiler_check},
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     classifiers=classifiers,
     python_requires=python_requires
 )
