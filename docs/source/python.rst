@@ -4,9 +4,9 @@
 Python
 ======
 
-.. automodule:: qbsolv.python.dwave_qbsolv.dimod_wrapper
+.. automodule:: dwave_qbsolv
 
-.. currentmodule:: qbsolv.python.dwave_qbsolv
+.. currentmodule:: dwave_qbsolv
 
 Class
 =====
