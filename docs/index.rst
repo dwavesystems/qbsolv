@@ -10,8 +10,21 @@ qbsolv
   :start-after: index-start-marker
   :end-before: index-end-marker
 
+Example
+=======
+
+.. code:: python
+
+    from dwave_qbsolv import QBSolv
+    Q = {(0, 0): 1, (1, 1): 1, (0, 1): 1}
+    response = QBSolv().sample_qubo(Q)
+    print("samples=" + str(list(response.samples())))
+    print("energies=" + str(list(response.data_vectors['energy'])))
+
+
+
 Documentation
--------------
+=============
 
 .. only:: html
 
@@ -20,7 +33,8 @@ Documentation
 .. toctree::
   :maxdepth: 1
 
-  reference
+  intro
+  source/index
   installation
   license
   contributing_qbsolv

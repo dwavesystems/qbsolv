@@ -68,10 +68,10 @@ line option for cmake to do this would be `-DQBSOLV_BUILD_TESTS=ON`.
 
 .. installation-end-marker
 
-.. usage-start-marker
-
 Command Line Usage
 ==================
+
+.. usage-start-marker
 
 .. code::
 
@@ -149,8 +149,12 @@ The options are as follows:
     -r seed
         Used to reset the seed for the random number generation
 
+.. usage-end-marker
+
 qbsolv QUBO Input File Format
 =============================
+
+.. format-start-marker
 
 A .qubo file contains data which describes an unconstrained
 quadratic binary optimization problem.  It is an ASCII file comprised
@@ -226,7 +230,7 @@ elements of a QUBO benchmark file, not to represent a real problem.
         1  3   4.5678
         2  3   -3.22
 
-.. usage-end-marker
+.. format-end-marker
 
 Library usage
 -------------
