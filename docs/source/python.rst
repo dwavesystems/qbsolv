@@ -1,8 +1,8 @@
 .. _python:
 
-======
-Python
-======
+================
+Python Interface
+================
 
 .. automodule:: dwave_qbsolv
 
