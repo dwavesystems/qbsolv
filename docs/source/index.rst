@@ -6,5 +6,5 @@ Reference Documentation
   :maxdepth: 1
 
   usage
-  format
   python
+  format

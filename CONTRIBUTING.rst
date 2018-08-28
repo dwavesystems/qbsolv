@@ -1,3 +1,4 @@
+.. _contributing:
 
 We, the qbsolv developers, expect a variety of contributions, from reporting of bugs or
 suggestions for examples or tutorials to development of improvements or alternatives to
