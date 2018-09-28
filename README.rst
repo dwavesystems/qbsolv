@@ -9,6 +9,9 @@
 
 .. image:: https://ci.appveyor.com/api/projects/status/y2f7rqxvepn4ak4b/branch/master?svg=true
     :target: https://ci.appveyor.com/project/dwave-adtt/qbsolv/branch/master
+    
+.. image:: https://readthedocs.com/projects/d-wave-systems-qbsolv/badge/?version=latest
+    :target: https://docs.ocean.dwavesys.com/projects/qbsolv/en/latest/?badge=latest
 
 .. image:: https://circleci.com/gh/dwavesystems/qbsolv.svg?style=svg
     :target: https://circleci.com/gh/dwavesystems/qbsolv
