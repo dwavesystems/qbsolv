@@ -83,5 +83,6 @@ setup(
     cmdclass={'build_ext': build_ext_compiler_check},
     long_description=open('README.rst').read(),
     classifiers=classifiers,
+    license='Apache 2.0',
     python_requires=python_requires
 )
