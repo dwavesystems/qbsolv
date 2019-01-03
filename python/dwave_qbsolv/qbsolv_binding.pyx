@@ -99,8 +99,8 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     else:
         raise ValueError('unknown algorithm given')
 
-    if not isinstance(timeout, int) or timeout <= 0:
-        raise ValueError("'timeout' must be a positive integer")
+    if timeout <= 0:
+        raise ValueError("'timeout' must be positive")
     global Time_
     Time_ = timeout # the maximum runtime of the algorithm in seconds before timeout (2592000 = a month's worth of seconds)
 
