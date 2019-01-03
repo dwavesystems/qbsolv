@@ -1,5 +1,5 @@
 import unittest
-
+import time
 import itertools
 
 import dwave_qbsolv as qbs
@@ -69,3 +69,18 @@ class TestWrapper(unittest.TestCase):
 
         for sample, energy in response.data(['sample', 'energy']):
             self.assertAlmostEqual(dimod.ising_energy(sample, h, J), energy)
+
+    # these tests are hard to automate for CI because different systems have different
+    # speeds
+    # def test_timeout_parameter(self):
+    #     # set up a problem we hope will take a long time
+    #     Q = {edge: random.uniform(-1, 1) for edge in itertools.combinations_with_replacement(range(500), 2)}
+
+    #     timeout = 1 # in seconds
+
+    #     t = time.time()
+
+    #     response = qbs.QBSolv().sample_qubo(Q, timeout=timeout)  # seconds to millisconds
+        
+    #     # let's be generous and give it 3x the timeout
+    #     self.assertLessEqual(time.time() - t, 3*timeout)
