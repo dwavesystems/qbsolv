@@ -1,5 +1,5 @@
-dimod==0.7.2
-cython==0.28.4
+dimod==0.8.1
+cython==0.29.2
 
 coverage
 codecov
