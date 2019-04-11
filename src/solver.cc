@@ -842,10 +842,10 @@ void solve(double **qubo, const int qubo_size, int8_t **solution_list, double *e
                     }
                     if (Verbose_ > 3) {
                         printf(" Submatrix search did not produce enough new values, so randomize %d bits\n", l);
-                    } else {
-                        if (Verbose_ > 3) {
-                            printf("Number of solution Bits changed %d \n ", change);
-                        }
+                    }
+                } else {
+                    if (Verbose_ > 3) {
+                        printf("Number of solution Bits changed %d \n ", change);
                     }
                 }
 
