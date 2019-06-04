@@ -1,0 +1,31 @@
+#cookie-notice {
+  display: none;
+  bottom: 0;
+  position: fixed;
+  width: 100%;
+  background: white;
+  z-index: 1000000;
+  height: auto;
+  text-align: center;
+}
+.cookie-button {
+  border: none;
+  display: inline-block;
+  justify-content: center;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: rgb(41, 128, 185);
+  box-shadow: 0 5px 14px 0 rgba(29,30,36,0.19);
+  color: #fff;
+  cursor: pointer;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 42px;
+  padding-right: 42px;
+  margin: 1em;
+  margin-left: 2em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
