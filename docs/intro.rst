@@ -4,7 +4,7 @@ Introduction
 
 Divide-and-conquer and dynamic programming algorithms have a rich history in computer
 science for problems with large numbers of variables. Many hard problems that can benefit
-from quantum computers are to large to map directly to a QPU. To solve a problem with
+from quantum computers are too large to map directly to a QPU. To solve a problem with
 more variables than the available number of qubits, we break the problem into subproblems, solve the
 subproblems, and then reconstruct an answer to the original problem from the subproblem
 solutions.
