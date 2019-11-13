@@ -31,7 +31,7 @@
 #define BIGNEGFP -1.225E308
 #define flt_equals(a, b) (fabs((a) - (b)) < EPSILON)
 
-#define GETMEM(P, T, N) (P = (T*)malloc((sizeof(T) * N)))
+#define GETMEM(P, T, N) (P = (T*)malloc((sizeof(T) * (N))))
 #define BADMALLOC                                                                                    \
     {                                                                                                \
         printf("\n  ------> Exit(%d) called by %s(%s.%d)\n\n", 9, __FUNCTION__, __FILE__, __LINE__); \
