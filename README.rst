@@ -233,8 +233,3 @@ Library usage
 -------------
 
 TODO
-
-Contribution
-------------
-
-See :ref:`contributing`
