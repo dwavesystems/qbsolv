@@ -54,30 +54,6 @@ jobs:
             . env/bin/activate
             codecov
 
-      - run: &sdist-build-template
-          name: build sdist
-          command: |
-            . env/bin/activate
-            python setup.py sdist
-
-      - store_artifacts:
-          path: ./dist
-
-      - run: &sdist-install-template
-          name: test installing from sdist without cython
-          command: |
-            python -m virtualenv env_sdist
-            . env_sdist/bin/activate
-            pip install dist/dwave-qbsolv-*.tar.gz
-
-      - run: &sdist-cython-install-template
-          name: install sdist with cython
-          command: |
-            python -m virtualenv env_cython_sdist
-            . env_cython_sdist/bin/activate
-            pip install cython
-            pip install dist/dwave-qbsolv-*.tar.gz
-
   test-3.8:
     <<: *full-test-template
     docker:
@@ -156,15 +132,6 @@ jobs:
       - run: *install-package-template
         
       - run: *run-tests-template
-
-      - run: *sdist-build-template
-
-      - store_artifacts:
-          path: ./dist
-
-      - run: *sdist-install-template
-
-      - run: *sdist-cython-install-template
 
   test-osx-3.7:
     <<: *osx-tests-template
