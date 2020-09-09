@@ -12,7 +12,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
       - run:
           name: create virtualenv
@@ -24,12 +24,12 @@ jobs:
           command: |
             . env/bin/activate
             python --version
-            pip install -r python/requirements.txt
+            pip install -r requirements.txt -r tests/requirements.txt
 
       - save_cache:
           paths:
             - ./env
-          key: v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
       - run: &install-package-template
           name: install package
@@ -115,19 +115,19 @@ jobs:
 
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
       - run: &install-dependencies-template
           name: install dependencies
           command: |
             . env/bin/activate
             python --version
-            pip install -r python/requirements.txt
+            pip install -r requirements.txt -r tests/requirements.txt
 
       - save_cache:
           paths:
             - ./env
-          key: v1-dependencies-{{ checksum "python/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
+          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
       - run: *install-package-template
         
@@ -172,7 +172,7 @@ jobs:
           command: |
             for PYBIN in /opt/python/*/bin; do
               if "${PYBIN}/python" -c "import sys; sys.exit(sys.version_info>=(3, 5))"; then continue; fi;
-              "${PYBIN}/pip" install -r python/requirements.txt
+              "${PYBIN}/pip" install -r requirements.txt -r tests/requirements.txt
               "${PYBIN}/pip" wheel . -w ./wheelhouse
               "${PYBIN}/python" setup.py sdist -d ./dist
             done
