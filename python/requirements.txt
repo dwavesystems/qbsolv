@@ -1,5 +1,0 @@
-dimod==0.8.1
-cython==0.29.2
-
-coverage
-codecov
