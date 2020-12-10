@@ -74,7 +74,7 @@ python_requires = '>=3.5'
 
 setup(
     name='dwave-qbsolv',
-    version='0.3.1',
+    version='0.3.2',
     packages=packages,
     package_dir={'dwave_qbsolv': 'python/dwave_qbsolv'},
     install_requires=['dimod>=0.8.1,<0.10.0'],
