@@ -1,8 +1,8 @@
 version: 2
 jobs:
-  test-3.6: &full-test-template
+  test-3.9: &full-test-template
     docker:
-      - image: circleci/python:3.6-jessie
+      - image: circleci/python:3.9
 
     working_directory: ~/repo
 
@@ -57,23 +57,28 @@ jobs:
   test-3.8:
     <<: *full-test-template
     docker:
-      - image: circleci/python:3.8-buster
+      - image: circleci/python:3.8
 
   test-3.7:
     <<: *full-test-template
     docker:
-      - image: circleci/python:3.7-stretch
+      - image: circleci/python:3.7
+
+  test-3.6:
+    <<: *full-test-template
+    docker:
+      - image: circleci/python:3.6
 
   test-3.5:
     <<: *full-test-template
     docker:
-      - image: circleci/python:3.5-jessie
+      - image: circleci/python:3.5
 
-  test-osx-3.8: &osx-tests-template
+  test-osx-3.9: &osx-tests-template
     macos:
       xcode: "11.2.1"
     environment:
-      PYTHON: 3.8.0
+      PYTHON: 3.9.0
       HOMEBREW_NO_AUTO_UPDATE: 1
 
       # Force (lie about) macOS 10.9 binary compatibility.
@@ -133,6 +138,13 @@ jobs:
         
       - run: *run-tests-template
 
+  test-osx-3.8:
+    <<: *osx-tests-template
+    environment:
+      PYTHON: 3.8.0
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      MACOSX_DEPLOYMENT_TARGET: 10.9
+
   test-osx-3.7:
     <<: *osx-tests-template
     environment:
@@ -171,7 +183,7 @@ jobs:
           name: build wheels
           command: |
             for PYBIN in /opt/python/*/bin; do
-              "${PYBIN}/python" -c "import sys; sys.exit((3,5)<=sys.version_info<(3,9))" && continue
+              "${PYBIN}/python" -c "import sys; sys.exit((3,5)<=sys.version_info<(3,10))" && continue
               "${PYBIN}/pip" install -r requirements.txt -r tests/requirements.txt
               "${PYBIN}/pip" wheel . -w ./wheelhouse
               "${PYBIN}/python" setup.py sdist -d ./dist
@@ -214,11 +226,11 @@ jobs:
     docker:
       - image: quay.io/pypa/manylinux1_i686
 
-  build-osx-3.8: &osx-build-template
+  build-osx-3.9: &osx-build-template
     macos:
       xcode: "11.2.0"
     environment:
-      PYTHON: 3.8.0
+      PYTHON: 3.9.0
       HOMEBREW_NO_AUTO_UPDATE: 1
       MACOSX_DEPLOYMENT_TARGET: 10.9
 
@@ -262,6 +274,13 @@ jobs:
 
       - run: *upload-template
 
+  build-osx-3.8:
+    <<: *osx-build-template
+    environment:
+      PYTHON: 3.8.0
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      MACOSX_DEPLOYMENT_TARGET: 10.9
+
   build-osx-3.7:
     <<: *osx-build-template
     environment:
@@ -288,10 +307,12 @@ workflows:
   version: 2
   test:
     jobs:
+      - test-3.9
       - test-3.8
       - test-3.7
       - test-3.6
       - test-3.5
+      - test-osx-3.9
       - test-osx-3.8
       - test-osx-3.7
       - test-osx-3.6
@@ -306,6 +327,12 @@ workflows:
             branches:
               ignore: /.*/
       - build-manylinux-32:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
+            branches:
+              ignore: /.*/
+      - build-osx-3.9:
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
