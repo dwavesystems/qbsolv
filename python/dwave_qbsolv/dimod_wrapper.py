@@ -31,7 +31,7 @@ class QBSolv(dimod.core.sampler.Sampler):
     @dimod.decorators.bqm_index_labels
     def sample(self, bqm, num_repeats=50, seed=None, algorithm=None,
                verbosity=-1, timeout=2592000, solver_limit=None, solver=None,
-               target=None, find_max=False, **sample_kwargs):
+               target=None, find_max=False, n_solutions=20, **sample_kwargs):
         """Sample low-energy states defined by a QUBO using qbsolv.
 
         Note:
@@ -71,6 +71,8 @@ class QBSolv(dimod.core.sampler.Sampler):
                 a state with this energy value or better is discoverd. Default is None.
             find_max (bool, optional): Switches from searching for minimization to
                 maximization. Default is False (minimization).
+            n_solutions (int, optional): The maximum number of solution samples
+                returned. Default is 20.
 
         Returns:
             :obj:`Response`
@@ -93,7 +95,8 @@ class QBSolv(dimod.core.sampler.Sampler):
         Q, offset = bqm.to_qubo()
         samples, energies, counts = run_qbsolv(Q=Q, num_repeats=num_repeats, seed=seed, algorithm=algorithm,
                                                verbosity=verbosity, timeout=timeout, solver_limit=solver_limit,
-                                               solver=solver, target=target, find_max=find_max, sample_kwargs=sample_kwargs)
+                                               solver=solver, target=target, find_max=find_max,
+                                               n_solutions=n_solutions, sample_kwargs=sample_kwargs)
 
         response = dimod.SampleSet.from_samples(samples, energy=energies,
                                                 num_occurrences=counts, vartype=dimod.BINARY)

@@ -25,7 +25,8 @@ log = logging.getLogger(__name__)
 
 def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
                algorithm=None, timeout=2592000, solver_limit=None,
-               solver=None, target=None, find_max=False, sample_kwargs={}):
+               solver=None, target=None, find_max=False, sample_kwargs={},
+               n_solutions=20):
     """Entry point to `solve` method in the qbsolv library.
 
     Arguments are described in the dimod wrapper.
@@ -87,7 +88,6 @@ def run_qbsolv(Q, num_repeats=50, seed=17932241798878,  verbosity=-1,
     Verbose_ = verbosity
 
     global algo_
-    cdef int n_solutions = 20  # the maximimum number of solutions returned
     if algorithm is None or algorithm == ENERGY_IMPACT:
         algo_[0] = "o"
         algo_[1] = 0
