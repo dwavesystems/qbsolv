@@ -6,8 +6,6 @@ environment:
     secure: 9/YAQhmz9Kb1ZeXzhBYeQA==
 
   matrix:
-    - PYTHON: "C:\\Python35"
-    - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python36-x64"
     - PYTHON: "C:\\Python37"
@@ -18,9 +16,6 @@ environment:
     - PYTHON: "C:\\Python39-x64"
 
 install:
-  # required to link py35 (x86 and x64)
-  - set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\8.1\bin\x86
-
   # Check that we have the expected version and architecture for Python
   - "%PYTHON%\\python.exe --version"
   - "%PYTHON%\\python.exe -c \"import struct; print(struct.calcsize('P') * 8)\""
