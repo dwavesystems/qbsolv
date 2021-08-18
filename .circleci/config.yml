@@ -1,10 +1,14 @@
-version: 2
+version: 2.1
 jobs:
-  test-3.9: &full-test-template
-    docker:
-      - image: circleci/python:3.9
+  test-linux:
+    parameters:
+      dimod-version:
+        type: string
+      python-version:
+        type: string
 
-    working_directory: ~/repo
+    docker:
+      - image: circleci/python:<< parameters.python-version >>
 
     steps:
 
@@ -25,6 +29,12 @@ jobs:
             . env/bin/activate
             python --version
             pip install -r requirements.txt -r tests/requirements.txt
+
+      - run:
+          name: install dimod
+          command: |
+            . env/bin/activate
+            pip install 'dimod<< parameters.dimod-version >>'
 
       - save_cache: &save-cache-env
           paths:
@@ -54,26 +64,15 @@ jobs:
             . env/bin/activate
             codecov
 
-  test-3.8:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.8
+  test-osx:
+    parameters:
+      python-version:
+        type: string
 
-  test-3.7:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.7
-
-  test-3.6:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.6
-
-  test-osx-3.9: &osx-tests-template
     macos:
       xcode: "12.2.0"
+
     environment:
-      PYTHON: 3.9.0
       HOMEBREW_NO_AUTO_UPDATE: 1
 
       # Force (lie about) macOS 10.9 binary compatibility.
@@ -98,7 +97,7 @@ jobs:
       - run:
           name: install python
           command: |
-            pyenv install $PYTHON -s
+            pyenv install << parameters.python-version >> -s
 
       - save_cache: &save-cache-pyenv
           paths:
@@ -109,7 +108,7 @@ jobs:
           name: create virtualenv
           command: |
             eval "$(pyenv init -)"
-            pyenv local $PYTHON
+            pyenv local << parameters.python-version >>
             python -m pip install virtualenv
             python -m virtualenv env
 
@@ -122,27 +121,6 @@ jobs:
       - run: *install-package
         
       - run: *run-tests
-
-  test-osx-3.8:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.8.6
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  test-osx-3.7:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.7.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  test-osx-3.6:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.6.12
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
 
 ##################################################################################################
 # Deploy
@@ -197,11 +175,15 @@ jobs:
     docker:
       - image: quay.io/pypa/manylinux1_i686
 
-  build-osx-3.9: &osx-build-template
+  build-osx:
+    parameters:
+      python-version:
+        type: string
+
     macos:
       xcode: "12.2.0"
+
     environment:
-      PYTHON: 3.9.0
       HOMEBREW_NO_AUTO_UPDATE: 1
       MACOSX_DEPLOYMENT_TARGET: 10.9
 
@@ -241,40 +223,20 @@ jobs:
 
       - run: *upload-pypi
 
-  build-osx-3.8:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.8.6
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  build-osx-3.7:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.7.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  build-osx-3.6:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.6.12
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-
 workflows:
-  version: 2
   test:
     jobs:
-      - test-3.9
-      - test-3.8
-      - test-3.7
-      - test-3.6
-      - test-osx-3.9
-      - test-osx-3.8
-      - test-osx-3.7
-      - test-osx-3.6
+      - test-linux:
+          name: test-linux-<< matrix.python-version >>-dimod<< matrix.dimod-version >>
+          matrix:
+            parameters:
+              python-version: &python-versions [3.6.8, 3.7.9, 3.8.9, 3.9.4]
+              dimod-version: ["~=0.8.0,>=0.8.1", "~=0.9.0", "~=0.10.0"]
+      - test-osx:
+          name: test-osx-<< matrix.python-version >>
+          matrix:
+            parameters:
+              python-version: *python-versions
 
   deploy:
     jobs:
@@ -290,25 +252,11 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
             branches:
               ignore: /.*/
-      - build-osx-3.9:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.8:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.7:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.6:
+      - build-osx:
+          name: build-osx-<< matrix.python-version >>
+          matrix:
+            parameters:
+              python-version: *python-versions
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
