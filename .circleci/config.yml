@@ -202,7 +202,7 @@ jobs:
       - run:
           name: install python
           command: |
-            pyenv install $PYTHON -s
+            pyenv install << parameters.python-version >> -s
 
       - save_cache: *save-cache-pyenv
 
