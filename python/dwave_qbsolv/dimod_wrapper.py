@@ -1,3 +1,5 @@
+import warnings
+
 import dimod
 
 from dwave_qbsolv.qbsolv_binding import run_qbsolv, ENERGY_IMPACT, SOLUTION_DIVERSITY
@@ -23,6 +25,11 @@ class QBSolv(dimod.core.sampler.Sampler):
     parameters = None
 
     def __init__(self):
+        msg = ("QBSolv is deprecated as of the end of 2021 and support will be "
+               "discontinued after March 2022. Please update your code to use "
+               "dwave-hybrid or Leap's quantum-classical hybrid solvers instead.")
+        warnings.warn(msg, DeprecationWarning, stacklevel=2)
+        
         self.properties = {}
         self.parameters = {'num_repeats': [],  'seed': [],  'algorithm': [],
                            'verbosity': [],  'timeout': [],  'solver_limit': [],  'solver': [],

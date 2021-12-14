@@ -9,7 +9,7 @@
 
 .. image:: https://ci.appveyor.com/api/projects/status/y2f7rqxvepn4ak4b/branch/master?svg=true
     :target: https://ci.appveyor.com/project/dwave-adtt/qbsolv/branch/master
-    
+
 .. image:: https://readthedocs.com/projects/d-wave-systems-qbsolv/badge/?version=latest
     :target: https://docs.ocean.dwavesys.com/projects/qbsolv/en/latest/?badge=latest
 
@@ -20,7 +20,14 @@
 Qbsolv
 ======
 
-.. index-start-marker
+**NOTICE**: This repository is deprecated as of the end of 2021. Support will be
+discontinued after March 2022. Please update your code to use Ocean's
+`dwave-hybrid <https://docs.ocean.dwavesys.com/en/stable/docs_hybrid/sdk_index.html>`_
+or Leap's quantum-classical
+`hybrid solvers <https://docs.dwavesys.com/docs/latest/doc_leap_hybrid.html>`_
+instead.
+
+ .. index-start-marker
 
 A decomposing solver that finds a minimum value of a large quadratic unconstrained binary
 optimization (QUBO) problem by splitting it into pieces. The pieces are solved using a
@@ -51,7 +58,6 @@ Alternatively, you can build the library with setuptools.
 .. code-block:: bash
 
     pip install -r python/requirements.txt
-    pip install cython==0.27
     python setup.py install
 
 C
