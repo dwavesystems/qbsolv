@@ -9,7 +9,7 @@
 
 .. image:: https://ci.appveyor.com/api/projects/status/y2f7rqxvepn4ak4b/branch/master?svg=true
     :target: https://ci.appveyor.com/project/dwave-adtt/qbsolv/branch/master
-    
+
 .. image:: https://readthedocs.com/projects/d-wave-systems-qbsolv/badge/?version=latest
     :target: https://docs.ocean.dwavesys.com/projects/qbsolv/en/latest/?badge=latest
 
@@ -51,7 +51,6 @@ Alternatively, you can build the library with setuptools.
 .. code-block:: bash
 
     pip install -r python/requirements.txt
-    pip install cython==0.27
     python setup.py install
 
 C
