@@ -20,6 +20,13 @@
 Qbsolv
 ======
 
+**NOTICE**: This repository is deprecated. Support will be discontinued in 2022.
+Please update your code to use Ocean's
+`dwave-hybrid <https://docs.ocean.dwavesys.com/en/stable/docs_hybrid/sdk_index.html>`_
+or Leap's quantum-classical 
+`hybrid solvers <https://docs.dwavesys.com/docs/latest/doc_leap_hybrid.html>`_
+instead.
+
 .. index-start-marker
 
 A decomposing solver that finds a minimum value of a large quadratic unconstrained binary
