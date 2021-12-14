@@ -20,14 +20,14 @@
 Qbsolv
 ======
 
-**NOTICE**: This repository is deprecated. Support will be discontinued in 2022.
-Please update your code to use Ocean's
+**NOTICE**: This repository is deprecated as of the end of 2021. Support will be
+discontinued after March 2022. Please update your code to use Ocean's
 `dwave-hybrid <https://docs.ocean.dwavesys.com/en/stable/docs_hybrid/sdk_index.html>`_
-or Leap's quantum-classical 
+or Leap's quantum-classical
 `hybrid solvers <https://docs.dwavesys.com/docs/latest/doc_leap_hybrid.html>`_
 instead.
 
-.. index-start-marker
+ .. index-start-marker
 
 A decomposing solver that finds a minimum value of a large quadratic unconstrained binary
 optimization (QUBO) problem by splitting it into pieces. The pieces are solved using a
