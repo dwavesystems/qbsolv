@@ -1,264 +1,85 @@
 version: 2.1
-jobs:
-  test-linux:
-    parameters:
-      dimod-version:
-        type: string
-      python-version:
-        type: string
 
-    docker:
-      - image: circleci/python:<< parameters.python-version >>
+parameters:
+  package:
+    type: string
+    default: dwave-qbsolv
 
-    steps:
+orbs:
+  ocean: dwave/ocean@1.3
 
-      - checkout
-
-      - restore_cache: &restore-cache-env
-          keys:
-          - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
-
-      - run:
-          name: create virtualenv
-          command: |
-            python -m virtualenv env
-
-      - run: &install-dependencies
-          name: install dependencies
-          command: |
-            . env/bin/activate
-            python --version
-            pip install -r requirements.txt -r tests/requirements.txt
-
-      - run:
-          name: install dimod
-          command: |
-            . env/bin/activate
-            pip install 'dimod<< parameters.dimod-version >>'
-
-      - save_cache: &save-cache-env
-          paths:
-            - ./env
-          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
-
-      - run: &install-package
-          name: install package
-          command: |
-            . env/bin/activate
-            python setup.py build_ext --inplace
-            pip install .
-        
-      - run: &run-tests
-          name: run unittests
-          command: |
-            . env/bin/activate
-            python --version
-            coverage run -m unittest discover
-
-      - store_artifacts:
-          path: ./htmlcov
-
-      - run:
-          name: codecov
-          command: |
-            . env/bin/activate
-            codecov
-
-  test-osx:
-    parameters:
-      python-version:
-        type: string
-
-    macos:
-      xcode: "12.2.0"
-
-    environment:
-      HOMEBREW_NO_AUTO_UPDATE: 1
-
-      # Force (lie about) macOS 10.9 binary compatibility.
-      # Needed for properly versioned wheels.
-      # See: https://github.com/MacPython/wiki/wiki/Spinning-wheels
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-    working_directory: ~/repo
-
-    steps: 
-      - checkout
-
-      - run: 
-          name: install pyenv
-          command: |
-            brew install pyenv
-
-      - restore_cache: &restore-cache-pyenv
-          keys:
-            - v3-pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.2.0
-
-      - run:
-          name: install python
-          command: |
-            pyenv install << parameters.python-version >> -s
-
-      - save_cache: &save-cache-pyenv
-          paths:
-            - ~/.pyenv
-          key: v3-pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.2.0
-
-      - run: &create-virtualenv-pyenv
-          name: create virtualenv
-          command: |
-            eval "$(pyenv init -)"
-            pyenv local << parameters.python-version >>
-            python -m pip install virtualenv
-            python -m virtualenv env
-
-      - restore_cache: *restore-cache-env
-
-      - run: *install-dependencies
-
-      - save_cache: *save-cache-env
-
-      - run: *install-package
-        
-      - run: *run-tests
-
-##################################################################################################
-# Deploy
-##################################################################################################
-
-  build-manylinux-64: &manylinux-template
-    docker:
-      - image: quay.io/pypa/manylinux1_x86_64
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - run:
-          name: build wheels
-          command: |
-            for PYBIN in /opt/python/*/bin; do
-              "${PYBIN}/python" -c "import sys; sys.exit((3,6)<=sys.version_info<(3,10))" && continue
-              "${PYBIN}/pip" install -r requirements.txt -r tests/requirements.txt
-              "${PYBIN}/pip" wheel . -w ./wheelhouse
-              "${PYBIN}/python" setup.py sdist -d ./dist
-            done
-
-      - run:
-          name: bundle shared libraries into wheels
-          command: |
-            for whl in ./wheelhouse/dwave*qbsolv*.whl; do
-              auditwheel repair "$whl" -w ./dist
-            done
-
-      - store_artifacts:
-          path: ./dist
-
-      - run:
-          name: create a virtualenv
-          command: |
-            pythons=(/opt/python/*/bin)
-            python="${pythons[0]}"
-            "$python/pip" install virtualenv
-            "$python/python" -m virtualenv env
-
-      - run: &upload-pypi
-          name: install twine and deploy
-          command: |
-            . env/bin/activate
-            pip install twine
-            twine upload -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD" --skip-existing ./dist/*
-
-  build-manylinux-32:
-    <<: *manylinux-template
-    docker:
-      - image: quay.io/pypa/manylinux1_i686
-
-  build-osx:
-    parameters:
-      python-version:
-        type: string
-
-    macos:
-      xcode: "12.2.0"
-
-    environment:
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-    working_directory: ~/repo
-
-    steps: 
-      - checkout
-
-      - run: 
-          name: install pyenv
-          command: |
-            brew install pyenv
-
-      - restore_cache: *restore-cache-pyenv
-
-      - run:
-          name: install python
-          command: |
-            pyenv install << parameters.python-version >> -s
-
-      - save_cache: *save-cache-pyenv
-
-      - run: *create-virtualenv-pyenv
-
-      - run: *install-dependencies
-
-      - run: *install-package
-        
-      - run:
-          name: create bdist_wheel
-          command: |
-            . env/bin/activate
-            python setup.py bdist_wheel
-
-      - store_artifacts:
-          path: ./dist
-
-      - run: *upload-pypi
+environment:
+  PIP_PROGRESS_BAR: 'off'
 
 workflows:
-  test:
+  build-test-deploy:
     jobs:
-      - test-linux:
-          name: test-linux-<< matrix.python-version >>-dimod<< matrix.dimod-version >>
-          matrix:
-            parameters:
-              python-version: &python-versions [3.6.8, 3.7.9, 3.8.9, 3.9.4]
-              dimod-version: ["~=0.8.0,>=0.8.1", "~=0.9.0", "~=0.10.0"]
-      - test-osx:
-          name: test-osx-<< matrix.python-version >>
-          matrix:
-            parameters:
-              python-version: *python-versions
+      - ocean/build-sdist:
+          filters: &always-run  # required because it's indirectly required by the deploy job that runs on tags only
+            tags:
+              only: /.*/
 
-  deploy:
-    jobs:
-      - build-manylinux-64:
+      - ocean/build-manylinux-wheel:
+          name: build-<< matrix.manylinux-tag >>_<< matrix.manylinux-arch >>-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              manylinux-tag: ["manylinux1", "manylinux2014"]
+              manylinux-arch: ["x86_64"]
+              python-version: &python-versions ["3.6.8", "3.7.9", "3.8.9", "3.9.4", "3.10.0"]
+            exclude:
+              # py310 not available in manylinux1_x86_64
+              - manylinux-tag: "manylinux1"
+                manylinux-arch: "x86_64"
+                python-version: "3.10.0"
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc|\.post)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-manylinux-32:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc|\.post)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx:
-          name: build-osx-<< matrix.python-version >>
+            <<: *always-run
+
+      - ocean/test-linux-from-dist:
+          name: test-linux-py<< matrix.python-version >>|<< matrix.constraints >>
+          requires:
+            - ocean/build-sdist
+            - ocean/build-manylinux-wheel
           matrix:
             parameters:
               python-version: *python-versions
+              package: [<< pipeline.parameters.package >>]
+              constraints: ["dimod~=0.9.0", "dimod~=0.10.0"]
+            exclude:
+              # dimod < 0.10 not supported on py310
+              - python-version: "3.10.0"
+                package: << pipeline.parameters.package >>
+                constraints: "dimod~=0.9.0"
+          filters:
+            <<: *always-run
+
+      - ocean/build-macos-wheel:
+          name: build-macos-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              python-version: *python-versions
+              xcode: ["13.2.0"]
+          filters:
+            <<: *always-run
+
+      - ocean/test-macos-from-dist:
+          name: test-macos-py<< matrix.python-version >>
+          requires:
+            - ocean/build-sdist
+            - ocean/build-macos-wheel
+          matrix:
+            parameters:
+              python-version: *python-versions
+              xcode: ["13.2.0"]
+              package: [<< pipeline.parameters.package >>]
+          filters:
+            <<: *always-run
+
+      - ocean/pypi-deploy:
+          requires:
+            - ocean/test-linux-from-dist
+            - ocean/test-macos-from-dist
           filters:
             tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc|\.post)([0-9]+)?)?$/
+              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
             branches:
               ignore: /.*/
